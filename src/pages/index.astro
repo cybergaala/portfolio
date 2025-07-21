@@ -1,11 +1,293 @@
 ---
-import Welcome from '../components/Welcome.astro';
-import Layout from '../layouts/Layout.astro';
+import Layout from "../layouts/Layout.astro";
 
 // Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
 // Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
 ---
 
-<Layout>
-	<Welcome />
+<Layout
+  title="Welcome to Astro"
+  description="This is a starter template for building your first Astro project. Customize it to fit your needs."
+>
+  <section class="flex items-center justify-center mx-auto mb-12 min-h-[90vh] w-full max-w-[1440px] overflow-hidden px-4 md:px-12 lg:px-20">
+    <div class="grid grid-cols-1 gap-4 p-4 md:grid-cols-2">
+      <!-- <div class="justify-center md:flex mt-8">
+        <img src="/img/main.webp" alt="Astro Logo" class="max-h-[500px] object-contain" />
+      </div> -->
+      <div class="flex justify-center mt-8">
+        <img src="/img/main.webp" alt="Astro Logo" class="max-h-[600px] object-contain" />
+      </div>
+      <div class="flex flex-col justify-center gcontent">
+        <h1>Hi there 👋!</h1>
+        <!-- <h1>I'm Edgar Mejía, a <span class="typewriter thick"></span> developer from El Salvador 🇸🇻</h1> -->
+        <h1>I'm Edgar Mejía,<br/>a <span class="gitch-text"></span><br/> from El Salvador 🇸🇻</h1>
+        <div class="container">
+          <div class="text"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- <div class="main-content">
+    <div class="section">
+      <div class="flex flex-col md:flex-row items-center justify-between">
+        <div class="md:w-1/2 p-4">
+          <img src="/img/main.webp" alt="Astro Logo" class="w-full h-auto" />
+        </div>
+        <div class="md:w-1/2 p-16">
+          <h1>Hi there 👋!</h1>
+          <h1>I'm Edgar Mejía, a <span class="typewriter thick"></span> developer from El Salvador 🇸🇻</h1>
+        </div>
+      </div>
+    </div>
+    <div class="section green">Sección 2: Fondo Blanco</div>
+    <div class="section purple">Sección 4: Fondo Morado</div>
+    <div class="section teal">Sección 8: Fondo Verde Azulado</div>
+  </div> -->
+
+  <style>
+    
+    .section {
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 2rem;
+      color: white;
+      transition: background-color 0.5s ease;
+    }
+
+    .section:nth-child(odd) { background-color: #fff; }
+    .section:nth-child(even) { background-color: #0d47a1; }
+
+    .section.green {
+      background-color: black;
+      color: #fff;
+      text-shadow: none;
+    }
+
+    .section.purple { background-color: #4a148c; }
+    .section.red { background-color: #b71c1c; }
+    .section.teal { background-color: #004d40; }
+
+    h1 {
+      /* font-size: 4vmin; */
+      color: #000;
+      text-align: left;
+      font-weight: 700;
+      /* margin: 0rem 0 0rem 0rem; */
+      margin: 0.5rem 0;
+    }
+
+    @keyframes typing {
+      0.00%, 12.93%, 14.63% { content: ""; }
+      0.85%, 12.24% { content: "J"; color: #f29111; }
+      1.70%, 11.56% { content: "Ja"; color: #f29111; }
+      2.55%, 10.88% { content: "Jav"; color: #f29111; }
+      3.40%, 10.20% { content: "Java"; color: #f29111; }
+
+      14.63%, 30.61%, 32.31% { content: ""; color: #ffd54a; }
+      15.48%, 29.93% { content: "P"; color: #ffd54a; }
+      16.33%, 29.25% { content: "Py"; color: #ffd54a; }
+      17.18%, 28.57% { content: "Pyt"; color: #ffd54a; }
+      18.03%, 27.89% { content: "Pyth"; color: #ffd54a; }
+      18.88%, 27.21% { content: "Pytho"; color: #ffd54a; }
+      19.73%, 26.53% { content: "Python"; color: #ffd54a; }
+
+      32.31%, 45.24%, 46.94% { content: ""; color: #5732d6; }
+      33.16%, 44.56% { content: "."; color: #5732d6; }
+      34.01%, 43.88% { content: ".N"; color: #5732d6; }
+      34.86%, 43.20% { content: ".Ne"; color: #5732d6; }
+      35.71%, 42.52% { content: ".Net"; color: #5732d6; }
+
+      46.94%, 61.39%, 63.09% { content: ""; color: #f05237; }
+      47.79%, 60.71% { content: "S"; color: #f05237; }
+      48.64%, 60.03% { content: "Sw"; color: #f05237; }
+      49.49%, 59.35% { content: "Swi"; color: #f05237; }
+      50.34%, 58.67% { content: "Swif"; color: #f05237; }
+      51.19%, 57.99% { content: "Swift"; color: #f05237; }
+
+      63.09%, 79.08%, 80.78% { content: ""; color: #8052ff; }
+      63.94%, 78.40% { content: "K"; color: #8052ff; }
+      64.79%, 77.72% { content: "Ko"; color: #8052ff; }
+      65.64%, 77.04% { content: "Kot"; color: #8052ff; }
+      66.49%, 76.36% { content: "Kotl"; color: #8052ff; }
+      67.34%, 75.68% { content: "Kotli"; color: #8052ff; }
+      68.20%, 75.00% { content: "Kotlin"; color: #8052ff; }
+
+      80.78%, 98.30%, 100.00% { content: ""; color: #15cbfc; }
+      81.63%, 97.62% { content: "F"; color: #15cbfc; }
+      82.48%, 96.94% { content: "Fl"; color: #15cbfc; }
+      83.33%, 96.26% { content: "Flu"; color: #15cbfc; }
+      84.18%, 95.58% { content: "Flut"; color: #15cbfc; }
+      85.03%, 94.90% { content: "Flutt"; color: #15cbfc; }
+      85.88%, 94.22% { content: "Flutte"; color: #15cbfc; }
+      86.73%, 93.54% { content: "Flutter"; color: #15cbfc; }
+    }
+
+    @keyframes blink {
+      0%,
+      100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    .typewriter {
+      --caret: currentcolor;
+      width: 150px;
+      border-bottom: #000 solid 3px;
+    }
+
+    .typewriter::before {
+      content: "";
+      animation: typing 11.76s infinite;
+    }
+
+    .typewriter::after {
+      content: "";
+      border-right: 1px solid var(--caret);
+      animation: blink 0.5s linear infinite;
+    }
+
+    .typewriter.thick::after { border-right: 1ch solid var(--caret); }
+    .typewriter.nocaret::after { border-right: 0; }
+    .thick {
+      /* Add beautiful shadow */
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.5), 0 0 20px rgba(255, 255, 255, 0.3);
+    }
+
+    @media (prefers-reduced-motion) {
+      .typewriter::after { animation: none; }
+
+      @keyframes sequencePopup {
+          0.00%, 16.67% { content: "Java"; }
+          16.67%, 33.33% { content: "Python"; }
+          33.33%, 50.00% { content: ".Net"; }
+          50.00%, 66.67% { content: "Swift"; }
+          66.67%, 83.33% { content: "Kotlin"; }
+          83.33%, 100.00% { content: "Flutter"; }
+      }
+
+      .typewriter::before {
+        content: "Java";
+        animation: sequencePopup 11.76s linear infinite;
+      }
+    }
+
+    .typewriter {
+      display: inline-block;
+    }
+  </style>
+
+  <style is:global>
+    /* .dud { color: #c0c0c0 !important; } */
+    /* .dud { color: #ee4e4e !important; } */
+    .dud { color: #ee4e4e64 !important; }
+  </style>
 </Layout>
+
+<script is:client>
+  // Thanks: https://codepen.io/soulwire/pen/mEMPrK
+
+  class TextScramble {
+    constructor(el) {
+      this.el = el;
+      this.chars = '!<>-_\\/[]{}—=+*^?#________';
+      this.update = this.update.bind(this);
+    }
+
+    setText(newText) {
+      const oldText = Array.from(this.el.innerText);
+      const newTextArr = Array.from(newText);
+      const length = Math.max(oldText.length, newTextArr.length);
+      const promise = new Promise((resolve) => (this.resolve = resolve));
+      this.queue = [];
+
+      for (let i = 0; i < length; i++) {
+        const from = oldText[i] || '';
+        const to = newTextArr[i] || '';
+        const start = Math.floor(Math.random() * 40);
+        const end = start + Math.floor(Math.random() * 40);
+        this.queue.push({ from, to, start, end });
+      }
+
+      cancelAnimationFrame(this.frameRequest);
+      this.frame = 0;
+      this.update();
+      return promise;
+    }
+
+    update() {
+      let output = '';
+      let complete = 0;
+
+      for (let i = 0, n = this.queue.length; i < n; i++) {
+        let { from, to, start, end, char } = this.queue[i];
+        if (this.frame >= end) {
+          complete++;
+          output += to;
+        } else if (this.frame >= start) {
+          if (!char || Math.random() < 0.28) {
+            char = this.randomChar();
+            this.queue[i].char = char;
+          }
+          output += `<span class="dud">${char}</span>`;
+        } else {
+          output += from;
+        }
+      }
+
+      this.el.innerHTML = output;
+
+      if (complete === this.queue.length) {
+        this.resolve();
+      } else {
+        this.frameRequest = requestAnimationFrame(this.update);
+        this.frame++;
+      }
+    }
+
+    randomChar() {
+      return this.chars[Math.floor(Math.random() * this.chars.length)];
+    }
+  }
+
+  const phrases = [
+    'Java hater ☕', 
+    'Python dev 🐍',
+    '.Net dev',
+    'Swift dev',
+    'Kotlin lover',
+    'Flutter dev',
+    'JS enthusiast',
+    'TS fan or hater?',
+    'Web dev',
+    'OW2 player 🧡',
+    'Coffee hater :)',
+    'Pre-AI dev 🗿',
+    'Coke lover 🥤',
+    'Girl dad 👧🏻',
+    'Cat lover 🐱',
+  ];
+
+  const el = document.querySelector('.gitch-text');
+
+  if (el) {
+    const fx = new TextScramble(el);
+    let lastIndex = -1;
+
+    const next = () => {
+      let randomIndex;
+
+      do {
+        randomIndex = Math.floor(Math.random() * phrases.length);
+      } while (randomIndex === lastIndex);
+
+      lastIndex = randomIndex;
+      fx.setText(phrases[randomIndex]).then(() => {
+        setTimeout(next, 1200);
+      });
+    };
+
+    next();
+  }
+</script>
