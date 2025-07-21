@@ -1,0 +1,99 @@
+@import "tailwindcss";
+
+:root {
+  --accent: #2337ff;
+  --accent-dark: #000d8a;
+  --black: 15, 18, 25;
+  --gray: 96, 115, 159;
+  --gray-light: 229, 233, 240;
+  --gray-dark: 34, 41, 57;
+  --gray-gradient: rgba(var(--gray-light), 50%), #fff;
+  --box-shadow: 0 2px 6px rgba(var(--gray), 25%),
+    0 8px 24px rgba(var(--gray), 33%), 0 16px 32px rgba(var(--gray), 33%);
+
+  --blur-intensity: 20px; /* Puedes ajustar la intensidad del blur */
+  /* Variables CSS para el tema inicial, se establecen con JavaScript */
+  --initial-body-bg: #FFF; /* Default dark background (will be overridden by JS) */
+  --initial-nav-bg: #FFF; /* Default dark nav background (will be overridden by JS) */
+  --initial-nav-text-color: --black; /* Default white text (will be overridden by JS) */
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --initial-body-bg: #0f1219;
+    --initial-nav-bg: #0f1219;
+    --initial-nav-text-color: #ffffff;
+    --gray: 200, 210, 240;
+    --gray-light: 45, 50, 70;
+    --gray-dark: 229, 233, 240;
+    --box-shadow: 0 2px 6px rgba(var(--gray), 10%),
+      0 8px 24px rgba(var(--gray), 15%), 0 16px 32px rgba(var(--gray), 20%);
+  }
+}
+
+@font-face {
+  font-family: "Roboto";
+  src: url("/fonts/Roboto-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Roboto";
+  src: url("/fonts/Roboto-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+body {
+  background-color: var(--initial-body-bg);
+  font-family: "Roboto", sans-serif;
+  overflow-x: hidden;
+  margin: 0;
+  padding: 0;
+  text-align: left;
+  background-size: 100% 600px;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  color: rgb(var(--gray-dark));
+  font-size: 20px;
+  line-height: 1.7;
+}
+
+main {
+  width: 100vw;
+  max-width: 100%;
+  margin: auto;
+}
+
+.main-content {
+  padding-top: 80px;
+}
+
+@media (max-width: 768px) {
+  /* nav {
+    flex-direction: column;
+    padding: 15px 20px;
+  }
+
+  .nav-left {
+    margin-bottom: 20px;
+  }
+
+  .nav-right ul {
+    flex-direction: column;
+    gap: 15px;
+    align-items: center;
+  } */
+
+  .main-content {
+    padding-top: 150px;
+  }
+}
+
+h1 { font-size: 2.625rem; }
+h2 { font-size: 1.625rem; }
+h3 { font-size: 1.375rem; }
+h4 { font-size: 1.125rem; }

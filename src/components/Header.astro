@@ -1,0 +1,203 @@
+---
+import { SITE_TITLE } from "../constants";
+---
+
+<header>
+  <nav id="mainNav">
+    <div class="nav-left">
+      <span>EM!</span>
+    </div>
+    <div class="nav-right">
+      <ul>
+        <li><a href="#experience">Experience</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+    </div>
+  </nav>
+</header>
+
+<style>
+  .blur-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    z-index: -1;
+  }
+
+  @keyframes float {
+    0% {
+      transform: translate(0, 0);
+    }
+    100% {
+      transform: translate(50px, 50px);
+    }
+  }
+
+  nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 15px 30px;
+    background-color: var(--initial-nav-bg);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    z-index: 10;
+    mix-blend-mode: normal;
+  }
+
+  nav.nav-scrolled {
+    background-color: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    mix-blend-mode: difference;
+  }
+
+  .nav-left span,
+  .nav-right ul li a {
+    color: var(--initial-nav-text-color);
+  }
+
+  nav.nav-scrolled .nav-left span,
+  nav.nav-scrolled .nav-right ul li a { color: white; }
+  .nav-right ul li a:hover { color: #ffd700; }
+
+  .nav-left {
+    font-size: 2.5rem;
+    font-weight: 600;
+    cursor: pointer;
+    position: relative;
+    display: inline-block;
+    transition: transform 0.3s ease-in-out;
+    perspective: 1000px;
+  }
+
+  @keyframes glitch {
+    0% {
+      transform: translate(0, 0);
+      text-shadow: 0 0 rgba(255, 0, 0, 0.7), 0 0 rgba(0, 255, 0, 0.7);
+    }
+    20% {
+      transform: translate(-2px, 2px);
+      text-shadow: -2px -2px rgba(255, 0, 0, 0.7), 2px 2px rgba(0, 255, 0, 0.7);
+    }
+    40% {
+      transform: translate(-2px, -2px);
+      text-shadow: 2px 2px rgba(255, 0, 0, 0.7), -2px -2px rgba(0, 255, 0, 0.7);
+    }
+    60% {
+      transform: translate(2px, 2px);
+      text-shadow: -2px 2px rgba(255, 0, 0, 0.7), 2px -2px rgba(0, 255, 0, 0.7);
+    }
+    80% {
+      transform: translate(2px, -2px);
+      text-shadow: 2px -2px rgba(255, 0, 0, 0.7), -2px 2px rgba(0, 255, 0, 0.7);
+    }
+    100% {
+        transform: translate(0, 0);
+        text-shadow: 0 0 rgba(255, 0, 0, 0.7), 0 0 rgba(0, 255, 0, 0.7);
+    }
+  }
+
+  .nav-left:hover span {
+      animation: glitch 0.2s infinite alternate; /* Apply glitch animation on hover */
+      /* color: #FFD700; */ /* Keep hover color for visibility during glitch (eliminado) */
+  }
+
+  .nav-right ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    gap: 40px;
+  }
+
+  .nav-right ul li a {
+    text-decoration: none;
+    font-size: 1.2rem;
+    font-weight: 400;
+    position: relative;
+  }
+
+  .nav-right ul li a::after {
+    content: "";
+    position: absolute;
+    width: 0;
+    height: 2px;
+    background: #ffd700;
+    left: 0;
+    bottom: -5px;
+    transition: width 0.3s ease-in-out;
+    mix-blend-mode: normal;
+  }
+
+  .nav-right ul li a:hover::after {width: 100%; }
+
+  .nav-right ul li .sun-icon {
+    font-size: 1.5rem;
+    vertical-align: middle;
+    mix-blend-mode: normal!important;
+    text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+  }
+
+  .main-content {padding-top: 80px; }
+
+  /* @media (max-width: 768px) {
+    nav {
+      flex-direction: column;
+      padding: 15px 20px;
+    }
+
+    .nav-left { margin-bottom: 20px; }
+
+    .nav-right ul {
+      flex-direction: column;
+      gap: 15px;
+      align-items: center;
+    }
+
+    .main-content { padding-top: 150px; }
+    .section {font-size: 1.5rem; }
+  } */
+</style>
+
+<script is:browser>
+  const mainNav = document.getElementById("mainNav");
+  // const toggleButton = document.querySelector(".sun-icon");
+
+  // // Detectar tema preferido del sistema o valor guardado
+  // const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+  // const savedTheme = localStorage.getItem("theme");
+  // const isDark = savedTheme === "dark" || (!savedTheme && prefersDark);
+
+  // document.documentElement.classList.toggle("dark", isDark);
+  // toggleButton.textContent = isDark ? "🌙" : "🌞";
+
+  // // Cambiar tema manualmente al hacer clic
+  // toggleButton.addEventListener("click", () => {
+  //   const currentIsDark = document.documentElement.classList.contains("dark");
+  //   document.documentElement.classList.toggle("dark", !currentIsDark);
+  //   localStorage.setItem("theme", !currentIsDark ? "dark" : "light");
+  //   toggleButton.textContent = !currentIsDark ? "🌙" : "🌞";
+  // });
+
+  // Efecto de scroll en el nav
+  window.addEventListener("scroll", () => {
+    if (window.scrollY > 0) {
+      mainNav.classList.add("nav-scrolled");
+    } else {
+      mainNav.classList.remove("nav-scrolled");
+    }
+  });
+</script>
