@@ -9,44 +9,25 @@ import Layout from "../layouts/Layout.astro";
   title="Welcome to Astro"
   description="This is a starter template for building your first Astro project. Customize it to fit your needs."
 >
-  <section class="flex items-center justify-center mx-auto mb-12 min-h-[90vh] w-full max-w-[1440px] overflow-hidden px-4 md:px-12 lg:px-20">
+  <section class="section-about flex items-center justify-center mb-12 min-h-[90vh] w-full overflow-hidden px-4 md:px-12 lg:px-20">
     <div class="grid grid-cols-1 gap-4 p-4 md:grid-cols-2">
-      <!-- <div class="justify-center md:flex mt-8">
-        <img src="/img/main.webp" alt="Astro Logo" class="max-h-[500px] object-contain" />
-      </div> -->
-      <div class="flex justify-center mt-8">
-        <img src="/img/main.webp" alt="Astro Logo" class="max-h-[600px] object-contain" />
+      <div class="flex justify-center mt-8 md:mr-8 relative">
+        <img src="/img/main.webp" alt="Astro Logo" class="max-h-[600px] object-contain rounded-[60px] shadow-[inset_20px_20px_60px_#00000040] md:rounded-[30px]" />
       </div>
-      <div class="flex flex-col justify-center gcontent">
+      <div class="flex flex-col justify-center gcontent md:ml-8">
         <h1>Hi there 👋!</h1>
-        <!-- <h1>I'm Edgar Mejía, a <span class="typewriter thick"></span> developer from El Salvador 🇸🇻</h1> -->
-        <h1>I'm Edgar Mejía,<br/>a <span class="gitch-text"></span><br/> from El Salvador 🇸🇻</h1>
+        <h1>I'm Edgar Mejía,<br/><span class="text-zinc-500">a <span class="gitch-text"></span></span><br/> from El Salvador 🇸🇻</h1>
         <div class="container">
           <div class="text"></div>
         </div>
       </div>
     </div>
   </section>
-
-  <!-- <div class="main-content">
-    <div class="section">
-      <div class="flex flex-col md:flex-row items-center justify-between">
-        <div class="md:w-1/2 p-4">
-          <img src="/img/main.webp" alt="Astro Logo" class="w-full h-auto" />
-        </div>
-        <div class="md:w-1/2 p-16">
-          <h1>Hi there 👋!</h1>
-          <h1>I'm Edgar Mejía, a <span class="typewriter thick"></span> developer from El Salvador 🇸🇻</h1>
-        </div>
-      </div>
-    </div>
-    <div class="section green">Sección 2: Fondo Blanco</div>
-    <div class="section purple">Sección 4: Fondo Morado</div>
-    <div class="section teal">Sección 8: Fondo Verde Azulado</div>
-  </div> -->
+  <section class="section green">
+    <h1>Section 2: Fondo Blanco</h1>
+  </section>
 
   <style>
-    
     .section {
       height: 100vh;
       display: flex;
@@ -69,13 +50,29 @@ import Layout from "../layouts/Layout.astro";
     .section.purple { background-color: #4a148c; }
     .section.red { background-color: #b71c1c; }
     .section.teal { background-color: #004d40; }
+    
+    .section-about {
+      position: relative;
+      overflow: hidden;
+      isolation: isolate;
+    }
+
+    .section-about::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      /* background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20'><text x='0' y='15' font-size='12' fill='rgba(0,0,0,0.04)'>永</text></svg>"); */
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20'><text x='0' y='15' font-size='12' fill='rgba(0,0,0,0.20)'>.</text></svg>");
+      background-repeat: repeat;
+      background-size: 20px 20px;
+      z-index: -1;
+    }
 
     h1 {
-      /* font-size: 4vmin; */
       color: #000;
       text-align: left;
       font-weight: 700;
-      /* margin: 0rem 0 0rem 0rem; */
       margin: 0.5rem 0;
     }
 
@@ -191,7 +188,9 @@ import Layout from "../layouts/Layout.astro";
   class TextScramble {
     constructor(el) {
       this.el = el;
-      this.chars = '!<>-_\\/[]{}—=+*^?#________';
+      //this.chars = '!<>-_\\/[]{}—=+*^?#________';
+      this.chars = '!<>-_\\/[]{}—=+*^?#火木中大小力__';
+      // this.chars = '日月火水木土人一二三上下中大小本日月力手田円年';
       this.update = this.update.bind(this);
     }
 
