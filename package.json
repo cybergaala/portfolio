@@ -16,7 +16,7 @@
   "license": "MIT",
   "scripts": {
     "build": "gatsby build",
-    "dev": "rm -rf .cache && gatsby clean && gatsby develop",
+    "dev": "gatsby clean && mkdir -p .cache && gatsby develop",
     "format": "prettier --write \"src/**/*.js\"",
     "test": "echo \"Write tests! -> https://gatsby.app/unit-testing\""
   },
@@ -87,5 +87,9 @@
   "bugs": {
     "url": "https://github.com/panr/gatsby-starter-hello-friend/issues"
   },
-  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e",
+  "resolutions": {
+    "ajv": "^8.0.0",
+    "ajv-keywords": "^5.0.0"
+  }
 }
