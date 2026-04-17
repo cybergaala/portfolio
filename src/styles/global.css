@@ -85,7 +85,7 @@ html.dark::view-transition-old(root) {
 /* Going light: old dark content shrinks back into button */
 html:not(.dark)::view-transition-old(root) {
   z-index: 2;
-  animation: theme-shrink 0.65s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: theme-shrink 0.65s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 html:not(.dark)::view-transition-new(root) {
   z-index: 1;
