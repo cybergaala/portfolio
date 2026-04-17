@@ -1,0 +1,44 @@
+---
+title: "What makes a good code review"
+description: "The habits that turn code review from a bottleneck into the most useful part of the engineering process."
+pubDate: 2026-04-08
+tags: ["engineering", "process", "teams"]
+---
+
+Code review is the part of software development most teams do but few do well. Done badly it's a bottleneck, a source of resentment, and a rubber stamp. Done well it's where the team's engineering culture actually lives.
+
+Here's what I've learned matters.
+
+## Small PRs
+
+The most impactful change you can make to your review culture is reducing PR size. A 50-line PR gets a real review. A 500-line PR gets a scan and an approval.
+
+When someone sends a large PR, the reviewer faces an impossible task: understand enough context to give meaningful feedback on a change that touched half the codebase. Most people resolve this by approving with a few surface-level comments. The author gets false confidence. Bugs ship.
+
+If a feature requires 500 lines, break it into a stack. The first PR adds the data model. The second adds the service layer. The third adds the UI. Each one is reviewable. The stack is mergeable piece by piece.
+
+## Separate correctness from style
+
+A review comment should be one of three things: a bug, a question, or a suggestion. Style preferences belong in the linter configuration, not in review comments.
+
+If you find yourself writing "I'd prefer this named X" or "we usually do this differently", ask whether the linter could catch it automatically. If yes, add it to the linter. If no, ask whether it actually matters. Most style preferences don't.
+
+This doesn't mean style is irrelevant — it means the review thread isn't the place to litigate it.
+
+## Review the tests first
+
+I always read the tests before the implementation. Tests are a spec. If the tests are well-named and comprehensive, they tell me what the code is supposed to do, which makes the implementation much easier to evaluate.
+
+If there are no tests, that's the first comment. If the tests don't cover the interesting cases, that's the second comment. Everything else is secondary.
+
+## Be explicit about blocking vs. non-blocking
+
+A comment that says "nit: could rename this to X" and a comment that says "this will cause a data race" look the same in most review tools. They're not.
+
+Prefix blocking issues with **Blocking:** or **Must fix:**. Prefix non-blocking suggestions with **Nit:** or **Optional:**. The author can then make an informed decision about what to address before merging.
+
+## Respond to every comment
+
+If you're the author, respond to every review comment — even if it's just "done" or "left a note in the commit message". This is basic respect for the reviewer's time and prevents the back-and-forth of "did you see my comment?"
+
+If you disagree with a comment, explain why. The reviewer might be wrong. They might be missing context. Or they might have a good point you hadn't considered. Either way, the conversation is more useful than a silent resolve.

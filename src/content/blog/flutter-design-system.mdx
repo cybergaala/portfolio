@@ -1,0 +1,131 @@
+---
+title: "Building a design system for Flutter"
+description: "How I went from copy-pasting widgets to a structured token-based system that scales across apps and teams."
+pubDate: 2026-04-16
+tags: ["flutter", "design-system", "ui", "architecture"]
+---
+
+Every Flutter project I worked on started the same way: a `colors.dart` file, a handful of hardcoded `TextStyle` values, and the quiet confidence that "we'll clean this up later." We never did.
+
+After the third app with the same duplicated button styles and a slightly different shade of blue, I stopped and built a proper design system. Here's what I learned.
+
+## Why ad-hoc widget styles break down
+
+The problem isn't laziness. It's that Flutter makes it easy to inline things. `TextStyle(fontSize: 14, color: Colors.grey)` is fast to write, it works, and the compiler doesn't complain. Then a designer changes the body font size to 15, and you're doing a project-wide search and replace.
+
+The deeper issue is that styling decisions live in hundreds of call sites instead of one place. When they're spread out, you can't reason about what your UI actually looks like — you have to run it.
+
+## Layer architecture
+
+The system I settled on has five layers, each depending only on the one below it:
+
+![Architecture diagram showing the five layers of the Flutter design system](/img/blog/flutter-design-system-layers.svg)
+
+The key rule: **no layer reaches past the one directly below it**. A feature widget doesn't import foundation constants — it uses tokens. A component doesn't know about screens. This makes every layer independently testable and replaceable.
+
+## Tokens: the foundation
+
+Tokens are named constants that encode every design decision that repeats. Not "blue", but `AppColors.primary`. Not `16.0`, but `AppSpacing.md`.
+
+![Token reference showing colors, spacing, and typography scales](/img/blog/flutter-design-system-tokens.svg)
+
+In practice, the token file looks like this:
+
+```dart
+abstract class AppColors {
+  static const primary   = Color(0xFF15CBFC);
+  static const accent    = Color(0xFF8052FF);
+  static const error     = Color(0xFFF05237);
+  static const warning   = Color(0xFFFFD54A);
+  static const bgDark    = Color(0xFF0F1219);
+  static const surface   = Color(0x0FFFFFFF);
+}
+
+abstract class AppSpacing {
+  static const xs = 4.0;
+  static const sm = 8.0;
+  static const md = 16.0;
+  static const lg = 24.0;
+  static const xl = 40.0;
+}
+
+abstract class AppTextStyles {
+  static const display = TextStyle(
+    fontSize: 28, fontWeight: FontWeight.w700, letterSpacing: -0.03 * 28,
+  );
+  static const heading = TextStyle(
+    fontSize: 18, fontWeight: FontWeight.w600, letterSpacing: -0.02 * 18,
+  );
+  static const body = TextStyle(fontSize: 14, height: 1.6);
+  static const caption = TextStyle(
+    fontSize: 11, fontWeight: FontWeight.w500, letterSpacing: 0.1 * 11,
+  );
+}
+```
+
+No magic numbers. The moment you want to change body font size, there's exactly one place to do it.
+
+## Components that own their style
+
+A component is a widget that knows what it looks like. It doesn't accept raw `Color` or `TextStyle` parameters — it reads from tokens.
+
+```dart
+class AppButton extends StatelessWidget {
+  const AppButton({required this.label, required this.onPressed, super.key});
+
+  final String label;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onPressed,
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.lg,
+          vertical: AppSpacing.sm + AppSpacing.xs,
+        ),
+        color: AppColors.primary,
+        child: Text(label, style: AppTextStyles.caption.copyWith(
+          color: AppColors.bgDark,
+          letterSpacing: 0.04 * 11,
+        )),
+      ),
+    );
+  }
+}
+```
+
+The consumer of this button doesn't style it. They call `AppButton(label: 'Send', onPressed: ...)` and get a consistent button everywhere.
+
+## Theming across light and dark
+
+The last piece is wiring tokens to Flutter's `ThemeData`. Instead of checking `MediaQuery` for brightness inside widgets, you define a light theme and a dark theme once, both built from the same token set.
+
+```dart
+ThemeData darkTheme() => ThemeData(
+  brightness: Brightness.dark,
+  scaffoldBackgroundColor: AppColors.bgDark,
+  colorScheme: const ColorScheme.dark(
+    primary: AppColors.primary,
+    error: AppColors.error,
+    surface: AppColors.surface,
+  ),
+  textTheme: TextTheme(
+    displayLarge: AppTextStyles.display,
+    titleLarge: AppTextStyles.heading,
+    bodyMedium: AppTextStyles.body,
+    labelSmall: AppTextStyles.caption,
+  ),
+);
+```
+
+Widgets that pull from `Theme.of(context)` automatically respect the active theme. Components that use token constants directly need a `Theme.of(context).brightness` check — so I try to keep those at the token level, not inside components.
+
+## Was it worth the upfront work?
+
+Yes. The payoff was visible within the same sprint: the designer opened a PR that changed three token values and every screen updated. No hunting, no missed instances.
+
+The rule I use now: if a value appears more than once, it's a token. If a widget has styling logic, it's a component. Everything else is a feature or a screen.
+
+Start small — even just a `colors.dart` and a `spacing.dart` with real names instead of numbers. The architecture comes naturally once you feel the pain of not having it.
