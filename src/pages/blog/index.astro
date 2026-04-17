@@ -110,13 +110,11 @@ const posts = (await getCollection('blog', ({ data }) => !data.draft))
     max-width: 56ch;
   }
 
-  @media (prefers-color-scheme: dark) {
-    .section-label { color: rgba(255, 255, 255, 0.3); }
-    .post-item { border-top-color: rgba(255, 255, 255, 0.08); }
-    .post-item:last-child { border-bottom-color: rgba(255, 255, 255, 0.08); }
-    .post-num { color: rgba(255, 255, 255, 0.08); }
-    .post-title { color: #f0f0f0; }
-    .post-meta { color: rgba(255, 255, 255, 0.35); }
-    .post-desc { color: rgba(255, 255, 255, 0.55); }
-  }
+  :global(html.dark) .section-label { color: rgba(255, 255, 255, 0.3); }
+  :global(html.dark) .post-item { border-top-color: rgba(255, 255, 255, 0.08); }
+  :global(html.dark) .post-item:last-child { border-bottom-color: rgba(255, 255, 255, 0.08); }
+  :global(html.dark) .post-num { color: rgba(255, 255, 255, 0.08); }
+  :global(html.dark) .post-title { color: #f0f0f0; }
+  :global(html.dark) .post-meta { color: rgba(255, 255, 255, 0.35); }
+  :global(html.dark) .post-desc { color: rgba(255, 255, 255, 0.55); }
 </style>

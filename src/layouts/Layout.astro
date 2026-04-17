@@ -15,6 +15,15 @@ const { title, description } = Astro.props;
 <html lang="es">
   <head>
     <Head title={title} description={description} />
+    <script is:inline>
+      (function() {
+        const saved = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (saved === 'dark' || (!saved && prefersDark)) {
+          document.documentElement.classList.add('dark');
+        }
+      })();
+    </script>
     <style></style>
   </head>
   <body>
