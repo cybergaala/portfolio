@@ -182,15 +182,23 @@
 </style>
 
 <script>
-  const mainNav = document.getElementById('mainNav');
-  const toggleBtn = document.getElementById('theme-toggle');
-  const html = document.documentElement;
-
+  // Scroll handler always looks up a fresh DOM reference so it works
+  // correctly after ViewTransitions swaps the page body.
   window.addEventListener('scroll', () => {
-    if (mainNav) mainNav.classList.toggle('nav-scrolled', window.scrollY > 0);
+    const nav = document.getElementById('mainNav');
+    if (nav) nav.classList.toggle('nav-scrolled', window.scrollY > 0);
   });
 
-  if (toggleBtn) {
+  function initHeader() {
+    const mainNav = document.getElementById('mainNav');
+    const toggleBtn = document.getElementById('theme-toggle');
+    const html = document.documentElement;
+
+    // Re-apply scroll class immediately in case the page loaded while scrolled.
+    if (mainNav) mainNav.classList.toggle('nav-scrolled', window.scrollY > 0);
+
+    if (!toggleBtn) return;
+
     toggleBtn.addEventListener('click', () => {
       const isDark = html.classList.contains('dark');
       const rect = toggleBtn.getBoundingClientRect();
@@ -215,7 +223,13 @@
         return;
       }
 
-      (document as any).startViewTransition(applyTheme);
+      html.dataset.themeTransition = 'true';
+      const t = (document as any).startViewTransition(applyTheme);
+      t.finished.finally(() => {
+        delete html.dataset.themeTransition;
+      });
     });
   }
+
+  document.addEventListener('astro:page-load', initHeader);
 </script>

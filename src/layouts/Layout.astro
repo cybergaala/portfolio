@@ -2,6 +2,7 @@
 import Head from '../components/Head.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+import { ViewTransitions } from 'astro:transitions';
 
 interface Props {
   title: string;
@@ -15,14 +16,41 @@ const { title, description } = Astro.props;
 <html lang="es">
   <head>
     <Head title={title} description={description} />
+    <ViewTransitions />
     <script is:inline>
-      (function() {
+      (function applyTheme() {
         const saved = localStorage.getItem('theme');
         const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
         if (saved === 'dark' || (!saved && prefersDark)) {
           document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
         }
       })();
+      document.addEventListener('astro:after-swap', function() {
+        const saved = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (saved === 'dark' || (!saved && prefersDark)) {
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
+      });
+      if (!window._samePageGuard) {
+        window._samePageGuard = true;
+        document.addEventListener('click', function(e) {
+          var a = e.target.closest('a[href]');
+          if (!a) return;
+          try {
+            var dest = new URL(a.href, location.href);
+            if (dest.origin === location.origin && dest.pathname === location.pathname) {
+              e.stopImmediatePropagation();
+              e.preventDefault();
+              if (dest.hash) location.hash = dest.hash;
+            }
+          } catch(_) {}
+        }, true);
+      }
     </script>
     <style></style>
   </head>
