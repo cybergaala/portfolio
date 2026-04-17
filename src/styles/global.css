@@ -66,28 +66,26 @@ h2 { font-size: 1.625rem; }
 h3 { font-size: 1.375rem; }
 h4 { font-size: 1.125rem; }
 
-/* Theme switch animation via View Transitions API */
-::view-transition-old(root),
-::view-transition-new(root) {
+/* ── Theme switch (circle reveal) ───────────────────────────────────── */
+html[data-theme-transition]::view-transition-old(root),
+html[data-theme-transition]::view-transition-new(root) {
   animation: none;
   mix-blend-mode: normal;
 }
 
-/* Going dark: new dark content expands from button */
-html.dark::view-transition-new(root) {
+html[data-theme-transition].dark::view-transition-new(root) {
   z-index: 2;
   animation: theme-expand 0.65s cubic-bezier(0.4, 0, 0.2, 1);
 }
-html.dark::view-transition-old(root) {
+html[data-theme-transition].dark::view-transition-old(root) {
   z-index: 1;
 }
 
-/* Going light: old dark content shrinks back into button */
-html:not(.dark)::view-transition-old(root) {
+html[data-theme-transition]:not(.dark)::view-transition-old(root) {
   z-index: 2;
   animation: theme-shrink 0.65s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
-html:not(.dark)::view-transition-new(root) {
+html[data-theme-transition]:not(.dark)::view-transition-new(root) {
   z-index: 1;
 }
 
@@ -99,6 +97,25 @@ html:not(.dark)::view-transition-new(root) {
 @keyframes theme-shrink {
   from { clip-path: circle(200vmax at var(--theme-x, 50%) var(--theme-y, 50%)); }
   to   { clip-path: circle(0px at var(--theme-x, 50%) var(--theme-y, 50%)); }
+}
+
+/* ── Page navigation transition ─────────────────────────────────────── */
+html:not([data-theme-transition])::view-transition-old(root) {
+  animation: page-out 0.25s ease forwards;
+}
+
+html:not([data-theme-transition])::view-transition-new(root) {
+  animation: page-in 0.25s ease forwards;
+}
+
+@keyframes page-out {
+  from { opacity: 1; transform: translateY(0); }
+  to   { opacity: 0; transform: translateY(-10px); }
+}
+
+@keyframes page-in {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 @media (prefers-reduced-motion: reduce) {
