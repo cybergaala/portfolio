@@ -1,0 +1,60 @@
+<svg width="720" height="320" viewBox="0 0 720 320" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="720" height="320" fill="#0f1219"/>
+
+  <!-- Title -->
+  <text x="40" y="44" font-family="monospace" font-size="11" fill="rgba(255,255,255,0.3)" letter-spacing="2">DESIGN TOKENS</text>
+
+  <!-- Color swatches -->
+  <text x="40" y="84" font-family="monospace" font-size="10" fill="rgba(255,255,255,0.25)" letter-spacing="1">COLORS</text>
+
+  <rect x="40" y="96" width="56" height="56" rx="3" fill="#15cbfc"/>
+  <text x="68" y="168" font-family="monospace" font-size="9" fill="rgba(255,255,255,0.4)" text-anchor="middle">primary</text>
+
+  <rect x="108" y="96" width="56" height="56" rx="3" fill="#8052ff"/>
+  <text x="136" y="168" font-family="monospace" font-size="9" fill="rgba(255,255,255,0.4)" text-anchor="middle">accent</text>
+
+  <rect x="176" y="96" width="56" height="56" rx="3" fill="#f05237"/>
+  <text x="204" y="168" font-family="monospace" font-size="9" fill="rgba(255,255,255,0.4)" text-anchor="middle">error</text>
+
+  <rect x="244" y="96" width="56" height="56" rx="3" fill="#ffd54a"/>
+  <text x="272" y="168" font-family="monospace" font-size="9" fill="rgba(255,255,255,0.4)" text-anchor="middle">warning</text>
+
+  <rect x="312" y="96" width="56" height="56" rx="3" fill="#0f1219" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+  <text x="340" y="168" font-family="monospace" font-size="9" fill="rgba(255,255,255,0.4)" text-anchor="middle">bg</text>
+
+  <rect x="380" y="96" width="56" height="56" rx="3" fill="rgba(255,255,255,0.06)"/>
+  <text x="408" y="168" font-family="monospace" font-size="9" fill="rgba(255,255,255,0.4)" text-anchor="middle">surface</text>
+
+  <!-- Spacing tokens -->
+  <text x="40" y="204" font-family="monospace" font-size="10" fill="rgba(255,255,255,0.25)" letter-spacing="1">SPACING</text>
+
+  <rect x="40" y="216" width="4" height="4" rx="1" fill="#15cbfc" opacity="0.6"/>
+  <text x="52" y="224" font-family="monospace" font-size="9" fill="rgba(255,255,255,0.35)">xs  = 4px</text>
+
+  <rect x="40" y="234" width="8" height="8" rx="1" fill="#15cbfc" opacity="0.6"/>
+  <text x="56" y="245" font-family="monospace" font-size="9" fill="rgba(255,255,255,0.35)">sm  = 8px</text>
+
+  <rect x="40" y="256" width="16" height="16" rx="1" fill="#15cbfc" opacity="0.6"/>
+  <text x="64" y="268" font-family="monospace" font-size="9" fill="rgba(255,255,255,0.35)">md  = 16px</text>
+
+  <rect x="40" y="280" width="24" height="24" rx="1" fill="#15cbfc" opacity="0.6"/>
+  <text x="72" y="296" font-family="monospace" font-size="9" fill="rgba(255,255,255,0.35)">lg  = 24px</text>
+
+  <!-- Typography -->
+  <text x="300" y="204" font-family="monospace" font-size="10" fill="rgba(255,255,255,0.25)" letter-spacing="1">TYPOGRAPHY</text>
+
+  <text x="300" y="232" font-family="sans-serif" font-size="28" font-weight="700" fill="rgba(255,255,255,0.85)" letter-spacing="-1">Display</text>
+  <text x="490" y="232" font-family="monospace" font-size="9" fill="rgba(255,255,255,0.25)">700 · 28px · -0.03em</text>
+
+  <text x="300" y="258" font-family="sans-serif" font-size="18" font-weight="600" fill="rgba(255,255,255,0.7)">Heading</text>
+  <text x="490" y="258" font-family="monospace" font-size="9" fill="rgba(255,255,255,0.25)">600 · 18px · -0.02em</text>
+
+  <text x="300" y="278" font-family="sans-serif" font-size="14" fill="rgba(255,255,255,0.55)">Body text</text>
+  <text x="490" y="278" font-family="monospace" font-size="9" fill="rgba(255,255,255,0.25)">400 · 14px · 1.6lh</text>
+
+  <text x="300" y="296" font-family="sans-serif" font-size="11" fill="rgba(255,255,255,0.35)">Caption / label</text>
+  <text x="490" y="296" font-family="monospace" font-size="9" fill="rgba(255,255,255,0.25)">500 · 11px · 0.1em</text>
+
+  <!-- Footer -->
+  <text x="360" y="316" font-family="monospace" font-size="10" fill="rgba(255,255,255,0.15)" text-anchor="middle">Flutter Design System — Token Reference</text>
+</svg>
