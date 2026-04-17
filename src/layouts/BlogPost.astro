@@ -6,9 +6,10 @@ interface Props {
   description: string;
   pubDate: Date;
   tags?: string[];
+  banner?: string;
 }
 
-const { title, description, pubDate, tags } = Astro.props;
+const { title, description, pubDate, tags, banner } = Astro.props;
 
 const formatted = pubDate.toLocaleDateString('en-US', {
   year: 'numeric',
@@ -32,6 +33,12 @@ const formatted = pubDate.toLocaleDateString('en-US', {
           </div>
         )}
       </header>
+
+      {banner && (
+        <div class="post-banner">
+          <img src={banner} alt="" role="presentation" />
+        </div>
+      )}
 
       <div class="post-layout">
         <div class="post-body">
@@ -266,6 +273,25 @@ const formatted = pubDate.toLocaleDateString('en-US', {
     margin: 2rem 0;
     border: 1px solid rgba(0,0,0,0.07);
   }
+
+  /* Banner */
+  .post-banner {
+    width: 100%;
+    aspect-ratio: 12 / 5;
+    overflow: hidden;
+    border-radius: 6px;
+    margin-bottom: 3.5rem;
+    border: 1px solid rgba(0,0,0,0.07);
+  }
+
+  .post-banner img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  :global(html.dark) .post-banner { border-color: rgba(255, 255, 255, 0.08); }
 
   /* Header */
   :global(html.dark) .back-link { color: rgba(255, 255, 255, 0.35); }
