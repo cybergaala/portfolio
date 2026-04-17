@@ -1,203 +1,144 @@
 ---
-import { SITE_TITLE } from "../constants";
 ---
 
 <header>
   <nav id="mainNav">
-    <div class="nav-left">
-      <span>EM!</span>
-    </div>
-    <div class="nav-right">
-      <ul>
-        <li><a href="#experience">Experience</a></li>
-        <li><a href="#contact">Contact</a></li>
+    <div class="nav-inner page-container">
+      <a href="/" class="nav-logo"><span class="nav-logo-box">EM</span></a>
+      <ul class="nav-links">
+        <li><a href="/#experience">Experience</a></li>
+        <li><a href="/#contact">Contact</a></li>
       </ul>
+      <a href="/blog" class="nav-blog">Blog</a>
     </div>
   </nav>
 </header>
 
 <style>
-  .blur-background {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    overflow: hidden;
-    z-index: -1;
-  }
-
-  @keyframes float {
-    0% {
-      transform: translate(0, 0);
-    }
-    100% {
-      transform: translate(50px, 50px);
-    }
-  }
-
   nav {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
     width: 100%;
-    padding: 15px 30px;
-    background-color: var(--initial-nav-bg);
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
+    padding: 0;
     z-index: 10;
-    mix-blend-mode: normal;
+    transition: border-bottom 0.2s;
   }
 
   nav.nav-scrolled {
-    background-color: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(15px);
-    -webkit-backdrop-filter: blur(15px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-    mix-blend-mode: difference;
+    background-color: rgba(255, 255, 255, 0.8);
+    backdrop-filter: saturate(180%) blur(16px);
+    -webkit-backdrop-filter: saturate(180%) blur(16px);
+    border-bottom: 1px solid rgba(0,0,0,0.07);
   }
 
-  .nav-left span,
-  .nav-right ul li a {
-    color: var(--initial-nav-text-color);
+  .nav-inner {
+    display: flex;
+    align-items: center;
+    height: 52px;
   }
 
-  nav.nav-scrolled .nav-left span,
-  nav.nav-scrolled .nav-right ul li a { color: white; }
-  .nav-right ul li a:hover { color: #ffd700; }
-
-  .nav-left {
-    font-size: 2.5rem;
-    font-weight: 600;
-    cursor: pointer;
-    position: relative;
-    display: inline-block;
-    transition: transform 0.3s ease-in-out;
-    perspective: 1000px;
+  .nav-logo {
+    text-decoration: none;
+    transition: opacity 0.2s;
   }
 
-  @keyframes glitch {
-    0% {
-      transform: translate(0, 0);
-      text-shadow: 0 0 rgba(255, 0, 0, 0.7), 0 0 rgba(0, 255, 0, 0.7);
-    }
-    20% {
-      transform: translate(-2px, 2px);
-      text-shadow: -2px -2px rgba(255, 0, 0, 0.7), 2px 2px rgba(0, 255, 0, 0.7);
-    }
-    40% {
-      transform: translate(-2px, -2px);
-      text-shadow: 2px 2px rgba(255, 0, 0, 0.7), -2px -2px rgba(0, 255, 0, 0.7);
-    }
-    60% {
-      transform: translate(2px, 2px);
-      text-shadow: -2px 2px rgba(255, 0, 0, 0.7), 2px -2px rgba(0, 255, 0, 0.7);
-    }
-    80% {
-      transform: translate(2px, -2px);
-      text-shadow: 2px -2px rgba(255, 0, 0, 0.7), -2px 2px rgba(0, 255, 0, 0.7);
-    }
-    100% {
-        transform: translate(0, 0);
-        text-shadow: 0 0 rgba(255, 0, 0, 0.7), 0 0 rgba(0, 255, 0, 0.7);
-    }
+  .nav-logo-box {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.875rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: #111;
+    border: 1.5px solid #111;
+    padding: 0 6px;
+    line-height: 1.6;
   }
 
-  .nav-left:hover span {
-      animation: glitch 0.2s infinite alternate; /* Apply glitch animation on hover */
-      /* color: #FFD700; */ /* Keep hover color for visibility during glitch (eliminado) */
+  .nav-logo:hover .nav-logo-box {
+    opacity: 0.5;
   }
 
-  .nav-right ul {
+  .nav-links {
     list-style: none;
-    margin: 0;
+    margin: 0 auto 0 2rem;
     padding: 0;
     display: flex;
-    gap: 40px;
+    align-items: center;
+    gap: 0;
   }
 
-  .nav-right ul li a {
+  .nav-links li {
+    display: flex;
+    align-items: center;
+  }
+
+  .nav-links a,
+  .nav-blog {
+    display: flex;
+    align-items: center;
     text-decoration: none;
-    font-size: 1.2rem;
+    font-size: 0.875rem;
     font-weight: 400;
-    position: relative;
+    color: rgba(0,0,0,0.5);
+    padding: 0 14px;
+    transition: color 0.2s;
   }
 
-  .nav-right ul li a::after {
-    content: "";
-    position: absolute;
-    width: 0;
-    height: 2px;
-    background: #ffd700;
-    left: 0;
-    bottom: -5px;
-    transition: width 0.3s ease-in-out;
-    mix-blend-mode: normal;
+  .nav-links a:hover,
+  .nav-blog:hover {
+    color: #111;
   }
 
-  .nav-right ul li a:hover::after {width: 100%; }
-
-  .nav-right ul li .sun-icon {
-    font-size: 1.5rem;
-    vertical-align: middle;
-    mix-blend-mode: normal!important;
-    text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+  .nav-blog {
+    padding-right: 0;
+    font-weight: 400;
+    color: rgba(0,0,0,0.5);
   }
 
-  .main-content {padding-top: 80px; }
+  .nav-logo-box {
+    transition: background 0.15s ease, color 0.15s ease;
+  }
 
-  /* @media (max-width: 768px) {
-    nav {
-      flex-direction: column;
-      padding: 15px 20px;
+  .nav-logo:hover .nav-logo-box {
+    background: #111;
+    color: #fff;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    nav.nav-scrolled {
+      background-color: rgba(15, 18, 25, 0.85);
+      border-bottom-color: rgba(255, 255, 255, 0.08);
     }
 
-    .nav-left { margin-bottom: 20px; }
-
-    .nav-right ul {
-      flex-direction: column;
-      gap: 15px;
-      align-items: center;
+    .nav-logo-box {
+      color: #f0f0f0;
+      border-color: #f0f0f0;
     }
 
-    .main-content { padding-top: 150px; }
-    .section {font-size: 1.5rem; }
-  } */
+    .nav-logo:hover .nav-logo-box {
+      background: #f0f0f0;
+      color: #111;
+    }
+
+    .nav-links a,
+    .nav-blog {
+      color: rgba(255, 255, 255, 0.45);
+    }
+
+    .nav-links a:hover,
+    .nav-blog:hover {
+      color: #f0f0f0;
+    }
+  }
 </style>
 
 <script is:browser>
   const mainNav = document.getElementById("mainNav");
-  // const toggleButton = document.querySelector(".sun-icon");
 
-  // // Detectar tema preferido del sistema o valor guardado
-  // const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-  // const savedTheme = localStorage.getItem("theme");
-  // const isDark = savedTheme === "dark" || (!savedTheme && prefersDark);
-
-  // document.documentElement.classList.toggle("dark", isDark);
-  // toggleButton.textContent = isDark ? "🌙" : "🌞";
-
-  // // Cambiar tema manualmente al hacer clic
-  // toggleButton.addEventListener("click", () => {
-  //   const currentIsDark = document.documentElement.classList.contains("dark");
-  //   document.documentElement.classList.toggle("dark", !currentIsDark);
-  //   localStorage.setItem("theme", !currentIsDark ? "dark" : "light");
-  //   toggleButton.textContent = !currentIsDark ? "🌙" : "🌞";
-  // });
-
-  // Efecto de scroll en el nav
   window.addEventListener("scroll", () => {
-    if (window.scrollY > 0) {
-      mainNav.classList.add("nav-scrolled");
-    } else {
-      mainNav.classList.remove("nav-scrolled");
-    }
+    mainNav.classList.toggle("nav-scrolled", window.scrollY > 0);
   });
 </script>
