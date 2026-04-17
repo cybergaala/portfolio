@@ -151,6 +151,7 @@ const posts = (await getCollection('blog', ({ data }) => !data.draft))
 
     .about-sub {
       color: rgba(0,0,0,0.35);
+      white-space: nowrap;
     }
 
     h1 {
@@ -558,23 +559,28 @@ const posts = (await getCollection('blog', ({ data }) => !data.draft))
   </style>
 </Layout>
 
-<script is:client>
+<script>
   // Thanks: https://codepen.io/soulwire/pen/mEMPrK
 
   class TextScramble {
-    constructor(el) {
+    el: HTMLElement;
+    chars: string;
+    resolve!: () => void;
+    queue: { from: string; to: string; start: number; end: number; char?: string }[] = [];
+    frame: number = 0;
+    frameRequest: number = 0;
+
+    constructor(el: HTMLElement) {
       this.el = el;
-      //this.chars = '!<>-_\\/[]{}—=+*^?#________';
       this.chars = '!<>-_\\/[]{}—=+*^?#火木中大小力__';
-      // this.chars = '日月火水木土人一二三上下中大小本日月力手田円年';
       this.update = this.update.bind(this);
     }
 
-    setText(newText) {
+    setText(newText: string) {
       const oldText = Array.from(this.el.innerText);
       const newTextArr = Array.from(newText);
       const length = Math.max(oldText.length, newTextArr.length);
-      const promise = new Promise((resolve) => (this.resolve = resolve));
+      const promise = new Promise<void>((resolve) => (this.resolve = resolve));
       this.queue = [];
 
       for (let i = 0; i < length; i++) {
@@ -627,7 +633,7 @@ const posts = (await getCollection('blog', ({ data }) => !data.draft))
   }
 
   const phrases = [
-    'Java hater ☕', 
+    'Java hater ☕',
     'Python dev 🐍',
     '.Net dev',
     'Swift dev',
@@ -644,15 +650,15 @@ const posts = (await getCollection('blog', ({ data }) => !data.draft))
     'Cat lover 🐱',
   ];
 
-  const el = document.querySelector('.gitch-text');
+  function initScramble() {
+    const el = document.querySelector<HTMLElement>('.gitch-text');
+    if (!el) return;
 
-  if (el) {
     const fx = new TextScramble(el);
     let lastIndex = -1;
 
     const next = () => {
-      let randomIndex;
-
+      let randomIndex: number;
       do {
         randomIndex = Math.floor(Math.random() * phrases.length);
       } while (randomIndex === lastIndex);
@@ -665,4 +671,6 @@ const posts = (await getCollection('blog', ({ data }) => !data.draft))
 
     next();
   }
+
+  document.addEventListener('astro:page-load', initScramble);
 </script>
