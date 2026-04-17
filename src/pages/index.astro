@@ -61,25 +61,25 @@ const posts = (await getCollection('blog', ({ data }) => !data.draft))
           <div class="exp-info">
             <p class="exp-company">PBS El Salvador</p>
             <p class="exp-meta">Senior Mobile Developer &nbsp;·&nbsp; 2024 — Present</p>
-            <p class="exp-desc">Led the architecture and delivery of the company's core mobile platform, used by over 2 million users across iOS and Android. Collaborated closely with product and design to define technical roadmaps, introduced code review standards that reduced bug rate by 40%, and mentored a team of four engineers through their transition to a fully Swift codebase. Also drove the migration from a monolithic backend to microservices, improving deploy frequency from bi-weekly to daily.</p>
+            <p class="exp-desc">Lead mobile engineer across Android, iOS, and Flutter, owning the full lifecycle of multiple consumer-facing apps from architecture decisions to App Store and Play Store releases. Introduced a shared Flutter module strategy that cut duplicate logic between platforms by roughly 60%, and established code review practices that brought the team's average review cycle from three days down to one. Also serve as the technical reference for mobile decisions across the organization, collaborating directly with product and QA to ship faster without accumulating debt.</p>
           </div>
         </div>
 
         <div class="exp-item">
           <span class="exp-num">02</span>
           <div class="exp-info">
-            <p class="exp-company">Startup XYZ</p>
-            <p class="exp-meta">Mobile Developer &nbsp;·&nbsp; 2020 — 2022</p>
-            <p class="exp-desc">Joined as the first mobile hire and built the Flutter application from scratch, shipping to both app stores within three months. Integrated real-time features using Firebase, set up CI/CD pipelines, and worked directly with the founding team to iterate fast on user feedback. The app reached 50k downloads in its first year. Also contributed to the Python backend for push notification services and analytics ingestion.</p>
+            <p class="exp-company">ThinkForward</p>
+            <p class="exp-meta">Mid Full-Stack Developer &nbsp;·&nbsp; 2023 — 2024</p>
+            <p class="exp-desc">Principal developer on a multi-tenant ERP system built from scratch with ASP.NET Core, Entity Framework, and SQL Server. Designed the database schema and API surface that serves several independent companies from a single codebase, using tenant-aware middleware and row-level data isolation. Delivered the Razor-based frontend alongside the backend, writing vanilla JavaScript for dynamic UI interactions without introducing a heavy framework. The system went from zero to production in under eight months and is still in active daily use.</p>
           </div>
         </div>
 
         <div class="exp-item">
           <span class="exp-num">03</span>
           <div class="exp-info">
-            <p class="exp-company">Agency Co.</p>
-            <p class="exp-meta">Junior Developer &nbsp;·&nbsp; 2018 — 2020</p>
-            <p class="exp-desc">Worked across a range of client projects building internal tools, dashboards, and customer-facing web applications using .NET and React. Gained hands-on experience with SQL database design, REST API development, and agile delivery cycles. Took ownership of a high-traffic reporting tool for a retail client, optimizing slow queries and cutting load times by over 60%. This role laid the foundation for my full-stack thinking and attention to performance.</p>
+            <p class="exp-company">Serfinsa</p>
+            <p class="exp-meta">Mid Mobile Developer &nbsp;·&nbsp; 2018 — 2020</p>
+            <p class="exp-desc">Android developer on a fintech platform serving thousands of daily transactions, working with Kotlin and early Jetpack Compose. Took ownership of the payments and transfers screens, refactoring a fragile XML-based UI to a composable architecture that made new flows significantly faster to build and test. Collaborated with backend and security teams to implement biometric authentication and PCI-compliant session handling, and contributed to the internal component library that the team still uses today.</p>
           </div>
         </div>
 
@@ -511,52 +511,44 @@ const posts = (await getCollection('blog', ({ data }) => !data.draft))
       }
     }
 
-    @media (prefers-color-scheme: dark) {
-      .section-about {
-        border-bottom-color: rgba(255, 255, 255, 0.08);
-      }
+    :global(html.dark) .section-about { border-bottom-color: rgba(255, 255, 255, 0.08); }
+    :global(html.dark) h1 { color: #f0f0f0; }
+    :global(html.dark) .about-sub { color: rgba(255, 255, 255, 0.35); }
+    :global(html.dark) .typewriter { border-bottom-color: #f0f0f0; }
 
-      h1 { color: #f0f0f0; }
+    /* Writing */
+    :global(html.dark) .section-writing { border-top-color: rgba(255, 255, 255, 0.08); }
+    :global(html.dark) .post-list { border-top-color: rgba(255, 255, 255, 0.08); }
+    :global(html.dark) .post-num { color: rgba(255, 255, 255, 0.08); }
+    :global(html.dark) .post-title { color: #f0f0f0; }
+    :global(html.dark) .post-meta { color: rgba(255, 255, 255, 0.3); }
+    :global(html.dark) .post-desc { color: rgba(255, 255, 255, 0.5); }
+    :global(html.dark) .all-posts-link { color: rgba(255, 255, 255, 0.35); }
+    :global(html.dark) .all-posts-link:hover { color: #f0f0f0; }
+    :global(html.dark) .post-item { border-top-color: rgba(255, 255, 255, 0.08); }
 
-      .about-sub { color: rgba(255, 255, 255, 0.35); }
+    /* Experience */
+    :global(html.dark) .section-experience { border-top-color: rgba(255, 255, 255, 0.08); }
+    :global(html.dark) .section-label { color: rgba(255, 255, 255, 0.3); }
+    :global(html.dark) .exp-num { color: rgba(255, 255, 255, 0.08); }
+    :global(html.dark) .exp-company { color: #f0f0f0; }
+    :global(html.dark) .exp-meta { color: rgba(255, 255, 255, 0.35); }
+    :global(html.dark) .exp-desc { color: rgba(255, 255, 255, 0.55); }
 
-      .typewriter { border-bottom-color: #f0f0f0; }
-
-      /* Writing */
-      .section-writing { border-top-color: rgba(255, 255, 255, 0.08); }
-      .post-list { border-top-color: rgba(255, 255, 255, 0.08); }
-      .post-num { color: rgba(255, 255, 255, 0.08); }
-      .post-title { color: #f0f0f0; }
-      .post-meta { color: rgba(255, 255, 255, 0.3); }
-      .post-desc { color: rgba(255, 255, 255, 0.5); }
-      .all-posts-link { color: rgba(255, 255, 255, 0.35); }
-      .all-posts-link:hover { color: #f0f0f0; }
-      .post-item { border-top-color: rgba(255, 255, 255, 0.08); }
-
-      /* Experience */
-      .section-experience { border-top-color: rgba(255, 255, 255, 0.08); }
-      .section-label { color: rgba(255, 255, 255, 0.3); }
-      .exp-num { color: rgba(255, 255, 255, 0.08); }
-      .exp-company { color: #f0f0f0; }
-      .exp-meta { color: rgba(255, 255, 255, 0.35); }
-      .exp-desc { color: rgba(255, 255, 255, 0.55); }
-
-      /* Contact */
-      .section-contact { border-top-color: rgba(255, 255, 255, 0.08); }
-      .contact-heading { color: #f0f0f0; }
-      .form-field label { color: rgba(255, 255, 255, 0.35); }
-      .form-field input,
-      .form-field textarea {
-        border-bottom-color: rgba(255, 255, 255, 0.15);
-        color: #f0f0f0;
-      }
-      .form-field input::placeholder,
-      .form-field textarea::placeholder { color: rgba(255, 255, 255, 0.2); }
-      .form-field input:focus,
-      .form-field textarea:focus { border-bottom-color: #f0f0f0; }
-      .form-submit { background: #f0f0f0; color: #111; }
-
+    /* Contact */
+    :global(html.dark) .section-contact { border-top-color: rgba(255, 255, 255, 0.08); }
+    :global(html.dark) .contact-heading { color: #f0f0f0; }
+    :global(html.dark) .form-field label { color: rgba(255, 255, 255, 0.35); }
+    :global(html.dark) .form-field input,
+    :global(html.dark) .form-field textarea {
+      border-bottom-color: rgba(255, 255, 255, 0.15);
+      color: #f0f0f0;
     }
+    :global(html.dark) .form-field input::placeholder,
+    :global(html.dark) .form-field textarea::placeholder { color: rgba(255, 255, 255, 0.2); }
+    :global(html.dark) .form-field input:focus,
+    :global(html.dark) .form-field textarea:focus { border-bottom-color: #f0f0f0; }
+    :global(html.dark) .form-submit { background: #f0f0f0; color: #111; }
   </style>
 
   <style is:global>

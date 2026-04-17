@@ -11,30 +11,20 @@
   --gray-gradient: rgba(var(--gray-light), 50%), #fff;
   --box-shadow: 0 2px 6px rgba(var(--gray), 25%),
     0 8px 24px rgba(var(--gray), 33%), 0 16px 32px rgba(var(--gray), 33%);
-
-  --blur-intensity: 20px; /* Puedes ajustar la intensidad del blur */
-  /* Variables CSS para el tema inicial, se establecen con JavaScript */
-  --initial-body-bg: #FFF; /* Default dark background (will be overridden by JS) */
-  --initial-nav-bg: #FFF; /* Default dark nav background (will be overridden by JS) */
-  --initial-nav-text-color: --black; /* Default white text (will be overridden by JS) */
+  --body-bg: #fff;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --initial-body-bg: #0f1219;
-    --initial-nav-bg: #0f1219;
-    --initial-nav-text-color: #ffffff;
-    --gray: 200, 210, 240;
-    --gray-light: 45, 50, 70;
-    --gray-dark: 229, 233, 240;
-    --box-shadow: 0 2px 6px rgba(var(--gray), 10%),
-      0 8px 24px rgba(var(--gray), 15%), 0 16px 32px rgba(var(--gray), 20%);
-  }
+html.dark {
+  --body-bg: #0f1219;
+  --gray: 200, 210, 240;
+  --gray-light: 45, 50, 70;
+  --gray-dark: 229, 233, 240;
+  --box-shadow: 0 2px 6px rgba(var(--gray), 10%),
+    0 8px 24px rgba(var(--gray), 15%), 0 16px 32px rgba(var(--gray), 20%);
 }
-
 
 body {
-  background-color: var(--initial-body-bg);
+  background-color: var(--body-bg);
   font-family: "Geist Variable", sans-serif;
   overflow-x: hidden;
   margin: 0;
@@ -66,21 +56,6 @@ main {
 }
 
 @media (max-width: 768px) {
-  /* nav {
-    flex-direction: column;
-    padding: 15px 20px;
-  }
-
-  .nav-left {
-    margin-bottom: 20px;
-  }
-
-  .nav-right ul {
-    flex-direction: column;
-    gap: 15px;
-    align-items: center;
-  } */
-
   .main-content {
     padding-top: 150px;
   }
