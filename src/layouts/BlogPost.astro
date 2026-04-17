@@ -323,10 +323,23 @@ const formatted = pubDate.toLocaleDateString('en-US', {
 </style>
 
 <script>
-  const toc = document.getElementById('toc');
-  const headings = document.querySelectorAll<HTMLHeadingElement>('.post-body h2');
+  function initToc() {
+    const toc = document.getElementById('toc');
+    const headings = document.querySelectorAll<HTMLHeadingElement>('.post-body h2');
 
-  if (toc && headings.length > 0) {
+    if (!toc) return;
+
+    toc.innerHTML = '';
+
+    if (headings.length === 0) {
+      const aside = document.getElementById('toc-aside');
+      if (aside) aside.style.display = 'none';
+      return;
+    }
+
+    const aside = document.getElementById('toc-aside');
+    if (aside) aside.style.display = '';
+
     headings.forEach((h, i) => {
       if (!h.id) h.id = `heading-${i}`;
       const a = document.createElement('a');
@@ -335,21 +348,21 @@ const formatted = pubDate.toLocaleDateString('en-US', {
       toc.appendChild(a);
     });
 
-    const links = toc.querySelectorAll<HTMLAnchorElement>('a');
+    const links = Array.from(toc.querySelectorAll<HTMLAnchorElement>('a'));
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach(entry => {
-          const id = entry.target.id;
-          const link = toc.querySelector<HTMLAnchorElement>(`a[href="#${id}"]`);
-          if (link) link.classList.toggle('active', entry.isIntersecting);
-        });
-      },
-      { rootMargin: '-20% 0px -70% 0px' }
-    );
+    const setActive = () => {
+      let current = headings[0];
+      for (const h of headings) {
+        if (h.getBoundingClientRect().top <= 120) current = h;
+      }
+      links.forEach(a => {
+        a.classList.toggle('active', a.getAttribute('href') === `#${current.id}`);
+      });
+    };
 
-    headings.forEach(h => observer.observe(h));
-  } else if (toc) {
-    document.getElementById('toc-aside')!.style.display = 'none';
+    window.addEventListener('scroll', setActive, { passive: true });
+    setActive();
   }
+
+  document.addEventListener('astro:page-load', initToc);
 </script>
