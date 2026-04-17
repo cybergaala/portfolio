@@ -65,3 +65,45 @@ h1 { font-size: 2.625rem; }
 h2 { font-size: 1.625rem; }
 h3 { font-size: 1.375rem; }
 h4 { font-size: 1.125rem; }
+
+/* Theme switch animation via View Transitions API */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+/* Going dark: new dark content expands from button */
+html.dark::view-transition-new(root) {
+  z-index: 2;
+  animation: theme-expand 0.65s cubic-bezier(0.4, 0, 0.2, 1);
+}
+html.dark::view-transition-old(root) {
+  z-index: 1;
+}
+
+/* Going light: old dark content shrinks back into button */
+html:not(.dark)::view-transition-old(root) {
+  z-index: 2;
+  animation: theme-shrink 0.65s cubic-bezier(0.4, 0, 0.2, 1);
+}
+html:not(.dark)::view-transition-new(root) {
+  z-index: 1;
+}
+
+@keyframes theme-expand {
+  from { clip-path: circle(0px at var(--theme-x, 50%) var(--theme-y, 50%)); }
+  to   { clip-path: circle(200vmax at var(--theme-x, 50%) var(--theme-y, 50%)); }
+}
+
+@keyframes theme-shrink {
+  from { clip-path: circle(200vmax at var(--theme-x, 50%) var(--theme-y, 50%)); }
+  to   { clip-path: circle(0px at var(--theme-x, 50%) var(--theme-y, 50%)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none !important;
+  }
+}

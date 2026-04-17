@@ -1,8 +1,6 @@
 ---
 ---
 
-<div id="theme-overlay"></div>
-
 <header>
   <nav id="mainNav">
     <div class="nav-inner page-container">
@@ -33,16 +31,6 @@
 </header>
 
 <style>
-  #theme-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 9998;
-    background: #0f1219;
-    pointer-events: none;
-    clip-path: circle(0px at 50% 50%);
-    will-change: clip-path;
-  }
-
   nav {
     position: fixed;
     top: 0;
@@ -196,52 +184,38 @@
 <script>
   const mainNav = document.getElementById('mainNav');
   const toggleBtn = document.getElementById('theme-toggle');
-  const overlay = document.getElementById('theme-overlay');
   const html = document.documentElement;
 
   window.addEventListener('scroll', () => {
     if (mainNav) mainNav.classList.toggle('nav-scrolled', window.scrollY > 0);
   });
 
-  if (toggleBtn && overlay) {
+  if (toggleBtn) {
     toggleBtn.addEventListener('click', () => {
       const isDark = html.classList.contains('dark');
       const rect = toggleBtn.getBoundingClientRect();
-      const cx = rect.left + rect.width / 2;
-      const cy = rect.top + rect.height / 2;
-      const maxR = Math.hypot(
-        Math.max(cx, window.innerWidth - cx),
-        Math.max(cy, window.innerHeight - cy)
-      );
+      const cx = Math.round(rect.left + rect.width / 2);
+      const cy = Math.round(rect.top + rect.height / 2);
 
-      if (!isDark) {
-        overlay.style.transition = 'none';
-        overlay.style.clipPath = `circle(0px at ${cx}px ${cy}px)`;
-        overlay.offsetHeight;
+      html.style.setProperty('--theme-x', cx + 'px');
+      html.style.setProperty('--theme-y', cy + 'px');
 
-        overlay.style.transition = 'clip-path 0.65s cubic-bezier(0.4, 0, 0.2, 1)';
-        overlay.style.clipPath = `circle(${maxR}px at ${cx}px ${cy}px)`;
-
-        setTimeout(() => {
+      const applyTheme = () => {
+        if (isDark) {
+          html.classList.remove('dark');
+          localStorage.setItem('theme', 'light');
+        } else {
           html.classList.add('dark');
           localStorage.setItem('theme', 'dark');
-        }, 320);
+        }
+      };
 
-        setTimeout(() => {
-          overlay.style.transition = 'none';
-          overlay.style.clipPath = `circle(0px at ${cx}px ${cy}px)`;
-        }, 700);
-      } else {
-        html.classList.remove('dark');
-        localStorage.setItem('theme', 'light');
-
-        overlay.style.transition = 'none';
-        overlay.style.clipPath = `circle(${maxR}px at ${cx}px ${cy}px)`;
-        overlay.offsetHeight;
-
-        overlay.style.transition = 'clip-path 0.65s cubic-bezier(0.4, 0, 0.2, 1)';
-        overlay.style.clipPath = `circle(0px at ${cx}px ${cy}px)`;
+      if (!('startViewTransition' in document)) {
+        applyTheme();
+        return;
       }
+
+      (document as any).startViewTransition(applyTheme);
     });
   }
 </script>
