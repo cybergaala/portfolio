@@ -305,6 +305,15 @@ const formatted = pubDate.toLocaleDateString('en-US', {
     background: rgba(255, 255, 255, 0.05);
     border-color: rgba(255, 255, 255, 0.08);
   }
+
+  :global(html.dark) .post-body :global(pre code) {
+    background: none;
+    color: inherit;
+  }
+
+  :global(html.dark) .post-body :global(pre .line) {
+    background-color: transparent !important;
+  }
   :global(html.dark) .post-body :global(blockquote) {
     border-left-color: rgba(255, 255, 255, 0.15);
     color: rgba(255, 255, 255, 0.45);

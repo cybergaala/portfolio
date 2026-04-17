@@ -3,7 +3,8 @@
     "allow": [
       "Bash(npm install:*)",
       "Bash(npm run *)",
-      "Bash(npx astro *)"
+      "Bash(npx astro *)",
+      "Bash(node *)"
     ]
   }
 }
