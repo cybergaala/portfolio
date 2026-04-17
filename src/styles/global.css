@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "@fontsource-variable/geist";
 
 :root {
   --accent: #2337ff;
@@ -31,25 +32,10 @@
   }
 }
 
-@font-face {
-  font-family: "Roboto";
-  src: url("/fonts/Roboto-Regular.ttf") format("truetype");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Roboto";
-  src: url("/fonts/Roboto-Bold.ttf") format("truetype");
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
 
 body {
   background-color: var(--initial-body-bg);
-  font-family: "Roboto", sans-serif;
+  font-family: "Geist Variable", sans-serif;
   overflow-x: hidden;
   margin: 0;
   padding: 0;
@@ -63,9 +49,16 @@ body {
 }
 
 main {
-  width: 100vw;
-  max-width: 100%;
-  margin: auto;
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.page-container {
+  max-width: 64rem;
+  margin: 0 auto;
+  padding: 0 1rem;
+  width: 100%;
 }
 
 .main-content {

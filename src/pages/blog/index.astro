@@ -1,0 +1,122 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+
+const posts = (await getCollection('blog', ({ data }) => !data.draft))
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+---
+
+<Layout title="Writing — Edgar Mejía" description="Articles on mobile development, tools, and software.">
+  <section class="section-blog-listing">
+    <div class="page-container">
+      <p class="section-label">Blog</p>
+      <div class="post-list">
+        {posts.map((post, i) => {
+          const num = String(i + 1).padStart(2, '0');
+          const date = post.data.pubDate.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+          });
+          return (
+            <a href={`/blog/${post.slug}`} class="post-item">
+              <span class="post-num">{num}</span>
+              <div class="post-info">
+                <p class="post-title">{post.data.title}</p>
+                <p class="post-meta">{date}</p>
+                <p class="post-desc">{post.data.description}</p>
+              </div>
+            </a>
+          );
+        })}
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .section-blog-listing {
+    padding: 10rem 0 8rem;
+  }
+
+  .section-label {
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(0,0,0,0.3);
+    margin: 0 0 2.5rem 0;
+  }
+
+  .post-list {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .post-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.5rem;
+    padding: 2.5rem 0;
+    border-top: 1px solid rgba(0,0,0,0.07);
+    text-decoration: none;
+    transition: opacity 0.2s;
+  }
+
+  .post-item:last-child {
+    border-bottom: 1px solid rgba(0,0,0,0.07);
+  }
+
+  .post-item:hover {
+    opacity: 0.6;
+  }
+
+  .post-num {
+    font-size: 4.5rem;
+    font-weight: 700;
+    line-height: 1;
+    color: rgba(0,0,0,0.06);
+    letter-spacing: -0.03em;
+    user-select: none;
+    flex-shrink: 0;
+    width: 5rem;
+    text-align: right;
+  }
+
+  .post-info {
+    padding-top: 0.6rem;
+  }
+
+  .post-title {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: #111;
+    letter-spacing: -0.02em;
+    margin: 0 0 0.3rem 0;
+    line-height: 1.2;
+  }
+
+  .post-meta {
+    font-size: 0.82rem;
+    color: rgba(0,0,0,0.35);
+    margin: 0 0 0.9rem 0;
+  }
+
+  .post-desc {
+    font-size: 0.95rem;
+    color: rgba(0,0,0,0.55);
+    line-height: 1.7;
+    margin: 0;
+    max-width: 56ch;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .section-label { color: rgba(255, 255, 255, 0.3); }
+    .post-item { border-top-color: rgba(255, 255, 255, 0.08); }
+    .post-item:last-child { border-bottom-color: rgba(255, 255, 255, 0.08); }
+    .post-num { color: rgba(255, 255, 255, 0.08); }
+    .post-title { color: #f0f0f0; }
+    .post-meta { color: rgba(255, 255, 255, 0.35); }
+    .post-desc { color: rgba(255, 255, 255, 0.55); }
+  }
+</style>
