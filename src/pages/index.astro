@@ -91,7 +91,8 @@ const posts = (await getCollection('blog', ({ data }) => !data.draft))
     <div class="page-container">
       <p class="section-label">Contact</p>
       <h2 class="contact-heading">Let's work<br/>together.</h2>
-      <form class="contact-form" name="contact" method="POST">
+      <form class="contact-form" name="contact" method="POST" netlify>
+      <!-- <form class="contact-form" name="contact" netlify></form> -->
         <div class="form-row">
           <div class="form-field">
             <label for="name">Name</label>
