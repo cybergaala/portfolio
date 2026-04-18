@@ -4,7 +4,11 @@
       "Bash(npm install:*)",
       "Bash(npm run *)",
       "Bash(npx astro *)",
-      "Bash(node *)"
+      "Bash(node *)",
+      "Bash(mkdir -p /Users/gaala/Developer/portfolio/src/content/blog/en /Users/gaala/Developer/portfolio/src/content/blog/es)",
+      "Bash(mkdir -p /Users/gaala/Developer/portfolio/src/pages/es/blog)",
+      "Bash(git *)",
+      "Bash(unzip *)"
     ]
   }
 }
