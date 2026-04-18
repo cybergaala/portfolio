@@ -2,7 +2,7 @@
 import Layout from "../layouts/Layout.astro";
 import { getCollection } from 'astro:content';
 
-const posts = (await getCollection('blog', ({ data }) => !data.draft))
+const posts = (await getCollection('blog', ({ id, data }) => id.startsWith('en/') && !data.draft))
   .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
   .slice(0, 4);
 
@@ -21,7 +21,7 @@ const posts = (await getCollection('blog', ({ data }) => !data.draft))
       <h1 class="about-h1">
         <span>Hi there 👋!</span>
         <span>I'm Edgar Mejía,</span>
-        <span class="about-sub">a <span class="gitch-text"></span></span>
+        <span class="about-sub"><span class="gitch-text"></span></span>
         <span class="about-last">from El Salvador 🇸🇻</span>
       </h1>
     </div>
@@ -36,7 +36,7 @@ const posts = (await getCollection('blog', ({ data }) => !data.draft))
             year: 'numeric', month: 'short', day: 'numeric',
           });
           return (
-            <a href={`/blog/${post.slug}`} class="post-item">
+            <a href={`/blog/${post.slug.replace('en/', '')}`} class="post-item">
               <span class="post-num">{num}</span>
               <p class="post-title">{post.data.title}</p>
               <p class="post-meta">{date}</p>
@@ -148,6 +148,12 @@ const posts = (await getCollection('blog', ({ data }) => !data.draft))
 
     .section-about h1 {
       font-size: clamp(3rem, 7vw, 6rem);
+    }
+
+    @media (max-width: 480px) {
+      .section-about h1 {
+        font-size: 2rem;
+      }
     }
 
     .about-sub {
@@ -587,9 +593,13 @@ const posts = (await getCollection('blog', ({ data }) => !data.draft))
       for (let i = 0; i < length; i++) {
         const from = oldText[i] || '';
         const to = newTextArr[i] || '';
-        const start = Math.floor(Math.random() * 40);
-        const end = start + Math.floor(Math.random() * 40);
-        this.queue.push({ from, to, start, end });
+        if (from === to) {
+          this.queue.push({ from, to, start: 0, end: 0 });
+        } else {
+          const start = Math.floor(Math.random() * 40);
+          const end = start + Math.floor(Math.random() * 40);
+          this.queue.push({ from, to, start, end });
+        }
       }
 
       cancelAnimationFrame(this.frameRequest);
@@ -634,21 +644,21 @@ const posts = (await getCollection('blog', ({ data }) => !data.draft))
   }
 
   const phrases = [
-    'Java hater ☕',
-    'Python dev 🐍',
-    '.Net dev',
-    'Swift dev',
-    'Kotlin lover',
-    'Flutter dev',
-    'JS enthusiast',
-    'TS fan or hater?',
-    'Web dev',
-    'OW2 player 🧡',
-    'Coffee hater :)',
-    'Pre-AI dev 🗿',
-    'Coke lover 🥤',
-    'Girl dad 👧🏻',
-    'Cat lover 🐱',
+    'a Java hater ☕',
+    'a Python dev 🐍',
+    'a .Net dev',
+    'a Swift dev',
+    'a Kotlin lover',
+    'a Flutter dev',
+    'a JS enthusiast',
+    'a TS fan or hater?',
+    'a Web dev',
+    'an OW2 player 🧡',
+    'a Coffee hater :)',
+    'a Pre-AI dev 🗿',
+    'a Coke lover 🥤',
+    'a Girl dad 👧🏻',
+    'a Cat lover 🐱',
   ];
 
   function initScramble() {

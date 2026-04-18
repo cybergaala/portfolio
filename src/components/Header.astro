@@ -213,8 +213,8 @@
     toggleBtn.addEventListener('click', () => {
       const isDark = html.classList.contains('dark');
       const rect = toggleBtn.getBoundingClientRect();
-      const cx = Math.round(rect.left + rect.width / 2);
-      const cy = Math.round(rect.top + rect.height / 2);
+      const cx = Math.round(rect.left + rect.width / 2 + window.scrollX);
+      const cy = Math.round(rect.top + rect.height / 2 + window.scrollY);
 
       html.style.setProperty('--theme-x', cx + 'px');
       html.style.setProperty('--theme-y', cy + 'px');
