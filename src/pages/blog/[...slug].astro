@@ -1,16 +1,23 @@
 ---
 import { getCollection } from 'astro:content';
 import BlogPost from '../../layouts/BlogPost.astro';
+import YouTube from '../../components/YouTube.astro';
 
 export async function getStaticPaths() {
-  const posts = await getCollection('blog', ({ data }) => !data.draft);
-  return posts.map(post => ({
-    params: { slug: post.slug },
-    props: { post },
-  }));
+  const posts = await getCollection('blog', ({ id, data }) => !data.draft && !id.startsWith('_'));
+  return posts.map(post => {
+    const related = posts
+      .filter(p => p.slug !== post.slug && p.data.tags?.some(t => post.data.tags?.includes(t)))
+      .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
+      .slice(0, 3);
+    return {
+      params: { slug: post.slug },
+      props: { post, related },
+    };
+  });
 }
 
-const { post } = Astro.props;
+const { post, related } = Astro.props;
 const { Content } = await post.render();
 ---
 
@@ -20,6 +27,8 @@ const { Content } = await post.render();
   pubDate={post.data.pubDate}
   tags={post.data.tags}
   banner={post.data.banner}
+  slug={post.slug}
+  related={related}
 >
-  <Content />
+  <Content components={{ YouTube }} />
 </BlogPost>
