@@ -2,8 +2,14 @@
 import { getCollection } from 'astro:content';
 import Layout from '../../layouts/Layout.astro';
 
-const posts = (await getCollection('blog', ({ data }) => !data.draft))
-  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+export async function getStaticPaths({ paginate }: { paginate: Function }) {
+  const posts = (await getCollection('blog', ({ id, data }) => !data.draft && !id.startsWith('_')))
+    .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+  return paginate(posts, { pageSize: 10 });
+}
+
+const { page } = Astro.props;
+const posts = page.data;
 ---
 
 <Layout title="Writing — Edgar Mejía" description="Articles on mobile development, tools, and software.">
@@ -12,7 +18,7 @@ const posts = (await getCollection('blog', ({ data }) => !data.draft))
       <p class="section-label">Blog</p>
       <div class="post-list">
         {posts.map((post, i) => {
-          const num = String(i + 1).padStart(2, '0');
+          const num = String((page.currentPage - 1) * page.size + i + 1).padStart(2, '0');
           const date = post.data.pubDate.toLocaleDateString('en-US', {
             year: 'numeric',
             month: 'short',
@@ -30,6 +36,33 @@ const posts = (await getCollection('blog', ({ data }) => !data.draft))
           );
         })}
       </div>
+
+      {page.lastPage > 1 && (
+        <nav class="pagination">
+          {page.url.prev ? (
+            <a href={page.url.prev} class="page-link">← Prev</a>
+          ) : (
+            <span class="page-link disabled">← Prev</span>
+          )}
+
+          <div class="page-numbers">
+            {Array.from({ length: page.lastPage }, (_, i) => i + 1).map(n => (
+              <a
+                href={n === 1 ? '/blog' : `/blog/${n}`}
+                class={`page-num ${n === page.currentPage ? 'active' : ''}`}
+              >
+                {n}
+              </a>
+            ))}
+          </div>
+
+          {page.url.next ? (
+            <a href={page.url.next} class="page-link">Next →</a>
+          ) : (
+            <span class="page-link disabled">Next →</span>
+          )}
+        </nav>
+      )}
     </div>
   </section>
 </Layout>
@@ -110,6 +143,64 @@ const posts = (await getCollection('blog', ({ data }) => !data.draft))
     max-width: 56ch;
   }
 
+  /* Pagination */
+  .pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid rgba(0,0,0,0.07);
+  }
+
+  .page-link {
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: rgba(0,0,0,0.5);
+    text-decoration: none;
+    transition: color 0.15s;
+  }
+
+  .page-link:not(.disabled):hover {
+    color: #111;
+  }
+
+  .page-link.disabled {
+    opacity: 0.25;
+    cursor: default;
+  }
+
+  .page-numbers {
+    display: flex;
+    gap: 0.25rem;
+  }
+
+  .page-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: rgba(0,0,0,0.4);
+    text-decoration: none;
+    border-radius: 3px;
+    transition: color 0.15s, background 0.15s;
+  }
+
+  .page-num:hover {
+    color: #111;
+    background: rgba(0,0,0,0.04);
+  }
+
+  .page-num.active {
+    color: #111;
+    background: rgba(0,0,0,0.06);
+    font-weight: 600;
+  }
+
+  /* Dark mode */
   :global(html.dark) .section-label { color: rgba(255, 255, 255, 0.3); }
   :global(html.dark) .post-item { border-top-color: rgba(255, 255, 255, 0.08); }
   :global(html.dark) .post-item:last-child { border-bottom-color: rgba(255, 255, 255, 0.08); }
@@ -117,4 +208,10 @@ const posts = (await getCollection('blog', ({ data }) => !data.draft))
   :global(html.dark) .post-title { color: #f0f0f0; }
   :global(html.dark) .post-meta { color: rgba(255, 255, 255, 0.35); }
   :global(html.dark) .post-desc { color: rgba(255, 255, 255, 0.55); }
+  :global(html.dark) .pagination { border-top-color: rgba(255, 255, 255, 0.08); }
+  :global(html.dark) .page-link { color: rgba(255, 255, 255, 0.4); }
+  :global(html.dark) .page-link:not(.disabled):hover { color: #f0f0f0; }
+  :global(html.dark) .page-num { color: rgba(255, 255, 255, 0.4); }
+  :global(html.dark) .page-num:hover { color: #f0f0f0; background: rgba(255,255,255,0.05); }
+  :global(html.dark) .page-num.active { color: #f0f0f0; background: rgba(255,255,255,0.08); }
 </style>

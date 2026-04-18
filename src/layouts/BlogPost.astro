@@ -1,5 +1,6 @@
 ---
 import Layout from './Layout.astro';
+import type { CollectionEntry } from 'astro:content';
 
 interface Props {
   title: string;
@@ -7,9 +8,11 @@ interface Props {
   pubDate: Date;
   tags?: string[];
   banner?: string;
+  slug?: string;
+  related?: CollectionEntry<'blog'>[];
 }
 
-const { title, description, pubDate, tags, banner } = Astro.props;
+const { title, description, pubDate, tags, banner, slug, related } = Astro.props;
 
 const formatted = pubDate.toLocaleDateString('en-US', {
   year: 'numeric',
@@ -36,7 +39,7 @@ const formatted = pubDate.toLocaleDateString('en-US', {
 
       {banner && (
         <div class="post-banner">
-          <img src={banner} alt="" role="presentation" />
+          <img src={banner} alt="" role="presentation" transition:name={`banner-${slug}`} />
         </div>
       )}
 
@@ -49,6 +52,25 @@ const formatted = pubDate.toLocaleDateString('en-US', {
           <nav id="toc"></nav>
         </aside>
       </div>
+
+      {related && related.length > 0 && (
+        <section class="related-posts">
+          <p class="section-label">Related posts</p>
+          <div class="related-list">
+            {related.map(p => (
+              <a href={`/blog/${p.slug}`} class="related-item">
+                <p class="related-title">{p.data.title}</p>
+                <p class="related-desc">{p.data.description}</p>
+                {p.data.tags && (
+                  <div class="post-tags">
+                    {p.data.tags.map(t => <span class="post-tag">{t}</span>)}
+                  </div>
+                )}
+              </a>
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   </article>
 </Layout>
@@ -203,14 +225,36 @@ const formatted = pubDate.toLocaleDateString('en-US', {
     margin: 0 0 1.25rem 0;
   }
 
-  .post-body :global(ul),
+  .post-body :global(ul) {
+    list-style: none;
+    padding-left: 0;
+    margin: 0 0 1.25rem 0;
+  }
+
+  .post-body :global(ul li) {
+    position: relative;
+    padding-left: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .post-body :global(ul li::before) {
+    content: '';
+    position: absolute;
+    left: 0.1rem;
+    top: 0.65em;
+    width: 4px;
+    height: 4px;
+    background: rgba(0,0,0,0.22);
+    border-radius: 50%;
+  }
+
   .post-body :global(ol) {
     padding-left: 1.25rem;
     margin: 0 0 1.25rem 0;
   }
 
-  .post-body :global(li) {
-    margin-bottom: 0.35rem;
+  .post-body :global(ol li) {
+    margin-bottom: 0.5rem;
   }
 
   .post-body :global(strong) {
@@ -272,6 +316,35 @@ const formatted = pubDate.toLocaleDateString('en-US', {
     border-radius: 4px;
     margin: 2rem 0;
     border: 1px solid rgba(0,0,0,0.07);
+  }
+
+  /* Image followed by blockquote → render blockquote as caption */
+  .post-body :global(p:has(img):has(+ blockquote)) {
+    margin-bottom: 0;
+  }
+
+  .post-body :global(p:has(img):has(+ blockquote) img) {
+    margin-bottom: 0;
+    border-radius: 4px 4px 0 0;
+  }
+
+  .post-body :global(p:has(img) + blockquote) {
+    border-left: none;
+    padding: 0.5rem 0.875rem 0.6rem;
+    font-style: normal;
+    font-size: 0.8rem;
+    color: rgba(0,0,0,0.4);
+    text-align: center;
+    margin-top: 0;
+    margin-bottom: 2rem;
+    background: rgba(0,0,0,0.025);
+    border-radius: 0 0 4px 4px;
+    border: 1px solid rgba(0,0,0,0.07);
+    border-top: none;
+  }
+
+  .post-body :global(p:has(img) + blockquote p) {
+    margin: 0;
   }
 
   /* Banner */
@@ -340,12 +413,72 @@ const formatted = pubDate.toLocaleDateString('en-US', {
   :global(html.dark) .post-body :global(pre .line) {
     background-color: transparent !important;
   }
+  :global(html.dark) .post-body :global(ul li::before) {
+    background: rgba(255,255,255,0.2);
+  }
+
   :global(html.dark) .post-body :global(blockquote) {
     border-left-color: rgba(255, 255, 255, 0.15);
     color: rgba(255, 255, 255, 0.45);
   }
+
+  :global(html.dark) .post-body :global(p:has(img) + blockquote) {
+    background: rgba(255,255,255,0.03);
+    border-color: rgba(255,255,255,0.08);
+    color: rgba(255,255,255,0.35);
+  }
   :global(html.dark) .post-body :global(hr) { border-top-color: rgba(255, 255, 255, 0.08); }
   :global(html.dark) .post-body :global(img) { border-color: rgba(255, 255, 255, 0.08); }
+
+  /* Related posts */
+  .related-posts {
+    margin-top: 5rem;
+    padding-top: 3rem;
+    border-top: 1px solid rgba(0,0,0,0.07);
+    max-width: 42rem;
+  }
+
+  .related-list {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .related-item {
+    display: block;
+    padding: 1.75rem 0;
+    border-top: 1px solid rgba(0,0,0,0.06);
+    text-decoration: none;
+    transition: opacity 0.2s;
+  }
+
+  .related-item:first-child {
+    border-top: none;
+  }
+
+  .related-item:hover {
+    opacity: 0.6;
+  }
+
+  .related-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: #111;
+    margin: 0 0 0.3rem 0;
+    line-height: 1.3;
+  }
+
+  .related-desc {
+    font-size: 0.875rem;
+    color: rgba(0,0,0,0.45);
+    line-height: 1.6;
+    margin: 0 0 0.75rem 0;
+  }
+
+  :global(html.dark) .related-posts { border-top-color: rgba(255,255,255,0.08); }
+  :global(html.dark) .related-item { border-top-color: rgba(255,255,255,0.06); }
+  :global(html.dark) .related-title { color: #f0f0f0; }
+  :global(html.dark) .related-desc { color: rgba(255,255,255,0.45); }
 </style>
 
 <script>

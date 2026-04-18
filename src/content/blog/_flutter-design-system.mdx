@@ -1,0 +1,67 @@
+---
+title: "Building a design system in Flutter"
+description: "How I structured tokens, components, and theming for a Flutter app that needed to scale across platforms."
+pubDate: 2026-03-28
+tags: ["flutter", "design", "mobile"]
+---
+
+Design systems solve a coordination problem. Without one, every screen becomes a negotiation: which shade of grey is this? Is this button 48dp or 44dp tall? With one, those questions disappear.
+
+This is what I learned building one from scratch in Flutter.
+
+## Start with tokens, not components
+
+The instinct is to build components first — a Button, a Card, a TextField. Resist it. Components without tokens are components without a foundation. You'll end up hardcoding colors and sizes everywhere and refactoring it all later.
+
+Tokens are named values: colors, typography, spacing, border radii. In Flutter, `ThemeData` and `TextTheme` are your home base.
+
+```dart
+class AppColors {
+  static const primary = Color(0xFF1A1A2E);
+  static const surface = Color(0xFFF8F8F8);
+  static const onSurface = Color(0xFF111111);
+}
+```
+
+## Layer the architecture
+
+I ended up with three layers:
+
+1. **Tokens** — raw values, no semantics
+2. **Semantic aliases** — `colorBackground`, `colorTextPrimary`, mapped from tokens
+3. **Components** — widgets that consume semantic aliases only, never raw tokens
+
+This means a theme switch (light → dark) only touches the alias layer. Components never change.
+
+## Theming with InheritedWidget
+
+Flutter's `Theme.of(context)` covers most cases, but for custom tokens you'll want your own `InheritedWidget`:
+
+```dart
+class AppTheme extends InheritedWidget {
+  final AppTokens tokens;
+
+  const AppTheme({required this.tokens, required super.child, super.key});
+
+  static AppTokens of(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<AppTheme>()!.tokens;
+  }
+
+  @override
+  bool updateShouldNotify(AppTheme old) => tokens != old.tokens;
+}
+```
+
+Wrap your app once, read tokens anywhere.
+
+## Watch: Flutter's theming system explained
+
+This talk from Google I/O covers Material 3 theming in Flutter — worth 20 minutes if you're starting from scratch.
+
+<YouTube id="h5LWbATsq0k?si=kEsRrCoTkRM0LjX5" title="Material 3 theming in Flutter — Google I/O" />
+
+## What I'd do differently
+
+Skip `ColorScheme.fromSeed` for anything beyond a prototype. It's convenient but you lose control over the neutral palette, which is where most of the UI lives. Define your colors explicitly from the start.
+
+Also: document the tokens. A design system no one understands is a design system no one uses.
