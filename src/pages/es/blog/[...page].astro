@@ -1,12 +1,12 @@
 ---
 import { getCollection } from 'astro:content';
-import Layout from '../../layouts/Layout.astro';
-import { useTranslations } from '../../i18n/ui';
+import Layout from '../../../layouts/Layout.astro';
+import { useTranslations } from '../../../i18n/ui';
 
-const t = useTranslations('en');
+const t = useTranslations('es');
 
 export async function getStaticPaths({ paginate }: { paginate: Function }) {
-  const posts = (await getCollection('blog', ({ id, data }) => id.startsWith('en/') && !data.draft))
+  const posts = (await getCollection('blog', ({ id, data }) => id.startsWith('es/') && !data.draft))
     .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
   return paginate(posts, { pageSize: 10 });
 }
@@ -15,20 +15,20 @@ const { page } = Astro.props;
 const posts = page.data;
 ---
 
-<Layout title={t('blog.writing')} description={t('blog.writing-description')} lang="en">
+<Layout title={t('blog.writing')} description={t('blog.writing-description')} lang="es">
   <section class="section-blog-listing">
     <div class="page-container">
       <p class="section-label">Blog</p>
       <div class="post-list">
         {posts.map((post, i) => {
           const num = String((page.currentPage - 1) * page.size + i + 1).padStart(2, '0');
-          const date = post.data.pubDate.toLocaleDateString('en-US', {
+          const date = post.data.pubDate.toLocaleDateString('es-ES', {
             year: 'numeric',
             month: 'short',
             day: 'numeric',
           });
           return (
-            <a href={`/blog/${post.slug.replace('en/', '')}`} class="post-item">
+            <a href={`/es/blog/${post.slug.replace('es/', '')}`} class="post-item">
               <span class="post-num">{num}</span>
               <div class="post-info">
                 <p class="post-title">{post.data.title}</p>
@@ -51,7 +51,7 @@ const posts = page.data;
           <div class="page-numbers">
             {Array.from({ length: page.lastPage }, (_, i) => i + 1).map(n => (
               <a
-                href={n === 1 ? '/blog' : `/blog/${n}`}
+                href={n === 1 ? '/es/blog' : `/es/blog/${n}`}
                 class={`page-num ${n === page.currentPage ? 'active' : ''}`}
               >
                 {n}
@@ -146,7 +146,6 @@ const posts = page.data;
     max-width: 56ch;
   }
 
-  /* Pagination */
   .pagination {
     display: flex;
     align-items: center;
@@ -203,7 +202,6 @@ const posts = page.data;
     font-weight: 600;
   }
 
-  /* Dark mode */
   :global(html.dark) .section-label { color: rgba(255, 255, 255, 0.3); }
   :global(html.dark) .post-item { border-top-color: rgba(255, 255, 255, 0.08); }
   :global(html.dark) .post-item:last-child { border-bottom-color: rgba(255, 255, 255, 0.08); }

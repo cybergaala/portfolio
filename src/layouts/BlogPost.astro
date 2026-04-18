@@ -1,6 +1,8 @@
 ---
 import Layout from './Layout.astro';
 import type { CollectionEntry } from 'astro:content';
+import { useTranslations } from '../i18n/ui';
+import type { Lang } from '../i18n/ui';
 
 interface Props {
   title: string;
@@ -10,21 +12,26 @@ interface Props {
   banner?: string;
   slug?: string;
   related?: CollectionEntry<'blog'>[];
+  lang?: Lang;
+  translationUrl?: string;
+  basePath?: string;
 }
 
-const { title, description, pubDate, tags, banner, slug, related } = Astro.props;
+const { title, description, pubDate, tags, banner, slug, related, lang = 'en', translationUrl, basePath = '/blog' } = Astro.props;
+const t = useTranslations(lang);
 
-const formatted = pubDate.toLocaleDateString('en-US', {
+const dateLocale = lang === 'es' ? 'es-ES' : 'en-US';
+const formatted = pubDate.toLocaleDateString(dateLocale, {
   year: 'numeric',
   month: 'long',
   day: 'numeric',
 });
 ---
 
-<Layout title={`${title} — Edgar Mejía`} description={description}>
+<Layout title={`${title} — Edgar Mejía`} description={description} lang={lang}>
   <article class="post-article">
     <div class="page-container">
-      <a href="/blog" class="back-link">← Blog</a>
+      <a href={basePath} class="back-link">{t('blog.back')}</a>
 
       <header class="post-header">
         <p class="section-label">{formatted}</p>
@@ -34,6 +41,14 @@ const formatted = pubDate.toLocaleDateString('en-US', {
           <div class="post-tags">
             {tags.map(tag => <span class="post-tag">{tag}</span>)}
           </div>
+        )}
+        {translationUrl && (
+          <p class="lang-switcher">
+            {lang === 'en'
+              ? <><strong>ENG</strong>{' | '}<a href={translationUrl}>SPA</a></>
+              : <><a href={translationUrl}>ENG</a>{' | '}<strong>SPA</strong></>
+            }
+          </p>
         )}
       </header>
 
@@ -48,17 +63,17 @@ const formatted = pubDate.toLocaleDateString('en-US', {
           <slot />
         </div>
         <aside class="post-toc" id="toc-aside">
-          <p class="toc-label">On this page</p>
+          <p class="toc-label">{t('blog.on-this-page')}</p>
           <nav id="toc"></nav>
         </aside>
       </div>
 
       {related && related.length > 0 && (
         <section class="related-posts">
-          <p class="section-label">Related posts</p>
+          <p class="section-label">{t('blog.related')}</p>
           <div class="related-list">
             {related.map(p => (
-              <a href={`/blog/${p.slug}`} class="related-item">
+              <a href={`${basePath}/${p.slug.replace(/^(en|es)\//, '')}`} class="related-item">
                 <p class="related-title">{p.data.title}</p>
                 <p class="related-desc">{p.data.description}</p>
                 {p.data.tags && (
@@ -95,11 +110,36 @@ const formatted = pubDate.toLocaleDateString('en-US', {
     color: #111;
   }
 
+  .lang-switcher {
+    display: block;
+    margin-top: 1.25rem;
+    margin-left: auto;
+    width: fit-content;
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+    color: rgba(0,0,0,0.35);
+    text-transform: uppercase;
+  }
+
+  .lang-switcher strong {
+    font-weight: 700;
+    color: #111;
+  }
+
+  .lang-switcher a {
+    color: rgba(0,0,0,0.35);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .lang-switcher a:hover {
+    color: #111;
+  }
+
   .post-header {
     border-bottom: 1px solid rgba(0,0,0,0.07);
     padding-bottom: 3rem;
     margin-bottom: 3.5rem;
-    max-width: 42rem;
   }
 
   .section-label {
@@ -257,6 +297,10 @@ const formatted = pubDate.toLocaleDateString('en-US', {
     margin-bottom: 0.5rem;
   }
 
+  .post-body :global(ol li::marker) {
+    color: rgba(0,0,0,0.22);
+  }
+
   .post-body :global(strong) {
     font-weight: 600;
     color: rgba(0,0,0,0.75);
@@ -369,6 +413,10 @@ const formatted = pubDate.toLocaleDateString('en-US', {
   /* Header */
   :global(html.dark) .back-link { color: rgba(255, 255, 255, 0.35); }
   :global(html.dark) .back-link:hover { color: #f0f0f0; }
+  :global(html.dark) .lang-switcher { color: rgba(255, 255, 255, 0.35); }
+  :global(html.dark) .lang-switcher strong { color: #f0f0f0; }
+  :global(html.dark) .lang-switcher a { color: rgba(255, 255, 255, 0.35); }
+  :global(html.dark) .lang-switcher a:hover { color: #f0f0f0; }
   :global(html.dark) .post-header { border-bottom-color: rgba(255, 255, 255, 0.08); }
   :global(html.dark) .section-label { color: rgba(255, 255, 255, 0.3); }
   :global(html.dark) .post-title { color: #f0f0f0; }
@@ -415,6 +463,10 @@ const formatted = pubDate.toLocaleDateString('en-US', {
   }
   :global(html.dark) .post-body :global(ul li::before) {
     background: rgba(255,255,255,0.2);
+  }
+
+  :global(html.dark) .post-body :global(ol li::marker) {
+    color: rgba(255,255,255,0.2);
   }
 
   :global(html.dark) .post-body :global(blockquote) {

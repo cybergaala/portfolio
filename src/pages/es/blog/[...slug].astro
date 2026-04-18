@@ -1,29 +1,29 @@
 ---
 import { getCollection } from 'astro:content';
-import BlogPost from '../../layouts/BlogPost.astro';
-import YouTube from '../../components/YouTube.astro';
+import BlogPost from '../../../layouts/BlogPost.astro';
+import YouTube from '../../../components/YouTube.astro';
 
 export async function getStaticPaths() {
   const allPosts = await getCollection('blog', ({ id, data }) => !data.draft);
-  const enPosts = allPosts.filter(p => p.id.startsWith('en/'));
+  const esPosts = allPosts.filter(p => p.id.startsWith('es/'));
 
-  return enPosts.map(post => {
-    const baseSlug = post.slug.replace('en/', '');
-    const related = enPosts
+  return esPosts.map(post => {
+    const baseSlug = post.slug.replace('es/', '');
+    const related = esPosts
       .filter(p => p.slug !== post.slug && p.data.tags?.some(t => post.data.tags?.includes(t)))
       .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
       .slice(0, 3);
-    const translation = allPosts.find(p => p.id.startsWith('es/') && p.slug.replace('es/', '') === baseSlug);
+    const translation = allPosts.find(p => p.id.startsWith('en/') && p.slug.replace('en/', '') === baseSlug);
     return {
       params: { slug: baseSlug },
-      props: { post, related, translationUrl: translation ? `/es/blog/${baseSlug}` : undefined },
+      props: { post, related, translationUrl: translation ? `/blog/${baseSlug}` : undefined },
     };
   });
 }
 
 const { post, related, translationUrl } = Astro.props;
 const { Content } = await post.render();
-const baseSlug = post.slug.replace('en/', '');
+const baseSlug = post.slug.replace('es/', '');
 ---
 
 <BlogPost
@@ -34,9 +34,9 @@ const baseSlug = post.slug.replace('en/', '');
   banner={post.data.banner}
   slug={baseSlug}
   related={related}
-  lang="en"
+  lang="es"
   translationUrl={translationUrl}
-  basePath="/blog"
+  basePath="/es/blog"
 >
   <Content components={{ YouTube }} />
 </BlogPost>
