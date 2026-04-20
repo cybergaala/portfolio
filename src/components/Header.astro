@@ -210,16 +210,73 @@
 
     if (!toggleBtn) return;
 
-    toggleBtn.addEventListener('click', () => {
-      const isDark = html.classList.contains('dark');
-      const rect = toggleBtn.getBoundingClientRect();
-      const cx = Math.round(rect.left + rect.width / 2 + window.scrollX);
-      const cy = Math.round(rect.top + rect.height / 2 + window.scrollY);
+    const DURATION = 650;
+    let transitionGen = 0;
+    let transitionEndTime = 0;
+    let animStartTime = 0;
+    let animStartR = 0;
+    let animEndR = 0;
+    let animDur = DURATION;
 
+    function startThemeTransition(applyFn: () => void, interrupted: boolean) {
+      const gen = ++transitionGen;
+      if (interrupted) {
+        html.dataset.themeInterrupted = 'true';
+      } else {
+        delete html.dataset.themeInterrupted;
+      }
+      html.dataset.themeTransition = 'true';
+
+      const trans = (document as any).startViewTransition(applyFn);
+      trans.finished.finally(() => {
+        if (transitionGen === gen) {
+          transitionEndTime = 0;
+          delete html.dataset.themeTransition;
+          delete html.dataset.themeInterrupted;
+        }
+      });
+    }
+
+    toggleBtn.addEventListener('click', () => {
+      const now = Date.now();
+      const rect = toggleBtn.getBoundingClientRect();
+      const cx = Math.round(rect.left + rect.width / 2);
+      const cy = Math.round(rect.top + rect.height / 2);
       html.style.setProperty('--theme-x', cx + 'px');
       html.style.setProperty('--theme-y', cy + 'px');
 
-      const applyTheme = () => {
+      if (now < transitionEndTime) {
+        const elapsed = now - animStartTime;
+        const t = Math.min(elapsed / animDur, 1);
+        const currentR = animStartR + (animEndR - animStartR) * t;
+        const newEndR = animEndR > animStartR ? 0 : 200;
+        const newDur = Math.max(80, (Math.abs(newEndR - currentR) / 200) * DURATION);
+
+        html.style.setProperty('--theme-r-interrupt', currentR.toFixed(2) + 'vmax');
+        html.style.setProperty('--theme-dur-interrupt', newDur + 'ms');
+
+        const isDarkNow = html.classList.contains('dark');
+        animStartTime = now;
+        animStartR = currentR;
+        animEndR = newEndR;
+        animDur = newDur;
+        transitionEndTime = now + newDur + 50;
+
+        startThemeTransition(() => {
+          if (isDarkNow) {
+            html.classList.remove('dark');
+            localStorage.setItem('theme', 'light');
+          } else {
+            html.classList.add('dark');
+            localStorage.setItem('theme', 'dark');
+          }
+        }, true);
+        return;
+      }
+
+      const isDark = html.classList.contains('dark');
+
+      if (!('startViewTransition' in document)) {
         if (isDark) {
           html.classList.remove('dark');
           localStorage.setItem('theme', 'light');
@@ -227,18 +284,24 @@
           html.classList.add('dark');
           localStorage.setItem('theme', 'dark');
         }
-      };
-
-      if (!('startViewTransition' in document)) {
-        applyTheme();
         return;
       }
 
-      html.dataset.themeTransition = 'true';
-      const t = (document as any).startViewTransition(applyTheme);
-      t.finished.finally(() => {
-        delete html.dataset.themeTransition;
-      });
+      animStartTime = now;
+      animStartR = isDark ? 200 : 0;
+      animEndR = isDark ? 0 : 200;
+      animDur = DURATION;
+      transitionEndTime = now + DURATION + 50;
+
+      startThemeTransition(() => {
+        if (isDark) {
+          html.classList.remove('dark');
+          localStorage.setItem('theme', 'light');
+        } else {
+          html.classList.add('dark');
+          localStorage.setItem('theme', 'dark');
+        }
+      }, false);
     });
   }
 

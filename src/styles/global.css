@@ -113,6 +113,24 @@ html[data-theme-transition]:not(.dark)::view-transition-new(root) {
   to   { clip-path: circle(0px at var(--theme-x, 50%) var(--theme-y, 50%)); }
 }
 
+@keyframes theme-expand-from {
+  from { clip-path: circle(var(--theme-r-interrupt) at var(--theme-x, 50%) var(--theme-y, 50%)); }
+  to   { clip-path: circle(200vmax at var(--theme-x, 50%) var(--theme-y, 50%)); }
+}
+
+@keyframes theme-shrink-from {
+  from { clip-path: circle(var(--theme-r-interrupt) at var(--theme-x, 50%) var(--theme-y, 50%)); }
+  to   { clip-path: circle(0px at var(--theme-x, 50%) var(--theme-y, 50%)); }
+}
+
+html[data-theme-transition][data-theme-interrupted].dark::view-transition-new(root) {
+  animation: theme-expand-from var(--theme-dur-interrupt, 0.65s) cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+html[data-theme-transition][data-theme-interrupted]:not(.dark)::view-transition-old(root) {
+  animation: theme-shrink-from var(--theme-dur-interrupt, 0.65s) cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
 /* ── Page navigation transition ─────────────────────────────────────── */
 html:not([data-theme-transition])::view-transition-old(root) {
   animation: page-out 0.25s ease forwards;
