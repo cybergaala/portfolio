@@ -24,6 +24,7 @@ const posts = (await getCollection('blog', ({ id, data }) => id.startsWith('en/'
         <span class="about-sub"><span class="gitch-text"></span></span>
         <span class="about-last">from El Salvador 🇸🇻</span>
       </h1>
+      <a href="/about" class="about-link">More about me →</a>
     </div>
   </section>
   <section id="writing" class="section-writing">
@@ -84,6 +85,7 @@ const posts = (await getCollection('blog', ({ id, data }) => id.startsWith('en/'
         </div>
 
       </div>
+      <a href="/experience" class="all-exp-link">Full experience →</a>
     </div>
   </section>
 
@@ -91,8 +93,8 @@ const posts = (await getCollection('blog', ({ id, data }) => id.startsWith('en/'
     <div class="page-container">
       <p class="section-label">Contact</p>
       <h2 class="contact-heading">Let's work<br/>together.</h2>
-      <form class="contact-form" name="contact" method="POST" netlify>
-      <!-- <form class="contact-form" name="contact" netlify></form> -->
+      <form class="contact-form" id="contact-form" name="contact" method="POST" data-netlify="true">
+        <input type="hidden" name="form-name" value="contact" />
         <div class="form-row">
           <div class="form-field">
             <label for="name">Name</label>
@@ -109,6 +111,9 @@ const posts = (await getCollection('blog', ({ id, data }) => id.startsWith('en/'
         </div>
         <button type="submit" class="form-submit">Send message</button>
       </form>
+      <div id="contact-success" style="display:none;" class="contact-success">
+        <p>Thanks! I'll get back to you soon.</p>
+      </div>
     </div>
   </section>
 
@@ -138,6 +143,21 @@ const posts = (await getCollection('blog', ({ id, data }) => id.startsWith('en/'
     
     .section-about {
       padding: 10rem 0 6rem;
+    }
+
+    .about-link {
+      display: inline-block;
+      margin-top: 2rem;
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: rgba(0,0,0,0.35);
+      text-decoration: none;
+      letter-spacing: 0.03em;
+      transition: color 0.2s;
+    }
+
+    .about-link:hover {
+      color: #111;
     }
 
     .about-h1 {
@@ -429,6 +449,21 @@ const posts = (await getCollection('blog', ({ id, data }) => id.startsWith('en/'
       max-width: 62ch;
     }
 
+    .all-exp-link {
+      display: inline-block;
+      margin-top: 2rem;
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: rgba(0,0,0,0.35);
+      text-decoration: none;
+      letter-spacing: 0.03em;
+      transition: color 0.2s;
+    }
+
+    .all-exp-link:hover {
+      color: #111;
+    }
+
     /* Contact section */
     .section-contact {
       padding: 6rem 0 8rem;
@@ -523,6 +558,8 @@ const posts = (await getCollection('blog', ({ id, data }) => id.startsWith('en/'
     :global(html.dark) h1 { color: #f0f0f0; }
     :global(html.dark) .about-sub { color: rgba(255, 255, 255, 0.35); }
     :global(html.dark) .typewriter { border-bottom-color: #f0f0f0; }
+    :global(html.dark) .about-link { color: rgba(255,255,255,0.35); }
+    :global(html.dark) .about-link:hover { color: #f0f0f0; }
 
     /* Writing */
     :global(html.dark) .section-writing { border-top-color: rgba(255, 255, 255, 0.08); }
@@ -543,6 +580,9 @@ const posts = (await getCollection('blog', ({ id, data }) => id.startsWith('en/'
     :global(html.dark) .exp-meta { color: rgba(255, 255, 255, 0.35); }
     :global(html.dark) .exp-desc { color: rgba(255, 255, 255, 0.55); }
 
+    :global(html.dark) .all-exp-link { color: rgba(255,255,255,0.35); }
+    :global(html.dark) .all-exp-link:hover { color: #f0f0f0; }
+
     /* Contact */
     :global(html.dark) .section-contact { border-top-color: rgba(255, 255, 255, 0.08); }
     :global(html.dark) .contact-heading { color: #f0f0f0; }
@@ -557,6 +597,11 @@ const posts = (await getCollection('blog', ({ id, data }) => id.startsWith('en/'
     :global(html.dark) .form-field input:focus,
     :global(html.dark) .form-field textarea:focus { border-bottom-color: #f0f0f0; }
     :global(html.dark) .form-submit { background: #f0f0f0; color: #111; }
+    .contact-success {
+      margin-top: 1.5rem;
+      font-size: 1rem;
+      opacity: 0.7;
+    }
   </style>
 
   <style is:global>
@@ -684,4 +729,20 @@ const posts = (await getCollection('blog', ({ id, data }) => id.startsWith('en/'
   }
 
   document.addEventListener('astro:page-load', initScramble);
+
+  function initContactForm() {
+    const form = document.getElementById('contact-form') as HTMLFormElement | null;
+    const success = document.getElementById('contact-success') as HTMLElement | null;
+    if (!form || !success) return;
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const data = new URLSearchParams(new FormData(form) as unknown as Record<string, string>);
+      await fetch('/', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: data.toString() });
+      form.style.display = 'none';
+      success.style.display = 'block';
+    });
+  }
+
+  document.addEventListener('astro:page-load', initContactForm);
 </script>

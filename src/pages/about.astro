@@ -1,0 +1,327 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout
+  title="About — Edgar Mejía"
+  description="A bit more about Edgar Mejía, software developer from El Salvador."
+  lang="en"
+>
+  <div class="about-page">
+    <div class="page-container">
+
+      <section class="hero-section">
+        <div class="hero-photo-wrap">
+          <img src="/img/main.webp" alt="Edgar Mejía at his desk" class="hero-photo" />
+        </div>
+        <div class="hero-text">
+          <p class="section-label">About me</p>
+          <h1 class="hero-heading">Edgar Mejía</h1>
+          <p class="hero-sub">Senior Mobile Developer · El Salvador 🇸🇻</p>
+          <p class="hero-bio">
+            I'm a software developer with over six years of experience building mobile and web applications.
+            I specialize in mobile — Android, iOS, and Flutter — but I'm equally comfortable on the web,
+            having built full-stack systems with .NET, SQL Server, and vanilla JS. I care about code that
+            is maintainable, fast, and ships without drama.
+          </p>
+          <p class="hero-bio">
+            Outside of work, I'm a girl dad 👧🏻, a cat person 🐱, an Overwatch player 🧡, and a
+            dedicated Coke drinker (never coffee). I built this site from scratch as a way to write
+            publicly and share what I learn.
+          </p>
+          <div class="hero-links">
+            <a href="/#experience" class="cta-link">View experience →</a>
+            <a href="/#contact" class="cta-link">Get in touch →</a>
+          </div>
+        </div>
+      </section>
+
+      <section class="skills-section">
+        <p class="section-label">Technologies</p>
+        <div class="skills-grid">
+          <div class="skill-group">
+            <p class="skill-group-name">Mobile</p>
+            <ul class="skill-list">
+              <li>Flutter</li>
+              <li>Kotlin</li>
+              <li>Swift</li>
+              <li>Jetpack Compose</li>
+            </ul>
+          </div>
+          <div class="skill-group">
+            <p class="skill-group-name">Backend</p>
+            <ul class="skill-list">
+              <li>ASP.NET Core</li>
+              <li>Python</li>
+              <li>SQL Server</li>
+              <li>Entity Framework</li>
+            </ul>
+          </div>
+          <div class="skill-group">
+            <p class="skill-group-name">Frontend</p>
+            <ul class="skill-list">
+              <li>TypeScript</li>
+              <li>JavaScript</li>
+              <li>Astro</li>
+              <li>Razor</li>
+            </ul>
+          </div>
+          <div class="skill-group">
+            <p class="skill-group-name">Tools</p>
+            <ul class="skill-list">
+              <li>Git</li>
+              <li>Android Studio</li>
+              <li>Xcode</li>
+              <li>VS Code</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="values-section">
+        <p class="section-label">How I work</p>
+        <div class="values-grid">
+          <div class="value-item">
+            <span class="value-num">01</span>
+            <div>
+              <p class="value-title">Ship and iterate</p>
+              <p class="value-desc">I prefer getting something real in front of users over polishing in the dark. Feedback from production beats speculation every time.</p>
+            </div>
+          </div>
+          <div class="value-item">
+            <span class="value-num">02</span>
+            <div>
+              <p class="value-title">Own the full lifecycle</p>
+              <p class="value-desc">From architecture decisions to App Store releases, I care about what happens after the code is merged. Maintenance is part of the job.</p>
+            </div>
+          </div>
+          <div class="value-item">
+            <span class="value-num">03</span>
+            <div>
+              <p class="value-title">Write for humans</p>
+              <p class="value-desc">Code is read far more than it's written. I aim for clarity over cleverness, and leave the codebase in better shape than I found it.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <style>
+    .about-page {
+      padding-top: 6rem;
+      padding-bottom: 8rem;
+    }
+
+    .section-label {
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: rgba(0,0,0,0.3);
+      margin: 0 0 2rem 0;
+    }
+
+    /* Hero */
+    .hero-section {
+      display: grid;
+      grid-template-columns: 1fr 1.1fr;
+      gap: 5rem;
+      align-items: start;
+      padding: 4rem 0 6rem;
+      border-bottom: 1px solid rgba(0,0,0,0.07);
+    }
+
+    .hero-photo-wrap {
+      position: sticky;
+      top: 5rem;
+    }
+
+    .hero-photo {
+      width: 100%;
+      max-width: 480px;
+      aspect-ratio: 4/5;
+      object-fit: cover;
+      object-position: top center;
+      display: block;
+      filter: grayscale(8%);
+    }
+
+    .hero-heading {
+      font-size: clamp(2.5rem, 5vw, 4.5rem);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      color: #111;
+      margin: 0 0 0.4rem 0;
+      line-height: 1;
+    }
+
+    .hero-sub {
+      font-size: 0.9rem;
+      color: rgba(0,0,0,0.35);
+      margin: 0 0 2rem 0;
+      letter-spacing: 0.02em;
+    }
+
+    .hero-bio {
+      font-size: 1rem;
+      color: rgba(0,0,0,0.6);
+      line-height: 1.75;
+      max-width: 52ch;
+      margin: 0 0 1.2rem 0;
+    }
+
+    .hero-links {
+      display: flex;
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+
+    .cta-link {
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: rgba(0,0,0,0.35);
+      text-decoration: none;
+      letter-spacing: 0.03em;
+      transition: color 0.2s;
+    }
+
+    .cta-link:hover {
+      color: #111;
+    }
+
+    /* Skills */
+    .skills-section {
+      padding: 5rem 0;
+      border-bottom: 1px solid rgba(0,0,0,0.07);
+    }
+
+    .skills-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 3rem;
+    }
+
+    .skill-group-name {
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #111;
+      margin: 0 0 1rem 0;
+    }
+
+    .skill-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .skill-list li {
+      font-size: 0.9rem;
+      color: rgba(0,0,0,0.5);
+      line-height: 1.5;
+    }
+
+    /* Values */
+    .values-section {
+      padding: 5rem 0;
+    }
+
+    .values-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 2.5rem;
+      border-top: 1px solid rgba(0,0,0,0.07);
+      padding-top: 2rem;
+    }
+
+    .value-item {
+      display: flex;
+      gap: 2rem;
+      align-items: flex-start;
+    }
+
+    .value-num {
+      font-size: 3rem;
+      font-weight: 700;
+      line-height: 1;
+      color: rgba(0,0,0,0.06);
+      letter-spacing: -0.03em;
+      user-select: none;
+      flex-shrink: 0;
+      width: 4rem;
+      text-align: right;
+    }
+
+    .value-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #111;
+      margin: 0 0 0.4rem 0;
+      letter-spacing: -0.02em;
+    }
+
+    .value-desc {
+      font-size: 0.92rem;
+      color: rgba(0,0,0,0.5);
+      line-height: 1.7;
+      max-width: 56ch;
+      margin: 0;
+    }
+
+    /* Responsive */
+    @media (max-width: 860px) {
+      .hero-section {
+        grid-template-columns: 1fr;
+        gap: 3rem;
+      }
+
+      .hero-photo-wrap {
+        position: static;
+      }
+
+      .hero-photo {
+        max-width: 100%;
+        aspect-ratio: 3/2;
+        object-position: center 20%;
+      }
+
+      .skills-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 520px) {
+      .skills-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+      }
+
+      .hero-links {
+        flex-direction: column;
+        gap: 1rem;
+      }
+    }
+
+    /* Dark mode */
+    :global(html.dark) .section-label { color: rgba(255,255,255,0.3); }
+    :global(html.dark) .hero-heading { color: #f0f0f0; }
+    :global(html.dark) .hero-sub { color: rgba(255,255,255,0.35); }
+    :global(html.dark) .hero-bio { color: rgba(255,255,255,0.6); }
+    :global(html.dark) .cta-link { color: rgba(255,255,255,0.35); }
+    :global(html.dark) .cta-link:hover { color: #f0f0f0; }
+    :global(html.dark) .hero-section { border-bottom-color: rgba(255,255,255,0.08); }
+    :global(html.dark) .skills-section { border-bottom-color: rgba(255,255,255,0.08); }
+    :global(html.dark) .skill-group-name { color: #f0f0f0; }
+    :global(html.dark) .skill-list li { color: rgba(255,255,255,0.5); }
+    :global(html.dark) .values-grid { border-top-color: rgba(255,255,255,0.08); }
+    :global(html.dark) .value-num { color: rgba(255,255,255,0.06); }
+    :global(html.dark) .value-title { color: #f0f0f0; }
+    :global(html.dark) .value-desc { color: rgba(255,255,255,0.5); }
+  </style>
+</Layout>

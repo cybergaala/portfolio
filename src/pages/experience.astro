@@ -1,0 +1,307 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout
+  title="Experience — Edgar Mejía"
+  description="Work history and professional experience of Edgar Mejía, software developer from El Salvador."
+  lang="en"
+>
+  <div class="experience-page">
+    <div class="page-container">
+
+      <section class="intro-section">
+        <p class="section-label">Experience</p>
+        <h1 class="page-heading">Where I've<br/>worked.</h1>
+        <p class="page-sub">Six years building mobile and web products across fintech, ERP, and consumer apps.</p>
+      </section>
+
+      <section class="jobs-section">
+        <div class="job-item">
+          <div class="job-meta">
+            <span class="job-num">01</span>
+            <p class="job-period">2024 — Present</p>
+          </div>
+          <div class="job-content">
+            <div class="job-header">
+              <p class="job-company">PBS El Salvador</p>
+              <p class="job-role">Senior Mobile Developer</p>
+            </div>
+            <p class="job-desc">
+              Lead mobile engineer across Android, iOS, and Flutter, owning the full lifecycle of multiple
+              consumer-facing apps from architecture decisions to App Store and Play Store releases. Introduced
+              a shared Flutter module strategy that cut duplicate logic between platforms by roughly 60%, and
+              established code review practices that brought the team's average review cycle from three days
+              down to one. Also serve as the technical reference for mobile decisions across the organization,
+              collaborating directly with product and QA to ship faster without accumulating debt.
+            </p>
+            <ul class="job-tags">
+              <li>Flutter</li>
+              <li>Kotlin</li>
+              <li>Swift</li>
+              <li>Android</li>
+              <li>iOS</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="job-item">
+          <div class="job-meta">
+            <span class="job-num">02</span>
+            <p class="job-period">2023 — 2024</p>
+          </div>
+          <div class="job-content">
+            <div class="job-header">
+              <p class="job-company">ThinkForward</p>
+              <p class="job-role">Mid Full-Stack Developer</p>
+            </div>
+            <p class="job-desc">
+              Principal developer on a multi-tenant ERP system built from scratch with ASP.NET Core, Entity
+              Framework, and SQL Server. Designed the database schema and API surface that serves several
+              independent companies from a single codebase, using tenant-aware middleware and row-level data
+              isolation. Delivered the Razor-based frontend alongside the backend, writing vanilla JavaScript
+              for dynamic UI interactions without introducing a heavy framework. The system went from zero to
+              production in under eight months and is still in active daily use.
+            </p>
+            <ul class="job-tags">
+              <li>ASP.NET Core</li>
+              <li>Entity Framework</li>
+              <li>SQL Server</li>
+              <li>Razor</li>
+              <li>JavaScript</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="job-item">
+          <div class="job-meta">
+            <span class="job-num">03</span>
+            <p class="job-period">2018 — 2020</p>
+          </div>
+          <div class="job-content">
+            <div class="job-header">
+              <p class="job-company">Serfinsa</p>
+              <p class="job-role">Mid Mobile Developer</p>
+            </div>
+            <p class="job-desc">
+              Android developer on a fintech platform serving thousands of daily transactions, working with
+              Kotlin and early Jetpack Compose. Took ownership of the payments and transfers screens,
+              refactoring a fragile XML-based UI to a composable architecture that made new flows
+              significantly faster to build and test. Collaborated with backend and security teams to
+              implement biometric authentication and PCI-compliant session handling, and contributed to
+              the internal component library that the team still uses today.
+            </p>
+            <ul class="job-tags">
+              <li>Kotlin</li>
+              <li>Jetpack Compose</li>
+              <li>Android</li>
+              <li>Fintech</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="cta-section">
+        <p class="cta-text">Want to work together?</p>
+        <a href="/#contact" class="cta-link">Get in touch →</a>
+      </section>
+
+    </div>
+  </div>
+
+  <style>
+    .experience-page {
+      padding-top: 6rem;
+      padding-bottom: 8rem;
+    }
+
+    .section-label {
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: rgba(0,0,0,0.3);
+      margin: 0 0 2rem 0;
+    }
+
+    /* Intro */
+    .intro-section {
+      padding: 4rem 0 5rem;
+      border-bottom: 1px solid rgba(0,0,0,0.07);
+    }
+
+    .page-heading {
+      font-size: clamp(3rem, 7vw, 6rem);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      color: #111;
+      line-height: 1.02;
+      margin: 0 0 1.2rem 0;
+    }
+
+    .page-sub {
+      font-size: 1rem;
+      color: rgba(0,0,0,0.45);
+      line-height: 1.6;
+      max-width: 48ch;
+      margin: 0;
+    }
+
+    /* Jobs */
+    .jobs-section {
+      padding: 0;
+    }
+
+    .job-item {
+      display: grid;
+      grid-template-columns: 9rem 1fr;
+      gap: 3rem;
+      padding: 4rem 0;
+      border-bottom: 1px solid rgba(0,0,0,0.07);
+    }
+
+    .job-meta {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      padding-top: 0.3rem;
+      gap: 0.6rem;
+    }
+
+    .job-num {
+      font-size: 3.5rem;
+      font-weight: 700;
+      line-height: 1;
+      color: rgba(0,0,0,0.06);
+      letter-spacing: -0.03em;
+      user-select: none;
+    }
+
+    .job-period {
+      font-size: 0.72rem;
+      color: rgba(0,0,0,0.3);
+      letter-spacing: 0.08em;
+      white-space: nowrap;
+      margin: 0;
+    }
+
+    .job-header {
+      margin-bottom: 1.2rem;
+    }
+
+    .job-company {
+      font-size: 1.75rem;
+      font-weight: 600;
+      color: #111;
+      letter-spacing: -0.02em;
+      margin: 0 0 0.2rem 0;
+      line-height: 1.1;
+    }
+
+    .job-role {
+      font-size: 0.85rem;
+      color: rgba(0,0,0,0.35);
+      margin: 0;
+      letter-spacing: 0.02em;
+    }
+
+    .job-desc {
+      font-size: 0.95rem;
+      color: rgba(0,0,0,0.55);
+      line-height: 1.75;
+      max-width: 62ch;
+      margin: 0 0 1.5rem 0;
+    }
+
+    .job-tags {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .job-tags li {
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(0,0,0,0.35);
+      border: 1px solid rgba(0,0,0,0.12);
+      padding: 0.25rem 0.6rem;
+    }
+
+    /* CTA */
+    .cta-section {
+      padding: 5rem 0 0;
+      display: flex;
+      align-items: baseline;
+      gap: 2rem;
+    }
+
+    .cta-text {
+      font-size: 1.5rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      color: #111;
+      margin: 0;
+    }
+
+    .cta-link {
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: rgba(0,0,0,0.35);
+      text-decoration: none;
+      letter-spacing: 0.03em;
+      transition: color 0.2s;
+    }
+
+    .cta-link:hover {
+      color: #111;
+    }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      .job-item {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+
+      .job-meta {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        padding-top: 0;
+      }
+
+      .job-num {
+        font-size: 2.5rem;
+      }
+
+      .cta-section {
+        flex-direction: column;
+        gap: 0.8rem;
+      }
+    }
+
+    /* Dark mode */
+    :global(html.dark) .section-label { color: rgba(255,255,255,0.3); }
+    :global(html.dark) .intro-section { border-bottom-color: rgba(255,255,255,0.08); }
+    :global(html.dark) .page-heading { color: #f0f0f0; }
+    :global(html.dark) .page-sub { color: rgba(255,255,255,0.45); }
+    :global(html.dark) .job-item { border-bottom-color: rgba(255,255,255,0.08); }
+    :global(html.dark) .job-num { color: rgba(255,255,255,0.06); }
+    :global(html.dark) .job-period { color: rgba(255,255,255,0.3); }
+    :global(html.dark) .job-company { color: #f0f0f0; }
+    :global(html.dark) .job-role { color: rgba(255,255,255,0.35); }
+    :global(html.dark) .job-desc { color: rgba(255,255,255,0.55); }
+    :global(html.dark) .job-tags li {
+      color: rgba(255,255,255,0.35);
+      border-color: rgba(255,255,255,0.12);
+    }
+    :global(html.dark) .cta-text { color: #f0f0f0; }
+    :global(html.dark) .cta-link { color: rgba(255,255,255,0.35); }
+    :global(html.dark) .cta-link:hover { color: #f0f0f0; }
+  </style>
+</Layout>

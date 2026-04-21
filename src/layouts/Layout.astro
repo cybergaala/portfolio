@@ -47,7 +47,13 @@ const { title, description, lang = 'en' } = Astro.props;
             if (dest.origin === location.origin && dest.pathname === location.pathname) {
               e.stopImmediatePropagation();
               e.preventDefault();
-              if (dest.hash) location.hash = dest.hash;
+              if (dest.hash) {
+                var target = document.querySelector(dest.hash);
+                if (target) target.scrollIntoView({ behavior: 'smooth' });
+                else location.hash = dest.hash;
+              } else {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }
             }
           } catch(_) {}
         }, true);
