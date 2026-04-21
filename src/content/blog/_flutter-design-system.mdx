@@ -11,7 +11,7 @@ This is what I learned building one from scratch in Flutter.
 
 ## Start with tokens, not components
 
-The instinct is to build components first — a Button, a Card, a TextField. Resist it. Components without tokens are components without a foundation. You'll end up hardcoding colors and sizes everywhere and refactoring it all later.
+The instinct is to build components first: a Button, a Card, a TextField. Resist it. Components without tokens are components without a foundation. You'll end up hardcoding colors and sizes everywhere and refactoring it all later.
 
 Tokens are named values: colors, typography, spacing, border radii. In Flutter, `ThemeData` and `TextTheme` are your home base.
 
@@ -27,9 +27,9 @@ class AppColors {
 
 I ended up with three layers:
 
-1. **Tokens** — raw values, no semantics
-2. **Semantic aliases** — `colorBackground`, `colorTextPrimary`, mapped from tokens
-3. **Components** — widgets that consume semantic aliases only, never raw tokens
+1. **Tokens**: raw values, no semantics
+2. **Semantic aliases**: `colorBackground`, `colorTextPrimary`, mapped from tokens
+3. **Components**: widgets that consume semantic aliases only, never raw tokens
 
 This means a theme switch (light → dark) only touches the alias layer. Components never change.
 
@@ -56,7 +56,7 @@ Wrap your app once, read tokens anywhere.
 
 ## Watch: Flutter's theming system explained
 
-This talk from Google I/O covers Material 3 theming in Flutter — worth 20 minutes if you're starting from scratch.
+This talk from Google I/O covers Material 3 theming in Flutter, worth 20 minutes if you're starting from scratch.
 
 <YouTube id="h5LWbATsq0k?si=kEsRrCoTkRM0LjX5" title="Material 3 theming in Flutter — Google I/O" />
 

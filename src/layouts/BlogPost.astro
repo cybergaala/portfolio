@@ -59,7 +59,7 @@ const formatted = pubDate.toLocaleDateString(dateLocale, {
 
       {banner && (
         <div class="post-banner">
-          <img src={banner} alt="" role="presentation" transition:name={`banner-${slug}`} />
+          <img src={banner} alt="" role="presentation" />
         </div>
       )}
 
@@ -287,6 +287,8 @@ const formatted = pubDate.toLocaleDateString(dateLocale, {
     line-height: 1.8;
     color: rgba(0,0,0,0.65);
     min-width: 0;
+    text-align: justify;
+    hyphens: auto;
   }
 
   .post-body :global(h2) {
@@ -306,6 +308,20 @@ const formatted = pubDate.toLocaleDateString(dateLocale, {
 
   .post-body :global(p) {
     margin: 0 0 1.25rem 0;
+  }
+
+  .post-body :global(> p:first-of-type::first-letter) {
+    float: left;
+    font-size: 4.5em;
+    line-height: 0.8;
+    font-weight: 700;
+    margin: 0.05em 0.1em 0 0;
+    color: #111;
+    letter-spacing: -0.02em;
+  }
+
+  :global(html.dark) .post-body :global(> p:first-of-type::first-letter) {
+    color: #f0f0f0;
   }
 
   .post-body :global(ul) {
