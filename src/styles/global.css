@@ -1,6 +1,10 @@
 @import "tailwindcss";
 @import "@fontsource-variable/geist";
 
+html {
+  scroll-behavior: smooth;
+}
+
 :root {
   --accent: #2337ff;
   --accent-dark: #000d8a;
@@ -81,6 +85,10 @@ li::marker {
 }
 
 /* ── Theme switch (circle reveal) ───────────────────────────────────── */
+html[data-theme-transition]::view-transition {
+  pointer-events: none;
+}
+
 html[data-theme-transition]::view-transition-old(root),
 html[data-theme-transition]::view-transition-new(root) {
   animation: none;
@@ -133,20 +141,20 @@ html[data-theme-transition][data-theme-interrupted]:not(.dark)::view-transition-
 
 /* ── Page navigation transition ─────────────────────────────────────── */
 html:not([data-theme-transition])::view-transition-old(root) {
-  animation: page-out 0.25s ease forwards;
+  animation: page-out 0.38s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
 html:not([data-theme-transition])::view-transition-new(root) {
-  animation: page-in 0.25s ease forwards;
+  animation: page-in 0.42s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
 @keyframes page-out {
   from { opacity: 1; transform: translateY(0); }
-  to   { opacity: 0; transform: translateY(-10px); }
+  to   { opacity: 0; transform: translateY(-40px); }
 }
 
 @keyframes page-in {
-  from { opacity: 0; transform: translateY(14px); }
+  from { opacity: 0; transform: translateY(60px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
