@@ -29,12 +29,17 @@ const formatted = pubDate.toLocaleDateString(dateLocale, {
 ---
 
 <Layout title={`${title} — Edgar Mejía`} description={description} lang={lang}>
+  <div id="reading-progress-bar" aria-hidden="true"></div>
   <article class="post-article">
     <div class="page-container">
       <a href={basePath} class="back-link">{t('blog.back')}</a>
 
       <header class="post-header">
-        <p class="section-label">{formatted}</p>
+        <p class="section-label">
+          {formatted}
+          <span class="reading-time-sep">·</span>
+          <span id="reading-time" class="reading-time-label" data-label={t('blog.min-read')}></span>
+        </p>
         <h1 class="post-title">{title}</h1>
         <p class="post-desc">{description}</p>
         {tags && tags.length > 0 && (
@@ -68,6 +73,11 @@ const formatted = pubDate.toLocaleDateString(dateLocale, {
         </aside>
       </div>
 
+      <div class="post-end">
+        <span class="post-end-marker" aria-hidden="true">· · ·</span>
+        <button id="back-to-top" class="back-to-top">↑ {t('blog.back-to-top')}</button>
+      </div>
+
       {related && related.length > 0 && (
         <section class="related-posts">
           <p class="section-label">{t('blog.related')}</p>
@@ -91,6 +101,39 @@ const formatted = pubDate.toLocaleDateString(dateLocale, {
 </Layout>
 
 <style>
+  #reading-progress-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 0%;
+    height: 3px;
+    background: #111;
+    z-index: 9999;
+    transition: width 0.1s linear;
+    transform-origin: left;
+  }
+
+  :global(html.dark) #reading-progress-bar {
+    background: #f0f0f0;
+  }
+
+  .reading-time-sep {
+    margin: 0 0.4em;
+    opacity: 0.4;
+  }
+
+  .reading-time-label {
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(0,0,0,0.3);
+  }
+
+  :global(html.dark) .reading-time-label {
+    color: rgba(255,255,255,0.3);
+  }
+
   .post-article {
     padding: 8rem 0 8rem;
   }
@@ -527,6 +570,56 @@ const formatted = pubDate.toLocaleDateString(dateLocale, {
     margin: 0 0 0.75rem 0;
   }
 
+  .post-end {
+    max-width: 42rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    margin-top: 4rem;
+  }
+
+  .back-to-top {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.45rem 1rem;
+    border: 1px solid rgba(0,0,0,0.1);
+    border-radius: 4px;
+    background: transparent;
+    color: rgba(0,0,0,0.35);
+    font-size: 0.78rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s;
+  }
+
+  .back-to-top:hover {
+    color: #111;
+    border-color: rgba(0,0,0,0.3);
+  }
+
+  :global(html.dark) .back-to-top {
+    border-color: rgba(255,255,255,0.12);
+    color: rgba(255,255,255,0.35);
+  }
+
+  :global(html.dark) .back-to-top:hover {
+    color: #f0f0f0;
+    border-color: rgba(255,255,255,0.35);
+  }
+
+  .post-end-marker {
+    font-size: 1rem;
+    letter-spacing: 0.4em;
+    color: rgba(0,0,0,0.18);
+    user-select: none;
+  }
+
+  :global(html.dark) .post-end-marker { color: rgba(255,255,255,0.18); }
+
+
   :global(html.dark) .related-posts { border-top-color: rgba(255,255,255,0.08); }
   :global(html.dark) .related-item { border-top-color: rgba(255,255,255,0.06); }
   :global(html.dark) .related-title { color: #f0f0f0; }
@@ -534,6 +627,31 @@ const formatted = pubDate.toLocaleDateString(dateLocale, {
 </style>
 
 <script>
+  function initReadingTime() {
+    const body = document.querySelector('.post-body');
+    const el = document.getElementById('reading-time');
+    if (!body || !el) return;
+    const label = el.dataset.label ?? 'min read';
+    const words = (body.textContent ?? '').trim().split(/\s+/).filter(Boolean).length;
+    const minutes = Math.max(1, Math.round(words / 200));
+    el.textContent = `${minutes} ${label}`;
+  }
+
+  function initProgressBar() {
+    const bar = document.getElementById('reading-progress-bar');
+    if (!bar) return;
+
+    const update = () => {
+      const scrollTop = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+      bar.style.width = `${Math.min(100, progress)}%`;
+    };
+
+    window.addEventListener('scroll', update, { passive: true });
+    update();
+  }
+
   function initToc() {
     const toc = document.getElementById('toc');
     const headings = document.querySelectorAll<HTMLHeadingElement>('.post-body h2');
@@ -575,5 +693,16 @@ const formatted = pubDate.toLocaleDateString(dateLocale, {
     setActive();
   }
 
-  document.addEventListener('astro:page-load', initToc);
+  function initBackToTop() {
+    const btn = document.getElementById('back-to-top');
+    if (!btn) return;
+    btn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+  }
+
+  document.addEventListener('astro:page-load', () => {
+    initToc();
+    initReadingTime();
+    initProgressBar();
+    initBackToTop();
+  });
 </script>

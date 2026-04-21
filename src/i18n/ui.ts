@@ -16,6 +16,8 @@ export const ui = {
     'blog.writing-description': 'Articles on mobile development, tools, and software.',
     'blog.prev': '← Prev',
     'blog.next': 'Next →',
+    'blog.min-read': 'min read',
+    'blog.back-to-top': 'Back to top',
   },
   es: {
     'nav.experience': 'Experiencia',
@@ -32,6 +34,8 @@ export const ui = {
     'blog.writing-description': 'Artículos sobre desarrollo móvil, herramientas y software.',
     'blog.prev': '← Anterior',
     'blog.next': 'Siguiente →',
+    'blog.min-read': 'min de lectura',
+    'blog.back-to-top': 'Volver arriba',
   },
 } as const;
 
