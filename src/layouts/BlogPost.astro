@@ -419,6 +419,7 @@ const formatted = pubDate.toLocaleDateString(dateLocale, {
     border-radius: 4px;
     margin: 2rem 0;
     border: 1px solid rgba(0,0,0,0.07);
+    transition: filter 0.5s ease;
   }
 
   /* Image followed by blockquote → render blockquote as caption */
@@ -465,9 +466,15 @@ const formatted = pubDate.toLocaleDateString(dateLocale, {
     height: 100%;
     object-fit: cover;
     display: block;
+    transition: filter 0.5s ease;
   }
 
   :global(html.dark) .post-banner { border-color: rgba(255, 255, 255, 0.08); }
+
+  :global(.img-blur-load) {
+    filter: blur(20px) !important;
+    will-change: filter;
+  }
 
   /* Header */
   :global(html.dark) .back-link { color: rgba(255, 255, 255, 0.35); }
@@ -715,10 +722,22 @@ const formatted = pubDate.toLocaleDateString(dateLocale, {
     btn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
   }
 
+  function initBlurUp() {
+    const images = document.querySelectorAll<HTMLImageElement>('.post-banner img, .post-body img');
+    images.forEach(img => {
+      if (img.complete && img.naturalWidth > 0) return;
+      img.classList.add('img-blur-load');
+      const reveal = () => img.classList.remove('img-blur-load');
+      img.addEventListener('load', reveal, { once: true });
+      img.addEventListener('error', reveal, { once: true });
+    });
+  }
+
   document.addEventListener('astro:page-load', () => {
     initToc();
     initReadingTime();
     initProgressBar();
     initBackToTop();
+    initBlurUp();
   });
 </script>
