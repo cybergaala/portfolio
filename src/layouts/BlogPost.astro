@@ -724,13 +724,20 @@ const formatted = pubDate.toLocaleDateString(dateLocale, {
 
   function initBlurUp() {
     const images = document.querySelectorAll<HTMLImageElement>('.post-banner img, .post-body img');
-    images.forEach(img => {
-      if (img.complete && img.naturalWidth > 0) return;
-      img.classList.add('img-blur-load');
-      const reveal = () => img.classList.remove('img-blur-load');
-      img.addEventListener('load', reveal, { once: true });
-      img.addEventListener('error', reveal, { once: true });
-    });
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        const img = entry.target as HTMLImageElement;
+        observer.unobserve(img);
+        if (img.complete && img.naturalWidth > 0) return;
+        img.classList.add('img-blur-load');
+        const reveal = () => img.classList.remove('img-blur-load');
+        img.addEventListener('load', reveal, { once: true });
+        img.addEventListener('error', reveal, { once: true });
+      });
+    }, { rootMargin: '200px' });
+
+    images.forEach(img => observer.observe(img));
   }
 
   document.addEventListener('astro:page-load', () => {
