@@ -5,9 +5,6 @@ import { getCollection } from 'astro:content';
 const posts = (await getCollection('blog', ({ id, data }) => id.startsWith('en/') && !data.draft))
   .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
   .slice(0, 4);
-
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
 ---
 
 <Layout
@@ -61,8 +58,8 @@ const posts = (await getCollection('blog', ({ id, data }) => id.startsWith('en/'
           <span class="exp-num">01</span>
           <div class="exp-info">
             <p class="exp-company">PBS El Salvador</p>
-            <p class="exp-meta">Senior Mobile Developer &nbsp;·&nbsp; 2024 — Present</p>
-            <p class="exp-desc">Lead mobile engineer across Android, iOS, and Flutter, owning the full lifecycle of multiple consumer-facing apps from architecture decisions to App Store and Play Store releases. Introduced a shared Flutter module strategy that cut duplicate logic between platforms by roughly 60%, and established code review practices that brought the team's average review cycle from three days down to one. Also serve as the technical reference for mobile decisions across the organization, collaborating directly with product and QA to ship faster without accumulating debt.</p>
+            <p class="exp-meta">Mid Mobile Developer &nbsp;·&nbsp; Mar 2024 — Present</p>
+            <p class="exp-desc">Working across Android and iOS — native development with Kotlin and Swift, plus Flutter for shared cross-platform features.</p>
           </div>
         </div>
 
@@ -70,8 +67,8 @@ const posts = (await getCollection('blog', ({ id, data }) => id.startsWith('en/'
           <span class="exp-num">02</span>
           <div class="exp-info">
             <p class="exp-company">ThinkForward</p>
-            <p class="exp-meta">Mid Full-Stack Developer &nbsp;·&nbsp; 2023 — 2024</p>
-            <p class="exp-desc">Principal developer on a multi-tenant ERP system built from scratch with ASP.NET Core, Entity Framework, and SQL Server. Designed the database schema and API surface that serves several independent companies from a single codebase, using tenant-aware middleware and row-level data isolation. Delivered the Razor-based frontend alongside the backend, writing vanilla JavaScript for dynamic UI interactions without introducing a heavy framework. The system went from zero to production in under eight months and is still in active daily use.</p>
+            <p class="exp-meta">Mid Full-stack Developer &nbsp;·&nbsp; Sep 2023 — Apr 2024</p>
+            <p class="exp-desc">Led C# development on a multi-company ERP built from scratch — ASP.NET Core, Entity Framework, SQL Server, Razor, and vanilla JavaScript.</p>
           </div>
         </div>
 
@@ -79,8 +76,17 @@ const posts = (await getCollection('blog', ({ id, data }) => id.startsWith('en/'
           <span class="exp-num">03</span>
           <div class="exp-info">
             <p class="exp-company">Serfinsa</p>
-            <p class="exp-meta">Mid Mobile Developer &nbsp;·&nbsp; 2018 — 2020</p>
-            <p class="exp-desc">Android developer on a fintech platform serving thousands of daily transactions, working with Kotlin and early Jetpack Compose. Took ownership of the payments and transfers screens, refactoring a fragile XML-based UI to a composable architecture that made new flows significantly faster to build and test. Collaborated with backend and security teams to implement biometric authentication and PCI-compliant session handling, and contributed to the internal component library that the team still uses today.</p>
+            <p class="exp-meta">Mid Mobile Developer &nbsp;·&nbsp; Oct 2023 — Mar 2024</p>
+            <p class="exp-desc">Android developer on a fintech app, building screens with Kotlin and Jetpack Compose.</p>
+          </div>
+        </div>
+
+        <div class="exp-item">
+          <span class="exp-num">04</span>
+          <div class="exp-info">
+            <p class="exp-company">Hightech Consulting</p>
+            <p class="exp-meta">Mid Mobile Developer &nbsp;·&nbsp; Jul 2022 — Aug 2023</p>
+            <p class="exp-desc">Mobile developer across iOS (Swift), Android (Kotlin/Java), and Flutter on multiple client projects, applying MVVM and Clean Architecture.</p>
           </div>
         </div>
 
@@ -299,7 +305,7 @@ const posts = (await getCollection('blog', ({ id, data }) => id.startsWith('en/'
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 0 3rem;
-      border-top: 1px solid rgba(0,0,0,0.07);
+      /* border-top: 1px solid rgba(0,0,0,0.07); */
     }
 
     .post-item {
@@ -698,7 +704,7 @@ const posts = (await getCollection('blog', ({ id, data }) => id.startsWith('en/'
     'a JS enthusiast',
     'a TS fan or hater?',
     'a Web dev',
-    'an OW2 player 🧡',
+    'an OW player 🧡',
     'a Coffee hater :)',
     'a Pre-AI dev 🗿',
     'a Coke lover 🥤',
