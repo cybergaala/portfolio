@@ -1,10 +1,14 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import { getCollection } from 'astro:content';
+import { experience } from '../data/experience';
+import { projects } from '../data/projects';
 
 const posts = (await getCollection('blog', ({ id, data }) => id.startsWith('en/') && !data.draft))
   .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
   .slice(0, 4);
+
+const email = 'contact@edgarmejia.com';
 ---
 
 <Layout
@@ -12,31 +16,66 @@ const posts = (await getCollection('blog', ({ id, data }) => id.startsWith('en/'
   description="Personal portfolio of Edgar Mejía, software developer from El Salvador."
   lang="en"
 >
-  <section class="section-about">
-    <div class="page-container">
-      <p class="section-label">About me</p>
-      <h1 class="about-h1">
-        <span>Hi there 👋!</span>
-        <span>I'm Edgar Mejía,</span>
-        <span class="about-sub"><span class="gitch-text"></span></span>
-        <span class="about-last">from El Salvador 🇸🇻</span>
-      </h1>
-      <a href="/about" class="about-link">More about me →</a>
+  <section class="hero">
+    <div class="page-container hero-grid">
+      <div class="hero-copy">
+        <h1 class="about-h1 reveal">
+          <span>Hi there 👋!</span>
+          <span>I'm Edgar Mejía,</span>
+          <span class="about-sub"><span class="gitch-text"></span></span>
+          <span class="about-last">from El Salvador 🇸🇻</span>
+        </h1>
+        <p class="lead reveal" style="--d:120ms">
+          I build mobile apps — iOS, Android and Flutter — and I've been doing it for six-plus years.
+          Off the clock I'm a dad, a cat person and an Overwatch player who drinks Coke, never coffee.
+        </p>
+        <p class="hero-links reveal" style="--d:200ms">
+          <a href="#projects" class="btn">See what I've made</a>
+          <a href="/about" class="ulink">More about me →</a>
+        </p>
+      </div>
+
+      <figure class="polaroid reveal" style="--d:160ms">
+        <img src="/img/main.webp" alt="Edgar at his desk with an Overwatch match on the second monitor" width="1200" height="1256" />
+        <figcaption>me, "working". (that's Overwatch on the right)</figcaption>
+        <span class="note n1">girl dad 👧🏻</span>
+        <span class="note n2">cat person 🐱</span>
+        <span class="note n3">Coke &gt; coffee 🥤</span>
+      </figure>
     </div>
   </section>
-  <section id="writing" class="section-writing">
+
+  {projects.length > 0 && (
+    <section id="projects" class="section">
+      <div class="page-container">
+        <h2 class="sec-title reveal">Things I've <em>made</em></h2>
+        <ul class="shelf">
+          {projects.map((p, i) => (
+            <li class="reveal" style={`--d:${i * 80}ms`}>
+              <a href={p.href ?? p.code ?? '#'} class="shelf-row" {...(p.href || p.code ? { target: '_blank', rel: 'noopener' } : {})}>
+                <span class="shelf-name">{p.title}</span>
+                <span class="shelf-desc">{p.desc}</span>
+                <span class="shelf-stack">{p.tags.join(' · ')}</span>
+                <span class="shelf-arrow">↗</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  )}
+
+  <section id="writing" class="section">
     <div class="page-container">
-      <p class="section-label">Latest posts</p>
+      <h2 class="sec-title reveal">Things I've <em>written</em></h2>
       <div class="post-list">
         {posts.map((post, i) => {
-          const num = String(i + 1).padStart(2, '0');
           const date = post.data.pubDate.toLocaleDateString('en-US', {
             year: 'numeric', month: 'short', day: 'numeric',
           });
           return (
-            <a href={`/blog/${post.slug.replace('en/', '')}`} class="post-item">
-              <span class="post-num">{num}</span>
-              <p class="post-title">{post.data.title}</p>
+            <a href={`/blog/${post.slug.replace('en/', '')}`} class="post-item reveal" style={`--d:${i * 90}ms`}>
+              <p class="post-title">{post.data.title}<span class="arrow"> ↗</span></p>
               <p class="post-meta">{date}</p>
               <p class="post-desc">{post.data.description}</p>
             </a>
@@ -44,62 +83,38 @@ const posts = (await getCollection('blog', ({ id, data }) => id.startsWith('en/'
         })}
       </div>
       {posts.length > 0 && (
-        <a href="/blog" class="all-posts-link">All posts →</a>
+        <a href="/blog" class="ulink more">All posts →</a>
       )}
     </div>
   </section>
 
-  <section id="experience" class="section-experience">
+  <section id="experience" class="section">
     <div class="page-container">
-      <p class="section-label">Experience</p>
-      <div class="exp-list">
-
-        <div class="exp-item">
-          <span class="exp-num">01</span>
-          <div class="exp-info">
-            <p class="exp-company">PBS El Salvador</p>
-            <p class="exp-meta">Mid Mobile Developer &nbsp;·&nbsp; Mar 2024 — Present</p>
-            <p class="exp-desc">Working across Android and iOS — native development with Kotlin and Swift, plus Flutter for shared cross-platform features.</p>
+      <h2 class="sec-title reveal">Where I've <em>worked</em></h2>
+      <div class="ledger">
+        {experience.map((e, i) => (
+          <div class="ledger-row reveal" style={`--d:${i * 80}ms`}>
+            <p class="ledger-when">{e.period}{e.current && <span class="now">now</span>}</p>
+            <div>
+              <p class="ledger-co">{e.company}</p>
+              <p class="ledger-role">{e.role}</p>
+              <p class="ledger-desc">{e.desc}</p>
+            </div>
           </div>
-        </div>
-
-        <div class="exp-item">
-          <span class="exp-num">02</span>
-          <div class="exp-info">
-            <p class="exp-company">ThinkForward</p>
-            <p class="exp-meta">Mid Full-stack Developer &nbsp;·&nbsp; Sep 2023 — Apr 2024</p>
-            <p class="exp-desc">Led C# development on a multi-company ERP built from scratch — ASP.NET Core, Entity Framework, SQL Server, Razor, and vanilla JavaScript.</p>
-          </div>
-        </div>
-
-        <div class="exp-item">
-          <span class="exp-num">03</span>
-          <div class="exp-info">
-            <p class="exp-company">Serfinsa</p>
-            <p class="exp-meta">Mid Mobile Developer &nbsp;·&nbsp; Oct 2023 — Mar 2024</p>
-            <p class="exp-desc">Android developer on a fintech app, building screens with Kotlin and Jetpack Compose.</p>
-          </div>
-        </div>
-
-        <div class="exp-item">
-          <span class="exp-num">04</span>
-          <div class="exp-info">
-            <p class="exp-company">Hightech Consulting</p>
-            <p class="exp-meta">Mid Mobile Developer &nbsp;·&nbsp; Jul 2022 — Aug 2023</p>
-            <p class="exp-desc">Mobile developer across iOS (Swift), Android (Kotlin/Java), and Flutter on multiple client projects, applying MVVM and Clean Architecture.</p>
-          </div>
-        </div>
-
+        ))}
       </div>
-      <a href="/experience" class="all-exp-link">Full experience →</a>
+      <a href="/experience" class="ulink more">Full experience →</a>
     </div>
   </section>
 
-  <section id="contact" class="section-contact">
+  <section id="contact" class="section section-contact">
     <div class="page-container">
-      <p class="section-label">Contact</p>
-      <h2 class="contact-heading">Let's work<br/>together.</h2>
-      <form class="contact-form" id="contact-form" name="contact" method="POST" data-netlify="true">
+      <h2 class="contact-heading reveal">Say <em>hi.</em></h2>
+      <p class="contact-lead reveal">
+        Have a project, a job, or just want to talk about cats?
+        <button type="button" class="copy-email" data-email={email}><span class="copy-label">{email}</span></button>
+      </p>
+      <form class="contact-form reveal" id="contact-form" name="contact" method="POST" data-netlify="true">
         <input type="hidden" name="form-name" value="contact" />
         <div class="form-row">
           <div class="form-field">
@@ -113,9 +128,9 @@ const posts = (await getCollection('blog', ({ id, data }) => id.startsWith('en/'
         </div>
         <div class="form-field">
           <label for="message">Message</label>
-          <textarea id="message" name="message" rows="6" placeholder="Tell me about your project..." required></textarea>
+          <textarea id="message" name="message" rows="5" placeholder="Tell me about your project..." required></textarea>
         </div>
-        <button type="submit" class="form-submit">Send message</button>
+        <button type="submit" class="btn">Send message</button>
       </form>
       <div id="contact-success" style="display:none;" class="contact-success">
         <p>Thanks! I'll get back to you soon.</p>
@@ -124,402 +139,300 @@ const posts = (await getCollection('blog', ({ id, data }) => id.startsWith('en/'
   </section>
 
   <style>
-    .section {
-      height: 100vh;
-      display: flex;
-      justify-content: center;
+    /* Hero */
+    .hero { padding: 9rem 0 5rem; }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.45fr 1fr;
+      gap: 3.5rem;
       align-items: center;
-      font-size: 2rem;
-      color: white;
-      transition: background-color 0.5s ease;
-    }
-
-    .section:nth-child(odd) { background-color: #fff; }
-    .section:nth-child(even) { background-color: #0d47a1; }
-
-    .section.green {
-      background-color: black;
-      color: #fff;
-      text-shadow: none;
-    }
-
-    .section.purple { background-color: #4a148c; }
-    .section.red { background-color: #b71c1c; }
-    .section.teal { background-color: #004d40; }
-    
-    .section-about {
-      padding: 10rem 0 6rem;
-    }
-
-    .about-link {
-      display: inline-block;
-      margin-top: 2rem;
-      font-size: 0.82rem;
-      font-weight: 500;
-      color: rgba(0,0,0,0.35);
-      text-decoration: none;
-      letter-spacing: 0.03em;
-      transition: color 0.2s;
-    }
-
-    .about-link:hover {
-      color: #111;
     }
 
     .about-h1 {
       display: flex;
       flex-direction: column;
+      font-family: var(--font-display);
+      font-weight: 600;
+      font-size: clamp(2.4rem, 4.6vw, 4.1rem);
+      letter-spacing: -0.035em;
+      line-height: 1.02;
+      color: var(--fg);
+      text-align: left;
+      margin: 0;
     }
 
-
-    .section-about h1 {
-      font-size: clamp(3rem, 7vw, 6rem);
-    }
-
-    @media (max-width: 480px) {
-      .section-about h1 {
-        font-size: 2rem;
-      }
-    }
+    .about-h1 span { white-space: nowrap; }
 
     .about-sub {
-      color: rgba(0,0,0,0.35);
+      color: var(--accent);
       white-space: nowrap;
     }
 
-    h1 {
-      color: #111;
-      text-align: left;
-      font-weight: 700;
-      font-size: clamp(2rem, 4.5vw, 3.75rem);
-      letter-spacing: -0.03em;
-      line-height: 1.05;
-      margin: 0.25rem 0;
+    @media (max-width: 480px) {
+      .about-h1 { font-size: 2.2rem; }
     }
 
-    @keyframes typing {
-      0.00%, 12.93%, 14.63% { content: ""; }
-      0.85%, 12.24% { content: "J"; color: #f29111; }
-      1.70%, 11.56% { content: "Ja"; color: #f29111; }
-      2.55%, 10.88% { content: "Jav"; color: #f29111; }
-      3.40%, 10.20% { content: "Java"; color: #f29111; }
-
-      14.63%, 30.61%, 32.31% { content: ""; color: #ffd54a; }
-      15.48%, 29.93% { content: "P"; color: #ffd54a; }
-      16.33%, 29.25% { content: "Py"; color: #ffd54a; }
-      17.18%, 28.57% { content: "Pyt"; color: #ffd54a; }
-      18.03%, 27.89% { content: "Pyth"; color: #ffd54a; }
-      18.88%, 27.21% { content: "Pytho"; color: #ffd54a; }
-      19.73%, 26.53% { content: "Python"; color: #ffd54a; }
-
-      32.31%, 45.24%, 46.94% { content: ""; color: #5732d6; }
-      33.16%, 44.56% { content: "."; color: #5732d6; }
-      34.01%, 43.88% { content: ".N"; color: #5732d6; }
-      34.86%, 43.20% { content: ".Ne"; color: #5732d6; }
-      35.71%, 42.52% { content: ".Net"; color: #5732d6; }
-
-      46.94%, 61.39%, 63.09% { content: ""; color: #f05237; }
-      47.79%, 60.71% { content: "S"; color: #f05237; }
-      48.64%, 60.03% { content: "Sw"; color: #f05237; }
-      49.49%, 59.35% { content: "Swi"; color: #f05237; }
-      50.34%, 58.67% { content: "Swif"; color: #f05237; }
-      51.19%, 57.99% { content: "Swift"; color: #f05237; }
-
-      63.09%, 79.08%, 80.78% { content: ""; color: #8052ff; }
-      63.94%, 78.40% { content: "K"; color: #8052ff; }
-      64.79%, 77.72% { content: "Ko"; color: #8052ff; }
-      65.64%, 77.04% { content: "Kot"; color: #8052ff; }
-      66.49%, 76.36% { content: "Kotl"; color: #8052ff; }
-      67.34%, 75.68% { content: "Kotli"; color: #8052ff; }
-      68.20%, 75.00% { content: "Kotlin"; color: #8052ff; }
-
-      80.78%, 98.30%, 100.00% { content: ""; color: #15cbfc; }
-      81.63%, 97.62% { content: "F"; color: #15cbfc; }
-      82.48%, 96.94% { content: "Fl"; color: #15cbfc; }
-      83.33%, 96.26% { content: "Flu"; color: #15cbfc; }
-      84.18%, 95.58% { content: "Flut"; color: #15cbfc; }
-      85.03%, 94.90% { content: "Flutt"; color: #15cbfc; }
-      85.88%, 94.22% { content: "Flutte"; color: #15cbfc; }
-      86.73%, 93.54% { content: "Flutter"; color: #15cbfc; }
+    .lead {
+      max-width: 32rem;
+      margin: 2rem 0 0;
+      font-size: 1.05rem;
+      line-height: 1.65;
+      color: var(--fg-muted);
     }
 
-    @keyframes blink {
-      0%,
-      100% { opacity: 1; }
-      50% { opacity: 0; }
-    }
+    .hero-links { display: flex; flex-wrap: wrap; align-items: center; gap: 1.5rem; margin: 2rem 0 0; }
 
-    .typewriter {
-      --caret: currentcolor;
-      width: 150px;
-      border-bottom: #000 solid 3px;
-    }
-
-    .typewriter::before {
-      content: "";
-      animation: typing 11.76s infinite;
-    }
-
-    .typewriter::after {
-      content: "";
-      border-right: 1px solid var(--caret);
-      animation: blink 0.5s linear infinite;
-    }
-
-    .typewriter.thick::after { border-right: 1ch solid var(--caret); }
-    .typewriter.nocaret::after { border-right: 0; }
-    .thick {
-      /* Add beautiful shadow */
-      text-shadow: 0 0 10px rgba(255, 255, 255, 0.5), 0 0 20px rgba(255, 255, 255, 0.3);
-    }
-
-    @media (prefers-reduced-motion) {
-      .typewriter::after { animation: none; }
-
-      @keyframes sequencePopup {
-          0.00%, 16.67% { content: "Java"; }
-          16.67%, 33.33% { content: "Python"; }
-          33.33%, 50.00% { content: ".Net"; }
-          50.00%, 66.67% { content: "Swift"; }
-          66.67%, 83.33% { content: "Kotlin"; }
-          83.33%, 100.00% { content: "Flutter"; }
-      }
-
-      .typewriter::before {
-        content: "Java";
-        animation: sequencePopup 11.76s linear infinite;
-      }
-    }
-
-    .typewriter {
+    .btn {
       display: inline-block;
-    }
-
-    /* Writing section */
-    .section-writing {
-      padding: 6rem 0;
-      border-top: 1px solid rgba(0,0,0,0.07);
-    }
-
-    .post-list {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 0 3rem;
-      /* border-top: 1px solid rgba(0,0,0,0.07); */
-    }
-
-    .post-item {
-      display: flex;
-      flex-direction: column;
-      padding: 2rem 0 0;
+      padding: 0.85rem 1.5rem;
+      font: 500 0.85rem/1 "Geist Variable", sans-serif;
+      letter-spacing: 0.02em;
       text-decoration: none;
-      transition: opacity 0.2s;
+      color: var(--body-bg);
+      background: var(--fg);
+      border: none;
+      border-radius: 2px;
+      box-shadow: 4px 4px 0 var(--accent);
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
     }
 
-    .post-item:hover {
-      opacity: 0.6;
+    .btn:hover { transform: translate(2px, 2px); box-shadow: 2px 2px 0 var(--accent); }
+
+    .ulink {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--fg);
+      text-decoration: underline;
+      text-decoration-color: var(--border);
+      text-underline-offset: 5px;
+      transition: text-decoration-color 0.2s, color 0.2s;
     }
 
-    .post-num {
-      font-size: 2.5rem;
-      font-weight: 700;
-      line-height: 1;
-      color: rgba(0,0,0,0.06);
+    .ulink:hover { color: var(--accent); text-decoration-color: var(--accent); }
+    .more { display: inline-block; margin-top: 2.5rem; }
+
+    /* Polaroid */
+    .polaroid {
+      position: relative;
+      margin: 0;
+      padding: 12px 12px 0;
+      background: var(--card);
+      border: 1px solid var(--border);
+      box-shadow: 0 14px 30px -14px rgba(60, 40, 10, 0.4);
+      transform: rotate(2.2deg);
+      transition: transform 0.4s cubic-bezier(0.2, 0.7, 0.2, 1);
+    }
+
+    .polaroid:hover { transform: rotate(0deg) scale(1.01); }
+
+    .polaroid::before {
+      content: "";
+      position: absolute;
+      top: -14px;
+      left: 50%;
+      width: 96px;
+      height: 28px;
+      margin-left: -48px;
+      background: rgba(226, 180, 80, 0.55);
+      transform: rotate(-4deg);
+    }
+
+    .polaroid img {
+      display: block;
+      width: 100%;
+      aspect-ratio: 4 / 4.2;
+      object-fit: cover;
+      object-position: 30% 40%;
+    }
+
+    .polaroid figcaption {
+      padding: 0.6rem 0 0.7rem;
+      font-size: 0.82rem;
+      line-height: 1.4;
+      color: var(--fg-muted);
+      text-align: center;
+    }
+
+    .note {
+      position: absolute;
+      padding: 0.15rem 0.7rem;
+      font-size: 0.8rem;
+      font-weight: 500;
+      line-height: 1.5;
+      color: #3a2d12;
+      background: #f7d774;
+      box-shadow: 2px 3px 6px rgba(60, 40, 10, 0.25);
+      white-space: nowrap;
+    }
+
+    .n1 { left: -2.2rem; top: 18%; transform: rotate(-7deg); }
+    .n2 { right: -1.2rem; top: 46%; transform: rotate(5deg); background: #f4b6a0; }
+    .n3 { left: -1rem; bottom: 22%; transform: rotate(-3deg); background: #bfe0c0; }
+
+    @media (max-width: 860px) {
+      .hero-grid { grid-template-columns: 1fr; gap: 3.5rem; }
+      .polaroid { max-width: 22rem; margin-inline: auto; }
+      .n1 { left: -0.5rem; }
+      .n2 { right: -0.5rem; }
+      .n3 { left: -0.3rem; }
+    }
+
+    /* Sections */
+    .section { padding: 5.5rem 0; border-top: 1px dashed var(--border); }
+
+    .sec-title {
+      margin: 0 0 3rem;
+      font-family: var(--font-display);
+      font-weight: 500;
+      font-size: clamp(1.9rem, 3.6vw, 2.75rem);
       letter-spacing: -0.03em;
-      user-select: none;
-      margin: 0 0 1.5rem 0;
+      line-height: 1.1;
+      color: var(--fg);
     }
+
+    .sec-title em, .contact-heading em { color: var(--accent); font-style: normal; }
+
+    /* Projects shelf */
+    .shelf { list-style: none; margin: 0; padding: 0; }
+    .shelf li { border-bottom: 1px dashed var(--border); }
+
+    .shelf-row {
+      display: grid;
+      grid-template-columns: 1.1fr 1.6fr 1fr auto;
+      gap: 1.5rem;
+      align-items: baseline;
+      padding: 1.4rem 0;
+      text-decoration: none;
+      transition: padding-left 0.25s, color 0.25s;
+    }
+
+    .shelf-row:hover { padding-left: 0.75rem; }
+    .shelf-row:hover .shelf-name, .shelf-row:hover .shelf-arrow { color: var(--accent); }
+
+    .shelf-name { font-family: var(--font-display); font-size: 1.5rem; font-weight: 500; letter-spacing: -0.02em; color: var(--fg); transition: color 0.25s; }
+    .shelf-desc { font-size: 0.9rem; line-height: 1.55; color: var(--fg-muted); }
+    .shelf-stack { font-size: 0.78rem; color: var(--fg-faint); }
+    .shelf-arrow { color: var(--fg-faint); transition: color 0.25s; }
+
+    @media (max-width: 760px) {
+      .shelf-row { grid-template-columns: 1fr auto; gap: 0.3rem 1rem; }
+      .shelf-desc, .shelf-stack { grid-column: 1; }
+      .shelf-arrow { grid-row: 1; grid-column: 2; }
+    }
+
+    /* Posts (layout kept) */
+    .post-list { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0 3rem; }
+    .post-item { display: flex; flex-direction: column; text-decoration: none; }
 
     .post-title {
       font-size: 1.05rem;
       font-weight: 600;
-      color: #111;
+      color: var(--fg);
       letter-spacing: -0.02em;
       margin: 0 0 0.5rem 0;
       line-height: 1.3;
-    }
-
-    .post-meta {
-      font-size: 0.75rem;
-      color: rgba(0,0,0,0.3);
-      margin: 0 0 0.75rem 0;
-      letter-spacing: 0.03em;
-    }
-
-    .post-desc {
-      font-size: 0.875rem;
-      color: rgba(0,0,0,0.5);
-      line-height: 1.65;
-      margin: 0;
-    }
-
-    .all-posts-link {
-      display: inline-block;
-      margin-top: 2rem;
-      font-size: 0.82rem;
-      font-weight: 500;
-      color: rgba(0,0,0,0.35);
-      text-decoration: none;
-      letter-spacing: 0.03em;
       transition: color 0.2s;
     }
 
-    .all-posts-link:hover {
-      color: #111;
-    }
+    .post-item .arrow { opacity: 0; display: inline-block; transition: opacity 0.2s, transform 0.2s; }
+    .post-item:hover .post-title { color: var(--accent); }
+    .post-item:hover .arrow { opacity: 1; transform: translate(2px, -2px); }
+
+    .post-meta { font-size: 0.75rem; color: var(--fg-faint); margin: 0 0 0.75rem 0; letter-spacing: 0.03em; }
+    .post-desc { font-size: 0.875rem; color: var(--fg-muted); line-height: 1.65; margin: 0; }
 
     @media (max-width: 900px) {
-      .post-list {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 0 2rem;
-      }
+      .post-list { grid-template-columns: repeat(2, 1fr); gap: 2rem; }
     }
 
     @media (max-width: 560px) {
-      .post-list {
-        grid-template-columns: 1fr;
-      }
-
-      .post-item {
-        padding: 1.5rem 0 0;
-        border-top: 1px solid rgba(0,0,0,0.07);
-      }
-
-      .post-list {
-        border-top: none;
-      }
+      .post-list { grid-template-columns: 1fr; gap: 0; }
+      .post-item { padding: 1.5rem 0; border-top: 1px dashed var(--border); }
     }
 
-    /* Experience section */
-    .section-experience {
-      padding: 6rem 0;
-      border-top: 1px solid rgba(0,0,0,0.07);
-    }
-
-    .section-label {
-      font-size: 0.7rem;
-      font-weight: 500;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: rgba(0,0,0,0.3);
-      margin: 0 0 2.5rem 0;
-    }
-
-    .exp-list {
-      display: flex;
-      flex-direction: column;
-      gap: 3rem;
-    }
-
-    .exp-item {
-      display: flex;
-      align-items: flex-start;
+    /* Experience ledger */
+    .ledger-row {
+      display: grid;
+      grid-template-columns: 11rem 1fr;
       gap: 1.5rem;
+      padding: 1.75rem 0;
+      border-bottom: 1px dashed var(--border);
     }
 
-    .exp-num {
-      font-size: 4.5rem;
-      font-weight: 700;
-      line-height: 1;
-      color: rgba(0,0,0,0.06);
-      letter-spacing: -0.03em;
-      user-select: none;
-      flex-shrink: 0;
-      width: 5rem;
-      text-align: right;
-    }
+    .ledger-row:first-child { padding-top: 0; }
+    .ledger-row p { margin: 0; }
 
-    .exp-info {
-      padding-top: 0.6rem;
-    }
+    .ledger-when { font-size: 0.82rem; color: var(--fg-faint); padding-top: 0.55rem !important; }
 
-    .exp-company {
-      font-size: 1.75rem;
+    .now {
+      margin-left: 0.5rem;
+      padding: 0 0.4rem;
+      font-size: 0.7rem;
       font-weight: 600;
-      color: #111;
-      letter-spacing: -0.02em;
-      margin: 0 0 0.3rem 0;
-    }
-
-    .exp-meta {
-      font-size: 0.82rem;
-      color: rgba(0,0,0,0.35);
-      margin: 0 0 0.9rem 0;
-    }
-
-    .exp-desc {
-      font-size: 0.95rem;
-      color: rgba(0,0,0,0.55);
-      line-height: 1.7;
-      margin: 0;
-      max-width: 62ch;
-    }
-
-    .all-exp-link {
+      color: #3a2d12;
+      background: #f7d774;
+      transform: rotate(-3deg);
       display: inline-block;
-      margin-top: 2rem;
-      font-size: 0.82rem;
+    }
+
+    .ledger-co { font-family: var(--font-display); font-size: 1.7rem; font-weight: 500; letter-spacing: -0.02em; color: var(--fg); }
+    .ledger-role { font-size: 0.88rem; color: var(--accent); margin: 0.1rem 0 0.6rem !important; }
+    .ledger-desc { font-size: 0.95rem; line-height: 1.7; color: var(--fg-muted); max-width: 60ch; }
+
+    @media (max-width: 640px) {
+      .ledger-row { grid-template-columns: 1fr; gap: 0.3rem; }
+      .ledger-when { padding-top: 0 !important; }
+    }
+
+    /* Contact */
+    .section-contact { padding-bottom: 8rem; }
+
+    .contact-heading {
+      margin: 0 0 1.5rem;
+      font-family: var(--font-display);
+      font-weight: 600;
+      font-size: clamp(3.5rem, 11vw, 8rem);
+      letter-spacing: -0.045em;
+      line-height: 0.95;
+      color: var(--fg);
+    }
+
+    .contact-lead { max-width: 34rem; margin: 0 0 3rem; font-size: 1.05rem; line-height: 1.7; color: var(--fg-muted); }
+
+    .copy-email {
+      display: block;
+      margin-top: 0.4rem;
+      padding: 0;
+      font-family: var(--font-display);
+      font-size: 1.5rem;
       font-weight: 500;
-      color: rgba(0,0,0,0.35);
-      text-decoration: none;
-      letter-spacing: 0.03em;
+      color: var(--fg);
+      background: none;
+      border: none;
+      border-bottom: 2px solid var(--accent);
+      cursor: pointer;
       transition: color 0.2s;
     }
 
-    .all-exp-link:hover {
-      color: #111;
-    }
+    .copy-email:hover { color: var(--accent); }
 
-    /* Contact section */
-    .section-contact {
-      padding: 6rem 0 8rem;
-      border-top: 1px solid rgba(0,0,0,0.07);
-    }
+    .contact-form { display: flex; flex-direction: column; gap: 1.5rem; max-width: 640px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+    .form-field { display: flex; flex-direction: column; gap: 0.4rem; }
+    .contact-form .btn { align-self: flex-start; }
 
-    .contact-heading {
-      font-size: clamp(2.5rem, 6vw, 5rem);
-      font-weight: 700;
-      letter-spacing: -0.03em;
-      color: #111;
-      margin: 0 0 3rem 0;
-      line-height: 1.05;
-    }
-
-    .contact-form {
-      display: flex;
-      flex-direction: column;
-      gap: 1.5rem;
-      max-width: 640px;
-    }
-
-    .form-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1.5rem;
-    }
-
-    .form-field {
-      display: flex;
-      flex-direction: column;
-      gap: 0.4rem;
-    }
-
-    .form-field label {
-      font-size: 0.72rem;
-      font-weight: 500;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: rgba(0,0,0,0.35);
-    }
+    .form-field label { font-size: 0.75rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--fg-faint); }
 
     .form-field input,
     .form-field textarea {
       background: none;
       border: none;
-      border-bottom: 1px solid rgba(0,0,0,0.15);
-      padding: 0.6rem 0;
+      border-bottom: 1px solid var(--border);
+      padding: 0.5rem 0;
       font-size: 0.95rem;
-      color: #111;
+      color: var(--fg);
       outline: none;
       resize: none;
       font-family: inherit;
@@ -527,93 +440,19 @@ const posts = (await getCollection('blog', ({ id, data }) => id.startsWith('en/'
     }
 
     .form-field input::placeholder,
-    .form-field textarea::placeholder {
-      color: rgba(0,0,0,0.2);
-    }
-
+    .form-field textarea::placeholder { color: var(--fg-faint); opacity: 0.6; }
     .form-field input:focus,
-    .form-field textarea:focus {
-      border-bottom-color: #111;
-    }
+    .form-field textarea:focus { border-bottom-color: var(--accent); }
 
-    .form-submit {
-      align-self: flex-start;
-      background: #111;
-      color: #fff;
-      border: none;
-      padding: 0.85rem 2rem;
-      font-size: 0.85rem;
-      font-family: inherit;
-      font-weight: 500;
-      letter-spacing: 0.04em;
-      cursor: pointer;
-      transition: opacity 0.2s;
-    }
-
-    .form-submit:hover {
-      opacity: 0.75;
-    }
+    .contact-success { margin-top: 1.5rem; font-size: 1rem; opacity: 0.7; }
 
     @media (max-width: 640px) {
-      .form-row {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    :global(html.dark) .section-about { border-bottom-color: rgba(255, 255, 255, 0.08); }
-    :global(html.dark) h1 { color: #f0f0f0; }
-    :global(html.dark) .about-sub { color: rgba(255, 255, 255, 0.35); }
-    :global(html.dark) .typewriter { border-bottom-color: #f0f0f0; }
-    :global(html.dark) .about-link { color: rgba(255,255,255,0.35); }
-    :global(html.dark) .about-link:hover { color: #f0f0f0; }
-
-    /* Writing */
-    :global(html.dark) .section-writing { border-top-color: rgba(255, 255, 255, 0.08); }
-    :global(html.dark) .post-list { border-top-color: rgba(255, 255, 255, 0.08); }
-    :global(html.dark) .post-num { color: rgba(255, 255, 255, 0.08); }
-    :global(html.dark) .post-title { color: #f0f0f0; }
-    :global(html.dark) .post-meta { color: rgba(255, 255, 255, 0.3); }
-    :global(html.dark) .post-desc { color: rgba(255, 255, 255, 0.5); }
-    :global(html.dark) .all-posts-link { color: rgba(255, 255, 255, 0.35); }
-    :global(html.dark) .all-posts-link:hover { color: #f0f0f0; }
-    :global(html.dark) .post-item { border-top-color: rgba(255, 255, 255, 0.08); }
-
-    /* Experience */
-    :global(html.dark) .section-experience { border-top-color: rgba(255, 255, 255, 0.08); }
-    :global(html.dark) .section-label { color: rgba(255, 255, 255, 0.3); }
-    :global(html.dark) .exp-num { color: rgba(255, 255, 255, 0.08); }
-    :global(html.dark) .exp-company { color: #f0f0f0; }
-    :global(html.dark) .exp-meta { color: rgba(255, 255, 255, 0.35); }
-    :global(html.dark) .exp-desc { color: rgba(255, 255, 255, 0.55); }
-
-    :global(html.dark) .all-exp-link { color: rgba(255,255,255,0.35); }
-    :global(html.dark) .all-exp-link:hover { color: #f0f0f0; }
-
-    /* Contact */
-    :global(html.dark) .section-contact { border-top-color: rgba(255, 255, 255, 0.08); }
-    :global(html.dark) .contact-heading { color: #f0f0f0; }
-    :global(html.dark) .form-field label { color: rgba(255, 255, 255, 0.35); }
-    :global(html.dark) .form-field input,
-    :global(html.dark) .form-field textarea {
-      border-bottom-color: rgba(255, 255, 255, 0.15);
-      color: #f0f0f0;
-    }
-    :global(html.dark) .form-field input::placeholder,
-    :global(html.dark) .form-field textarea::placeholder { color: rgba(255, 255, 255, 0.2); }
-    :global(html.dark) .form-field input:focus,
-    :global(html.dark) .form-field textarea:focus { border-bottom-color: #f0f0f0; }
-    :global(html.dark) .form-submit { background: #f0f0f0; color: #111; }
-    .contact-success {
-      margin-top: 1.5rem;
-      font-size: 1rem;
-      opacity: 0.7;
+      .form-row { grid-template-columns: 1fr; }
     }
   </style>
 
   <style is:global>
-    /* .dud { color: #c0c0c0 !important; } */
-    /* .dud { color: #ee4e4e !important; } */
-    .dud { color: #ee4e4e64 !important; }
+    .dud { color: var(--accent) !important; opacity: 0.5; }
   </style>
 </Layout>
 
@@ -716,6 +555,12 @@ const posts = (await getCollection('blog', ({ id, data }) => id.startsWith('en/'
     const el = document.querySelector<HTMLElement>('.gitch-text');
     if (!el) return;
 
+    // ponytail: reduced motion gets a static phrase instead of the endless loop
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      el.textContent = phrases[3];
+      return;
+    }
+
     const fx = new TextScramble(el);
     let lastIndex = -1;
 
@@ -736,7 +581,36 @@ const posts = (await getCollection('blog', ({ id, data }) => id.startsWith('en/'
 
   document.addEventListener('astro:page-load', initScramble);
 
-  function initContactForm() {
+  function initReveal() {
+    const els = document.querySelectorAll<HTMLElement>('.reveal');
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((en) => {
+        if (en.isIntersecting) {
+          en.target.classList.remove('pre');
+          io.unobserve(en.target);
+        }
+      });
+    }, { threshold: 0.12 });
+    els.forEach((el) => {
+      // only hide what is not already on screen, so above-the-fold content never flashes
+      if (el.getBoundingClientRect().top > innerHeight * 0.9) el.classList.add('pre');
+      io.observe(el);
+    });
+  }
+
+  document.addEventListener('astro:page-load', initReveal);
+
+  function initContact() {
+    const btn = document.querySelector<HTMLButtonElement>('.copy-email');
+    btn?.addEventListener('click', async () => {
+      const label = btn.querySelector('.copy-label')!;
+      const email = btn.dataset.email!;
+      try { await navigator.clipboard.writeText(email); label.textContent = 'Copied ✓'; }
+      catch { location.href = `mailto:${email}`; return; }
+      setTimeout(() => (label.textContent = email), 1600);
+    });
+
     const form = document.getElementById('contact-form') as HTMLFormElement | null;
     const success = document.getElementById('contact-success') as HTMLElement | null;
     if (!form || !success) return;
@@ -750,5 +624,5 @@ const posts = (await getCollection('blog', ({ id, data }) => id.startsWith('en/'
     });
   }
 
-  document.addEventListener('astro:page-load', initContactForm);
+  document.addEventListener('astro:page-load', initContact);
 </script>

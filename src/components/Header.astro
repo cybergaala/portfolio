@@ -6,6 +6,7 @@
     <div class="nav-inner page-container">
       <a href="/" class="nav-logo"><span class="nav-logo-box">EM</span></a>
       <ul class="nav-links">
+        <li><a href="/#projects">Projects</a></li>
         <li><a href="/#experience">Experience</a></li>
         <li><a href="/#contact">Contact</a></li>
       </ul>
@@ -43,7 +44,7 @@
   }
 
   nav.nav-scrolled {
-    background-color: rgba(255, 255, 255, 0.8);
+    background-color: rgba(244, 238, 226, 0.85);
     backdrop-filter: saturate(180%) blur(16px);
     -webkit-backdrop-filter: saturate(180%) blur(16px);
     border-bottom: 1px solid rgba(0,0,0,0.07);
@@ -144,18 +145,18 @@
 
   /* Solid fallback during theme transition — backdrop-filter can't render inside view-transition snapshots */
   :global(html[data-theme-transition]) nav.nav-scrolled {
-    background-color: rgba(255, 255, 255, 0.97);
+    background-color: rgba(244, 238, 226, 0.97);
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
     transition: none;
   }
   :global(html[data-theme-transition].dark) nav.nav-scrolled {
-    background-color: rgba(15, 18, 25, 0.97);
+    background-color: rgba(22, 19, 15, 0.97);
   }
 
   /* Dark mode styles */
   :global(html.dark) nav.nav-scrolled {
-    background-color: rgba(15, 18, 25, 0.85);
+    background-color: rgba(22, 19, 15, 0.85);
     border-bottom-color: rgba(255, 255, 255, 0.08);
   }
 
