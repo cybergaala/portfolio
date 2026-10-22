@@ -3,6 +3,14 @@ import Layout from "../layouts/Layout.astro";
 import { getCollection } from 'astro:content';
 import { experience } from '../data/experience';
 import { projects } from '../data/projects';
+// ANSI half-block art, generated with scripts/ascii-art.py --ansi (the .ascii.json files keep the earlier ASCII take)
+import art from '../data/hero-art.json';
+// color blocks taken from the art itself (scripts/ascii-art.py --palette)
+import palette from '../data/hero-palette.json';
+
+// art only holds ASCII and hex colors from our own script, so it is safe as raw HTML
+const toHtml = (rows: typeof art) =>
+  rows.map((row) => row.map(([fg, bg, t]) => (fg ? `<span style="color:${fg}${bg ? `;background:${bg}` : ''}">${t}</span>` : t)).join('')).join('\n');
 
 const posts = (await getCollection('blog', ({ id, data }) => id.startsWith('en/') && !data.draft))
   .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
@@ -10,30 +18,15 @@ const posts = (await getCollection('blog', ({ id, data }) => id.startsWith('en/'
 
 const email = 'contact@edgarmejia.com';
 
-// ANSI Shadow figlet of Edgar's initials, used like a distro logo
-const logo = [
-  '███████╗███╗   ███╗',
-  '██╔════╝████╗ ████║',
-  '█████╗  ██╔████╔██║',
-  '██╔══╝  ██║╚██╔╝██║',
-  '███████╗██║ ╚═╝ ██║',
-  '╚══════╝╚═╝     ╚═╝',
-].join('\n');
-
-// fastfetch-style hero; keys follow fastfetch's default module names
+// fastfetch-style hero; keys follow fastfetch's module names
 const fetch: [string, string][] = [
-  ['OS', 'Human (El Salvador 🇸🇻)'],
+  ['User', 'Edgar Mejía'],
   ['Host', 'PBS El Salvador'],
   ['Kernel', 'Mobile Developer'],
   ['Uptime', '6+ years shipping'],
   ['Packages', 'Swift, Kotlin, Flutter'],
-  ['Shell', 'zsh'],
-  ['IDE', 'Xcode, Android Studio'],
-  ['Theme', 'Red (pastel)'],
   ['CPU', 'Coca-Cola 🥤 (no coffee)'],
-  ['GPU', 'Overwatch 🧡'],
   ['Memory', 'girl dad 👧🏻 · cat 🐱'],
-  ['Locale', 'es_SV, en_US'],
 ];
 
 // ASCII star field behind the hero; seeded so every build renders the same sky
@@ -87,8 +80,6 @@ const shortPeriod = (p: string) => p.split('—').map(shortDate).join(' → ');
 
 // open on the current job instead of the merge commit
 const selected = commits.findIndex((c) => c.job?.current);
-
-const palette = ['var(--fg-faint)', 'var(--syn-str)', '#3ecf6e', 'var(--syn-num)', 'var(--syn-type)', 'var(--syn-kw)', 'var(--accent)', 'var(--fg)'];
 ---
 
 <Layout
@@ -102,35 +93,27 @@ const palette = ['var(--fg-faint)', 'var(--syn-str)', '#3ecf6e', 'var(--syn-num)
         <span class:list={{ twinkle: st.twinkle, red: st.red }} style={`left:${st.x}%;top:${st.y}%;--delay:${st.delay}s`}>{st.char}</span>
       ))}
     </div>
-    <div class="page-container hero-grid">
-      <div class="reveal">
-        <p class="cmd"><span class="path">~/edgar</span> <span class="branch">main</span> $ whoami</p>
-        <h1 class="hero-title">Edgar Mejía</h1>
-        <p class="lead">
-          Mobile developer in San Salvador. Six-plus years shipping iOS, Android and Flutter apps,
-          currently at PBS El Salvador.
-        </p>
-        <p class="status mono"><span class="dot" aria-hidden="true"></span> open to new projects · <time id="local-time">--:--</time> local</p>
-        <div class="hero-links mono">
-          <a href="#contact" class="btn">say hi</a>
-          <a href="https://github.com/cybergaala" target="_blank" rel="noopener" class="btn btn-ghost">github ↗</a>
-          <a href="https://www.linkedin.com/in/mejia-edgar/" target="_blank" rel="noopener" class="btn btn-ghost">linkedin ↗</a>
-        </div>
-      </div>
-
-      <div class="window term reveal" style="--d:120ms">
-        <div class="tabs mono"><span>zsh — 80×24</span></div>
+    <div class="page-container">
+      <h1 class="sr-only">Edgar Mejía — mobile developer in San Salvador</h1>
+      <div class="term reveal">
         <div class="term-body mono">
           <p class="term-cmd"><span class="path">~</span> $ fastfetch</p>
           <div class="ff">
-            <pre class="ff-logo" aria-hidden="true">{logo}</pre>
+            <pre class="ff-art" aria-hidden="true" set:html={toHtml(art)} />
             <div class="ff-info">
               <p class="ff-title"><span class="ff-key">edgar</span>@<span class="ff-key">san-salvador</span></p>
               <p class="ff-rule" aria-hidden="true">------------------</p>
               {fetch.map(([k, v]) => <p><span class="ff-key">{k}</span>: {v}</p>)}
+              <p><span class="ff-key">Status</span>: <span class="dot" aria-hidden="true"></span> open to new projects</p>
               <p class="ff-colors" aria-hidden="true">{palette.map((c) => <span style={`background:${c}`}></span>)}</p>
             </div>
           </div>
+          <p class="term-cmd"><span class="path">~</span> $ ls ~/links</p>
+          <p class="ff-links">
+            <a href="#contact">say-hi.sh</a>
+            <a href="https://github.com/cybergaala" target="_blank" rel="noopener">github ↗</a>
+            <a href="https://www.linkedin.com/in/mejia-edgar/" target="_blank" rel="noopener">linkedin ↗</a>
+          </p>
           <p class="term-cmd"><span class="path">~</span> $ <span class="caret" aria-hidden="true"></span></p>
         </div>
       </div>
@@ -276,7 +259,7 @@ const palette = ['var(--fg-faint)', 'var(--syn-str)', '#3ecf6e', 'var(--syn-num)
     .branch { color: var(--syn-kw); }
 
     /* Hero */
-    .hero { position: relative; overflow: hidden; padding: 9rem 0 6rem; }
+    .hero { position: relative; overflow: hidden; padding: 5.5rem 0 5rem; }
     .hero > .page-container { position: relative; }
 
     .sky { position: absolute; inset: 0; pointer-events: none; font-size: 0.85rem; color: var(--fg-faint); }
@@ -289,22 +272,7 @@ const palette = ['var(--fg-faint)', 'var(--syn-str)', '#3ecf6e', 'var(--syn-num)
 
     @keyframes twinkle { 50% { opacity: 0.1; } }
 
-    .hero-grid {
-      display: grid;
-      grid-template-columns: 1fr 1.15fr;
-      gap: 4rem;
-      align-items: center;
-    }
-
-    .hero-title {
-      margin: 0;
-      font-family: var(--font-display);
-      font-weight: 600;
-      font-size: clamp(2.8rem, 6vw, 4.6rem);
-      letter-spacing: -0.045em;
-      line-height: 1;
-      color: var(--fg);
-    }
+    .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 
     .lead {
       max-width: 30rem;
@@ -314,10 +282,7 @@ const palette = ['var(--fg-faint)', 'var(--syn-str)', '#3ecf6e', 'var(--syn-num)
       color: var(--fg-muted);
     }
 
-    .status { display: flex; align-items: center; gap: 0.55rem; margin: 1.75rem 0 0; font-size: 0.78rem; color: var(--fg-faint); }
-    .dot { width: 7px; height: 7px; border-radius: 50%; background: #3ecf6e; box-shadow: 0 0 0 3px rgba(62, 207, 110, 0.2); }
-
-    .hero-links { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 1.5rem; }
+    .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #3ecf6e; box-shadow: 0 0 0 3px rgba(62, 207, 110, 0.2); vertical-align: middle; }
 
     .btn {
       display: inline-flex;
@@ -351,18 +316,34 @@ const palette = ['var(--fg-faint)', 'var(--syn-str)', '#3ecf6e', 'var(--syn-num)
     .tabs span { padding: 0.6rem 1rem; color: var(--fg-muted); border-right: 1px solid var(--border); }
 
     /* fastfetch */
-    .term-body { padding: 1.1rem 1.25rem 1.25rem; font-size: 0.8rem; line-height: 1.7; color: var(--fg); }
+    /* no window chrome: the output sits on the page, right under the header prompt */
+    .term-body { padding: 0; font-size: 0.8rem; line-height: 1.7; color: var(--fg); }
     .term-body p { margin: 0; }
     .term-cmd { color: var(--fg-muted); }
-    .term-cmd:last-child { margin-top: 1rem !important; }
 
-    .ff { display: grid; grid-template-columns: auto 1fr; gap: 1.75rem; margin-top: 1rem; align-items: start; }
-    .ff-logo { margin: 0; font: 0.9rem/1.1 var(--font-mono); color: var(--accent); }
+    .ff { display: grid; grid-template-columns: auto 1fr; gap: 2rem; margin-top: 1rem; align-items: center; }
     .ff-key { color: var(--accent); font-weight: 600; }
     .ff-title { font-weight: 600; }
     .ff-rule { color: var(--fg-faint); }
     .ff-colors { display: flex; margin-top: 0.75rem !important; }
     .ff-colors span { width: 1.4rem; height: 0.9rem; }
+
+    /* 128 columns of art: shrink the glyphs so it always fits the viewport */
+    .ff-art {
+      font: min(8.2px, calc((100vw - 5rem) / 77)) / 1 var(--font-mono);
+      letter-spacing: 0;
+      user-select: none;
+      margin: 0;
+    }
+
+    /* cells exactly one row tall so the half blocks stack into square pixels */
+    .ff-art :global(span) { display: inline-block; height: 1em; vertical-align: top; }
+
+    .ff-links { display: flex; flex-wrap: wrap; gap: 0.4rem 2rem; }
+    .ff-links a { color: var(--syn-type); text-decoration: none; }
+    .ff-links a:hover { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+
+    .term-body > .term-cmd:not(:first-child) { margin-top: 1rem !important; }
 
     .caret { display: inline-block; width: 0.55em; height: 1.1em; vertical-align: text-bottom; background: var(--accent); }
 
@@ -372,13 +353,12 @@ const palette = ['var(--fg-faint)', 'var(--syn-str)', '#3ecf6e', 'var(--syn-num)
 
     @keyframes blink { 50% { opacity: 0; } }
 
-    @media (max-width: 520px) {
-      .ff { grid-template-columns: 1fr; gap: 1rem; }
+    @media (max-width: 960px) {
+      .ff { grid-template-columns: 1fr; gap: 1.25rem; }
     }
 
     @media (max-width: 900px) {
-      .hero { padding-top: 7rem; }
-      .hero-grid { grid-template-columns: 1fr; gap: 3rem; }
+      .hero { padding-top: 6rem; }
     }
 
     /* Sections */
@@ -575,15 +555,6 @@ const palette = ['var(--fg-faint)', 'var(--syn-str)', '#3ecf6e', 'var(--syn-num)
 </Layout>
 
 <script>
-  function initHero() {
-    const time = document.getElementById('local-time');
-    // ponytail: minute precision on load is enough, no interval
-    if (time) time.textContent = new Date().toLocaleTimeString('en-GB', { timeZone: 'America/El_Salvador', hour: '2-digit', minute: '2-digit' });
-
-  }
-
-  document.addEventListener('astro:page-load', initHero);
-
   function initLazygit() {
     const root = document.querySelector<HTMLElement>('[data-lazygit]');
     if (!root) return;
