@@ -6,9 +6,10 @@
     <div class="bar page-container">
       <a href="/" class="nav-logo" aria-label="Edgar Mejía, home"><span class="accent">edgar</span>@sv<span class="faint">:~$</span><span class="cursor" aria-hidden="true"></span></a>
       <ul class="nav-links">
+        <li><a href="/#hero" data-sec="hero">./fastfetch</a></li>
         <li><a href="/#projects" data-sec="projects">./projects</a></li>
+        <li><a href="/#writing" data-sec="writing">./blog</a></li>
         <li><a href="/#experience" data-sec="experience">./experience</a></li>
-        <li><a href="/blog" data-sec="blog">./blog</a></li>
         <li><a href="/#contact" data-sec="contact" class="say-hi">[ say hi ]</a></li>
       </ul>
       <button id="theme-toggle" aria-label="Toggle theme">
@@ -67,6 +68,11 @@
 
   .nav-links a:hover { color: var(--fg); }
   .nav-links a.active { color: var(--accent); }
+
+  /* on wide screens the home page shows these as a command history on the left */
+  @media (min-width: 1360px) {
+    :global(body:has(.history)) .nav-links li:has(a:not(.say-hi)) { display: none; }
+  }
   .nav-links a.say-hi { color: var(--accent); }
   .nav-links a.say-hi:hover { color: var(--fg); }
 
@@ -132,20 +138,21 @@
 
   function initNavState() {
     const nav = document.getElementById('mainNav');
-    const links = document.querySelectorAll<HTMLAnchorElement>('.nav-links a');
+    // every section link on the page, so the home page's command history lights up too
+    const links = document.querySelectorAll<HTMLAnchorElement>('a[data-sec]');
     const setActive = (id: string) => links.forEach((a) => a.classList.toggle('active', a.dataset.sec === id));
 
     nav?.classList.remove('open');
     document.getElementById('menu-btn')?.setAttribute('aria-expanded', 'false');
     secObserver?.disconnect();
 
-    if (location.pathname.startsWith('/blog')) return setActive('blog');
+    if (location.pathname.startsWith('/blog')) return setActive('writing');
     setActive('');
     if (location.pathname !== '/') return;
     secObserver = new IntersectionObserver((entries) => {
       entries.forEach((en) => { if (en.isIntersecting) setActive(en.target.id); });
     }, { rootMargin: '-40% 0px -55% 0px' });
-    ['projects', 'experience', 'contact'].forEach((id) => {
+    ['hero', 'projects', 'writing', 'experience', 'contact'].forEach((id) => {
       const el = document.getElementById(id);
       if (el) secObserver!.observe(el);
     });

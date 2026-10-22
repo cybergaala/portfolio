@@ -197,3 +197,70 @@ html:not([data-theme-transition])::view-transition-new(root) {
     animation: none !important;
   }
 }
+
+/* ── Terminal sections (landing + blog index) ───────────────────────── */
+.mono { font-family: var(--font-mono); }
+
+.cmd {
+  margin: 0 0 1rem;
+  font: 0.8rem/1.4 var(--font-mono);
+  color: var(--fg-faint);
+}
+
+.sec-head { margin-bottom: 2rem; }
+.sec-head .cmd { margin-bottom: 0.4rem; }
+
+.sec-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(1.6rem, 3vw, 2rem);
+  letter-spacing: -0.03em;
+  color: var(--fg);
+}
+
+.more { display: inline-block; margin-top: 1.75rem; font-size: 0.8rem; color: var(--accent); text-decoration: none; }
+.more:hover { text-decoration: underline; text-underline-offset: 4px; }
+
+/* ls -l (projects + posts): rows share one grid so columns line up like a terminal */
+.ls {
+  display: grid;
+  grid-template-columns: repeat(6, auto) 1fr;
+  column-gap: 1.5ch;
+  font-size: 0.82rem;
+  line-height: 1.6;
+}
+
+.ls-dirs { grid-template-columns: repeat(5, auto) 1fr; }
+.ls-total { grid-column: 1 / -1; margin: 0 0 0.25rem; color: var(--fg-faint); }
+
+.ls-row {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+  padding: 0.2rem 0.4rem;
+  margin: 0 -0.4rem;
+  color: var(--fg-muted);
+  text-decoration: none;
+  white-space: nowrap;
+  border-radius: 3px;
+}
+
+.ls-row:hover { background: var(--accent-soft); }
+.ls-perm, .ls-owner, .ls-group { color: var(--fg-faint); }
+.ls-size { text-align: right; }
+.ls-date { color: var(--syn-type); }
+.ls-name { color: var(--fg); font-weight: 600; }
+.ls-name.dir { color: var(--accent); }
+.ls-arrow { font-weight: 400; color: var(--fg-muted); }
+.ls-note { min-width: 0; overflow: hidden; text-overflow: ellipsis; color: var(--fg-faint); }
+.ls-row:hover .ls-name { text-decoration: underline; text-underline-offset: 3px; }
+
+@media (max-width: 720px) {
+  .ls-perm, .ls-owner, .ls-group { display: none; }
+  .ls { grid-template-columns: auto auto 1fr; }
+  .ls-dirs { grid-template-columns: auto 1fr; }
+  .ls-dirs .ls-size { display: none; }
+  .ls:not(.ls-dirs) .ls-note { display: none; }
+}
+

@@ -1,7 +1,8 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import Sky from "../components/Sky.astro";
 import { getCollection } from 'astro:content';
-import { experience } from '../data/experience';
+import { experience, type Role } from '../data/experience';
 import { projects } from '../data/projects';
 // ANSI half-block art, generated with scripts/ascii-art.py --ansi (the .ascii.json files keep the earlier ASCII take)
 import art from '../data/hero-art.json';
@@ -29,18 +30,6 @@ const fetch: [string, string][] = [
   ['Memory', 'girl dad 👧🏻 · cat 🐱'],
 ];
 
-// ASCII star field behind the hero; seeded so every build renders the same sky
-let seed = 7;
-const rand = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
-const stars = Array.from({ length: 70 }, () => ({
-  char: ['.', '.', '.', '*', '+', "'"][Math.floor(rand() * 6)],
-  x: (rand() * 100).toFixed(1),
-  y: (rand() * 100).toFixed(1),
-  twinkle: rand() < 0.3,
-  delay: (rand() * 4).toFixed(1),
-  red: rand() < 0.12,
-}));
-
 // lazygit-style commit hashes, derived from the company name so they never change
 const hash = (str: string) => {
   let h = 5381;
@@ -48,27 +37,63 @@ const hash = (str: string) => {
   return h.toString(16).padStart(8, '0').slice(0, 7);
 };
 
-// lazygit graph: one string per row, a rail every 2 chars (main, fullstack, life)
-const [pbs, thinkforward, serfinsa, hightech] = experience;
+// lazygit graph: one string per row, a rail every 2 chars (main, a side branch, life).
+// The side rail is freelance (2019-22) and later fullstack (2023-24); `side` picks its color.
+const role = Object.fromEntries(experience.map((e) => [e.id, e]));
 type Label = [string, 'head' | 'branch' | 'tag'];
-type Commit = { graph: string; labels?: Label[]; msg?: string; date?: string; desc?: string; job?: typeof pbs };
+type Commit = { graph: string; side?: string; labels?: Label[]; msg?: string; date?: string; desc?: string; job?: Role; parents?: [string, string] };
+
+const jobMsg = (j: Role) => `feat: ${j.role} @ ${j.company}${j.client ? ` (${j.client})` : ''}`;
+const FULL = 'r1', FREE = 'r3';
 
 const commits: Commit[] = ([
-  { graph: '⏣─╮ │', labels: [['HEAD -> main', 'head']], msg: "Merge branch 'fullstack' into main", date: 'Apr 2024', desc: 'Wrapped up the ERP work and went back to mobile full time.' },
-  { graph: '◯ │ │', labels: [['v3.0', 'tag']], job: pbs },
-  { graph: '│ │ ◯', labels: [['life', 'branch']], msg: 'feat(life): girl dad 👧🏻', desc: 'Best release so far. Zero patience for loading spinners.' },
-  { graph: '◯ │ │', labels: [['v2.1', 'tag']], job: serfinsa },
-  { graph: '│ ◯ │', labels: [['fullstack', 'branch']], job: thinkforward },
-  { graph: '◯─╯ │', msg: 'chore: wrap up Hightech Consulting', date: 'Aug 2023' },
-  { graph: '│   ◯', msg: 'feat(life): adopt a cat 🐱', desc: 'Chief keyboard inspector. Reviews every PR by walking on it.' },
-  { graph: '◯   │', labels: [['v2.0', 'tag']], job: hightech },
-  { graph: '◯───╯', labels: [['v0.1', 'tag']], msg: 'init: hello, world', date: 'a long time ago', desc: 'First line of code. Probably a missing semicolon.' },
-] as Commit[]).map((c) => c.job
-  ? { ...c, msg: `feat: ${c.job.role} @ ${c.job.company}`, date: c.job.period, desc: c.job.desc }
-  : c);
+  { graph: '⏣─╮ │', side: FULL, labels: [['HEAD -> main', 'head']], msg: "Merge branch 'fullstack' into main", date: 'Apr 2024', desc: 'Wrapped up the ERP work and went back to mobile full time.', parents: ['pbs', 'thinkforward'] },
+  { graph: '◯ │ │', side: FULL, labels: [['v3.0', 'tag']], job: role.pbs },
+  { graph: '│ │ ◯', side: FULL, labels: [['life', 'branch']], msg: 'feat(life): girl dad 👧🏻', desc: 'Best release so far. Zero patience for loading spinners.' },
+  { graph: '◯ │ │', side: FULL, labels: [['v2.1', 'tag']], job: role.serfinsa },
+  { graph: '│ ◯ │', side: FULL, labels: [['fullstack', 'branch']], job: role.thinkforward },
+  { graph: '◯─╯ │', side: FULL, labels: [['v2.0', 'tag']], job: role.hightech },
+  { graph: '⏣─╮ │', side: FREE, msg: "Merge branch 'freelance' into main", date: 'Jun 2022', desc: 'Freelance and Creativa wrap up; mobile becomes the main branch.', parents: ['aes-analyst', 'freelance-ios'] },
+  { graph: '◯ │ │', side: FREE, job: role.aeroman },
+  { graph: '◯ │ │', side: FREE, job: role['aes-analyst'] },
+  { graph: '│ ◯ │', side: FREE, labels: [['freelance', 'branch']], job: role['freelance-ios'] },
+  { graph: '│ │ ◯', side: FREE, msg: 'feat(life): adopt a cat 🐱', desc: 'Chief keyboard inspector. Reviews every PR by walking on it.' },
+  { graph: '◯ │ │', side: FREE, job: role['aes-python'] },
+  { graph: '│ ◯ │', side: FREE, job: role['freelance-android'] },
+  { graph: '◯─╯ │', side: FREE, labels: [['v1.0', 'tag']], job: role.creativa },
+  { graph: '◯   │', job: role.betterride },
+  { graph: '◯───╯', side: 'r2', labels: [['v0.1', 'tag']], msg: 'init: hello, world', date: 'a long time ago', desc: 'First line of code. Probably a missing semicolon.' },
+] as Commit[]).map((c) => (c.job ? { ...c, msg: jobMsg(c.job), date: c.job.period, desc: c.job.desc } : c));
 
 // color each graph char by the rail it belongs to
-const rail = (i: number) => ['r0', 'r1', 'r2'][Math.floor((i + 1) / 2)];
+const rail = (i: number, c: Commit) => (i === 0 ? 'r0' : i <= 2 ? (c.side ?? 'r1') : 'r2');
+
+// Draw each row's graph as SVG instead of box-drawing glyphs: font glyphs leave gaps between
+// rows and around ◯, while SVG cells span the full row height so rails always connect.
+const CW = 6.9, CH = 14, CX = CW / 2, CY = CH / 2, R = 2.4;
+const line = (x1: number, y1: number, x2: number, y2: number) => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/>`;
+const graphSvg = (i: number) => {
+  const c = commits[i];
+  const chars = [...c.graph];
+  const at = (row: number, col: number) => [...(commits[row]?.graph ?? '')][col] ?? ' ';
+  const cells = chars.map((ch, col) => {
+    let d = '';
+    if (ch === '│') d = line(CX, 0, CX, CH);
+    else if (ch === '─') d = line(0, CY, CW, CY);
+    else if (ch === '╮') d = line(0, CY, CX, CY) + line(CX, CY, CX, CH);
+    else if (ch === '╯') d = line(0, CY, CX, CY) + line(CX, 0, CX, CY);
+    else if (ch === '◯' || ch === '⏣') {
+      if ('│◯⏣╮'.includes(at(i - 1, col))) d += line(CX, 0, CX, CY - R);
+      if ('│◯⏣╯'.includes(at(i + 1, col))) d += line(CX, CY + R, CX, CH);
+      if (chars[col + 1] === '─') d += line(CX + R, CY, CW, CY);
+      d += ch === '◯'
+        ? `<circle cx="${CX}" cy="${CY}" r="${R}"/>`
+        : `<polygon points="${[0, 60, 120, 180, 240, 300].map((a) => `${(CX + R * Math.cos((a * Math.PI) / 180)).toFixed(2)},${(CY + R * Math.sin((a * Math.PI) / 180)).toFixed(2)}`).join(' ')}"/>`;
+    }
+    return d && `<g class="${rail(col, c)}" transform="translate(${col * CW} 0)">${d}</g>`;
+  });
+  return `<svg viewBox="0 0 ${chars.length * CW} ${CH}" style="width:${chars.length * 0.69}em">${cells.join('')}</svg>`;
+};
 
 // 'Mar 2024 — Present' -> '2024-03 → now'
 const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -92,12 +117,8 @@ const selected = commits.findIndex((c) => c.job?.current);
   description="Edgar Mejía, mobile developer from El Salvador building iOS, Android and Flutter apps."
   lang="en"
 >
-  <section class="hero">
-    <div class="sky mono" aria-hidden="true">
-      {stars.map((st) => (
-        <span class:list={{ twinkle: st.twinkle, red: st.red }} style={`left:${st.x}%;top:${st.y}%;--delay:${st.delay}s`}>{st.char}</span>
-      ))}
-    </div>
+  <section id="hero" class="hero">
+    <Sky />
     <div class="page-container">
       <h1 class="sr-only">Edgar Mejía — mobile developer in San Salvador</h1>
       <div class="term reveal">
@@ -119,14 +140,22 @@ const selected = commits.findIndex((c) => c.job?.current);
             <a href="https://github.com/cybergaala" target="_blank" rel="noopener">github ↗</a>
             <a href="https://www.linkedin.com/in/mejia-edgar/" target="_blank" rel="noopener">linkedin ↗</a>
           </p>
-          <p class="term-cmd"><span class="path">~</span> $ <span class="caret" aria-hidden="true"></span></p>
         </div>
       </div>
     </div>
   </section>
 
-  {projects.length > 0 && (
-    <section id="projects" class="section">
+  <nav class="history mono" aria-label="Sections">
+    <ol>
+      <li><a href="#hero" data-sec="hero"><span class="hp">~ $</span> fastfetch</a></li>
+      <li><a href="#projects" data-sec="projects"><span class="hp">~ $</span> ls -l ~/projects</a></li>
+      <li><a href="#writing" data-sec="writing"><span class="hp">~ $</span> ls -lt ~/blog</a></li>
+      <li><a href="#experience" data-sec="experience"><span class="hp">~ $</span> lazygit</a></li>
+      <li><a href="#contact" data-sec="contact"><span class="hp">~ $</span> mail edgar</a></li>
+    </ol>
+  </nav>
+
+  <section id="projects" class="section">
       <div class="page-container">
         <header class="sec-head reveal">
           <p class="cmd">$ ls -l ~/projects</p>
@@ -134,6 +163,7 @@ const selected = commits.findIndex((c) => c.job?.current);
         </header>
         <div class="ls ls-dirs mono reveal">
           <p class="ls-total">total {projects.length}</p>
+          {projects.length === 0 && <p class="ls-wip"><span class="ls-wip-tag">[WIP]</span> # still polishing these, check back soon</p>}
           {projects.map((p) => {
             const link = p.href ?? p.code;
             return (
@@ -150,60 +180,6 @@ const selected = commits.findIndex((c) => c.job?.current);
         </div>
       </div>
     </section>
-  )}
-
-  <section id="experience" class="section">
-    <div class="page-container">
-      <header class="sec-head reveal">
-        <p class="cmd">$ lazygit</p>
-        <h2 class="sec-title">Experience</h2>
-      </header>
-      <div class="lg mono reveal" data-lazygit>
-        <div class="lg-panel lg-commits">
-          <span class="lg-title">[4] Commits</span>
-          <ul class="lg-list" role="listbox" aria-label="Experience" tabindex="0">
-            {commits.map((c, i) => (
-              <li role="option" aria-selected={i === selected ? 'true' : 'false'} class:list={{ job: c.job }} data-i={i}>
-                <span class="lg-hash">{hash(c.msg!)}</span>
-                <span class="lg-graph" aria-hidden="true">{[...c.graph].map((ch, j) => <span class={rail(j)}>{ch}</span>)}</span>
-                <span class="lg-msg">
-                  {c.labels?.map(([t, k]) => <span class={`lg-label ${k}`}>{t}</span>)}
-                  {c.job
-                    ? <><span class="lg-co">{c.job.company}</span> <span class="lg-role">{c.job.role}</span></>
-                    : <span class="lg-note">{c.msg}</span>}
-                </span>
-                {c.job && <span class="lg-date">{shortPeriod(c.job.period)}</span>}
-              </li>
-            ))}
-          </ul>
-          <span class="lg-count"><span data-pos>{selected + 1}</span> of {commits.length}</span>
-        </div>
-
-        <div class="lg-panel lg-patch">
-          <span class="lg-title">Patch</span>
-          {commits.map((c, i) => (
-            <div class="lg-detail" data-detail={i} hidden={i !== selected}>
-              <p><span class="lg-hash">commit {hash(c.msg!)}</span>{c.labels && <span> ({c.labels.map(([t]) => t).join(', ')})</span>}</p>
-              {c.graph.startsWith('⏣') && <p>{'Merge:  '}{hash(pbs.company)} {hash(thinkforward.company)}</p>}
-              <p>Author: Edgar Mejía &lt;contact@edgarmejia.com&gt;</p>
-              {c.date && <p>{'Date:   '}{c.date}</p>}
-              <p class="lg-body">{c.msg}</p>
-              {c.desc && <p class="lg-body lg-desc">{c.desc}</p>}
-              {c.job && (
-                <>
-                  <p class="lg-file">--- a/stack.txt<br />+++ b/stack.txt</p>
-                  {c.job.tags.map((t) => <p class="lg-add">+ {t}</p>)}
-                </>
-              )}
-            </div>
-          ))}
-        </div>
-
-        <p class="lg-keys">navigate: <span>↑/↓</span> <span>j/k</span> · select: <span>click</span></p>
-      </div>
-      <a href="/experience" class="more mono">full log →</a>
-    </div>
-  </section>
 
   {posts.length > 0 && (
     <section id="writing" class="section">
@@ -230,43 +206,83 @@ const selected = commits.findIndex((c) => c.job?.current);
     </section>
   )}
 
-  <section id="contact" class="section">
-    <div class="page-container contact-grid">
-      <div class="reveal">
-        <p class="cmd">$ mail edgar</p>
-        <h2 class="contact-heading">Got a project?<br />Let's talk.</h2>
-        <p class="lead">Freelance, a full-time role, or just cats. I usually reply within a day.</p>
-        <button type="button" class="copy-email mono" data-email={email}><span class="copy-label">{email}</span> <span class="copy-hint">[copy]</span></button>
-      </div>
-      <div class="reveal" style="--d:100ms">
-        <form class="window contact-form" id="contact-form" name="contact" method="POST" data-netlify="true">
-          <div class="tabs mono"><span>new-message.txt</span></div>
-          <div class="form-body">
-            <input type="hidden" name="form-name" value="contact" />
-            <div class="form-row">
-              <label class="field"><span class="mono">name:</span><input type="text" name="name" placeholder="Your name" required /></label>
-              <label class="field"><span class="mono">email:</span><input type="email" name="email" placeholder="your@email.com" required /></label>
-            </div>
-            <label class="field"><span class="mono">message:</span><textarea name="message" rows="5" placeholder="Tell me about your project..." required></textarea></label>
-            <button type="submit" class="btn mono">send ⏎</button>
-          </div>
-        </form>
-        <div id="contact-success" style="display:none;" class="window contact-success mono">
-          <p><span class="ok">✓</span> sent. I'll get back to you soon.</p>
+  <section id="experience" class="section">
+    <div class="page-container">
+      <header class="sec-head reveal">
+        <p class="cmd">$ lazygit</p>
+        <h2 class="sec-title">Experience</h2>
+      </header>
+      <div class="lg mono reveal" data-lazygit>
+        <div class="lg-panel lg-commits">
+          <span class="lg-title">[4] Commits</span>
+          <ul class="lg-list" role="listbox" aria-label="Experience" tabindex="0">
+            {commits.map((c, i) => (
+              <li role="option" aria-selected={i === selected ? 'true' : 'false'} class:list={{ job: c.job }} data-i={i}>
+                <span class="lg-hash">{hash(c.msg!)}</span>
+                <span class="lg-graph" aria-hidden="true" set:html={graphSvg(i)} />
+                <span class="lg-msg">
+                  {c.labels?.map(([t, k]) => <span class={`lg-label ${k}`}>{t}</span>)}
+                  {c.job
+                    ? <><span class="lg-co">{c.job.client ?? c.job.company}</span> <span class="lg-role">{c.job.role}</span></>
+                    : <span class="lg-note">{c.msg}</span>}
+                </span>
+                {c.job && <span class="lg-date">{shortPeriod(c.job.period)}</span>}
+              </li>
+            ))}
+          </ul>
+          <span class="lg-count"><span data-pos>{selected + 1}</span> of {commits.length}</span>
         </div>
+
+        <div class="lg-panel lg-patch">
+          <span class="lg-title">Patch</span>
+          {commits.map((c, i) => (
+            <div class="lg-detail" data-detail={i} hidden={i !== selected}>
+              <p><span class="lg-hash">commit {hash(c.msg!)}</span>{c.labels && <span> ({c.labels.map(([t]) => t).join(', ')})</span>}</p>
+              {c.parents && <p>{'Merge:  '}{c.parents.map((id) => hash(jobMsg(role[id]))).join(' ')}</p>}
+              <p>Author: Edgar Mejía &lt;contact@edgarmejia.com&gt;</p>
+              {c.date && <p>{'Date:   '}{c.date}</p>}
+              <p class="lg-body">{c.msg}</p>
+              {c.job && <p class="lg-body lg-desc">{c.job.meta}</p>}
+              {c.desc && <p class="lg-body lg-desc">{c.desc}</p>}
+              {c.job && c.job.tags.length > 0 && (
+                <>
+                  <p class="lg-file">--- a/stack.txt<br />+++ b/stack.txt</p>
+                  {c.job.tags.map((t) => <p class="lg-add">+ {t}</p>)}
+                </>
+              )}
+            </div>
+          ))}
+        </div>
+
+        <p class="lg-keys">navigate: <span>↑/↓</span> <span>j/k</span> · select: <span>click</span></p>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact" class="section">
+    <div class="page-container">
+      <header class="sec-head reveal">
+        <p class="cmd">$ mail edgar</p>
+        <h2 class="sec-title">Contact</h2>
+      </header>
+      <div class="mail mono reveal">
+        <p class="mail-note"># freelance, a full-time role, or just cats. I usually reply within a day.</p>
+        <p class="mail-to"><span class="ff-key">To</span>: edgar &lt;<button type="button" class="copy-email" data-email={email}><span class="copy-label">{email}</span></button>&gt; <span class="copy-hint">[copy]</span></p>
+        <form id="contact-form" name="contact" method="POST" data-netlify="true">
+          <input type="hidden" name="form-name" value="contact" />
+          <div class="mail-row">
+            <label class="lg-panel mail-field"><span class="lg-title">[1] From</span><input type="text" name="name" placeholder="your name" required /></label>
+            <label class="lg-panel mail-field"><span class="lg-title">[2] Reply-To</span><input type="email" name="email" placeholder="you@example.com" required /></label>
+          </div>
+          <label class="lg-panel mail-field"><span class="lg-title">[3] Body</span><textarea name="message" rows="6" placeholder="tell me about your project..." required></textarea></label>
+          <p class="lg-keys mail-keys"><button type="submit" class="mail-send">send <span>⏎</span></button> · next field: <span>tab</span></p>
+        </form>
+        <p id="contact-success" class="mail-ok" hidden><span class="ok">✓</span> message queued for delivery. I'll get back to you soon.</p>
       </div>
     </div>
   </section>
 
   <style>
-    .mono { font-family: var(--font-mono); }
-
-    .cmd {
-      margin: 0 0 1rem;
-      font: 0.8rem/1.4 var(--font-mono);
-      color: var(--fg-faint);
-    }
-
     .path { color: var(--accent); }
     .branch { color: var(--syn-kw); }
 
@@ -274,58 +290,10 @@ const selected = commits.findIndex((c) => c.job?.current);
     .hero { position: relative; overflow: hidden; padding: 5.5rem 0 5rem; }
     .hero > .page-container { position: relative; }
 
-    .sky { position: absolute; inset: 0; pointer-events: none; font-size: 0.85rem; color: var(--fg-faint); }
-    .sky span { position: absolute; line-height: 1; opacity: 0.55; }
-    .sky .red { color: var(--accent); opacity: 0.8; }
-
-    @media (prefers-reduced-motion: no-preference) {
-      .sky .twinkle { animation: twinkle 3.5s ease-in-out var(--delay) infinite; }
-    }
-
-    @keyframes twinkle { 50% { opacity: 0.1; } }
 
     .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 
-    .lead {
-      max-width: 30rem;
-      margin: 1.25rem 0 0;
-      font-size: 1.05rem;
-      line-height: 1.65;
-      color: var(--fg-muted);
-    }
-
     .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #3ecf6e; box-shadow: 0 0 0 3px rgba(62, 207, 110, 0.2); vertical-align: middle; }
-
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      padding: 0.6rem 1rem;
-      font-size: 0.82rem;
-      font-weight: 500;
-      text-decoration: none;
-      color: var(--body-bg);
-      background: var(--accent);
-      border: 1px solid var(--accent);
-      border-radius: 6px;
-      cursor: pointer;
-      transition: opacity 0.2s, border-color 0.2s, color 0.2s;
-    }
-
-    .btn:hover { opacity: 0.85; }
-    .btn-ghost { color: var(--fg-muted); background: transparent; border-color: var(--border); }
-    .btn-ghost:hover { opacity: 1; color: var(--fg); border-color: var(--fg-faint); }
-
-    /* Editor window */
-    .window {
-      overflow: hidden;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-    }
-
-    .tabs { display: flex; border-bottom: 1px solid var(--border); font-size: 0.75rem; }
-
-    .tabs span { padding: 0.6rem 1rem; color: var(--fg-muted); border-right: 1px solid var(--border); }
 
     /* fastfetch */
     /* no window chrome: the output sits on the page, right under the header prompt */
@@ -357,14 +325,6 @@ const selected = commits.findIndex((c) => c.job?.current);
 
     .term-body > .term-cmd:not(:first-child) { margin-top: 1rem !important; }
 
-    .caret { display: inline-block; width: 0.55em; height: 1.1em; vertical-align: text-bottom; background: var(--accent); }
-
-    @media (prefers-reduced-motion: no-preference) {
-      .caret { animation: blink 1.1s steps(1) infinite; }
-    }
-
-    @keyframes blink { 50% { opacity: 0; } }
-
     @media (max-width: 960px) {
       .ff { grid-template-columns: 1fr; gap: 1.25rem; }
     }
@@ -373,65 +333,59 @@ const selected = commits.findIndex((c) => c.job?.current);
       .hero { padding-top: 6rem; }
     }
 
+    /* Command history: section links as a timeline of executed commands (wide screens only) */
+    .history { display: none; }
+
+    @media (min-width: 1360px) {
+      .history {
+        display: block;
+        position: fixed;
+        top: 50%;
+        left: 2rem;
+        z-index: 5;
+        transform: translateY(-50%);
+        font-size: 0.75rem;
+        transition: opacity 0.3s;
+      }
+    }
+
+    /* faded when no command is running (e.g. between sections) */
+    .history:not(:has(.active)) { opacity: 0.45; }
+
+    .history ol { list-style: none; margin: 0; padding: 0; border-left: 1px solid var(--border); }
+    .history li { position: relative; padding: 0.55rem 0 0.55rem 1.1rem; }
+
+    .history li::before {
+      content: "";
+      position: absolute;
+      left: -4.5px;
+      top: 50%;
+      width: 8px;
+      height: 8px;
+      margin-top: -4px;
+      border-radius: 50%;
+      background: var(--body-bg);
+      border: 1px solid var(--fg-faint);
+    }
+
+    .history a { color: var(--fg-faint); text-decoration: none; white-space: nowrap; transition: color 0.2s; }
+    .history a:hover { color: var(--fg); }
+    .hp { color: inherit; }
+
+    /* already ran: every command before the running one */
+    .history li:has(~ li .active) a { color: var(--fg-muted); }
+    .history li:has(~ li .active)::before { background: var(--fg-faint); }
+
+    /* running now */
+    .history a.active { color: var(--fg); }
+    .history a.active .hp { color: var(--accent); }
+    .history li:has(.active)::before { background: var(--accent); border-color: var(--accent); }
+
     /* Sections */
     .section { padding: 5rem 0; border-top: 1px solid var(--border); }
 
-    .sec-head { margin-bottom: 2rem; }
-    .sec-head .cmd { margin-bottom: 0.4rem; }
-
-    .sec-title {
-      margin: 0;
-      font-family: var(--font-display);
-      font-weight: 600;
-      font-size: clamp(1.6rem, 3vw, 2rem);
-      letter-spacing: -0.03em;
-      color: var(--fg);
-    }
-
-    .more { display: inline-block; margin-top: 1.75rem; font-size: 0.8rem; color: var(--accent); text-decoration: none; }
-    .more:hover { text-decoration: underline; text-underline-offset: 4px; }
-
-    /* ls -l (projects + posts): rows share one grid so columns line up like a terminal */
-    .ls {
-      display: grid;
-      grid-template-columns: repeat(6, auto) 1fr;
-      column-gap: 1.5ch;
-      font-size: 0.82rem;
-      line-height: 1.6;
-    }
-
-    .ls-dirs { grid-template-columns: repeat(5, auto) 1fr; }
-    .ls-total { grid-column: 1 / -1; margin: 0 0 0.25rem; color: var(--fg-faint); }
-
-    .ls-row {
-      display: grid;
-      grid-column: 1 / -1;
-      grid-template-columns: subgrid;
-      padding: 0.2rem 0.4rem;
-      margin: 0 -0.4rem;
-      color: var(--fg-muted);
-      text-decoration: none;
-      white-space: nowrap;
-      border-radius: 3px;
-    }
-
-    .ls-row:hover { background: var(--accent-soft); }
-    .ls-perm, .ls-owner, .ls-group { color: var(--fg-faint); }
-    .ls-size { text-align: right; }
-    .ls-date { color: var(--syn-type); }
-    .ls-name { color: var(--fg); font-weight: 600; }
-    .ls-name.dir { color: var(--accent); }
-    .ls-arrow { font-weight: 400; color: var(--fg-muted); }
-    .ls-note { min-width: 0; overflow: hidden; text-overflow: ellipsis; color: var(--fg-faint); }
-    .ls-row:hover .ls-name { text-decoration: underline; text-underline-offset: 3px; }
-
-    @media (max-width: 720px) {
-      .ls-perm, .ls-owner, .ls-group { display: none; }
-      .ls { grid-template-columns: auto auto 1fr; }
-      .ls-dirs { grid-template-columns: auto 1fr; }
-      .ls-dirs .ls-size { display: none; }
-      .ls:not(.ls-dirs) .ls-note { display: none; }
-    }
+    .ls-wip { grid-column: 1 / -1; margin: 0; color: var(--fg-faint); }
+    .ls-wip-tag { color: var(--syn-num); font-weight: 600; }
 
     /* lazygit */
     .lg { display: grid; grid-template-columns: 1.75fr 1fr; gap: 0.6rem; font-size: 0.8rem; line-height: 1.65; }
@@ -478,10 +432,13 @@ const selected = commits.findIndex((c) => c.job?.current);
     .lg-list li[aria-selected="true"] { background: color-mix(in srgb, var(--syn-type) 22%, transparent); }
 
     .lg-hash { color: var(--syn-num); }
-    .lg-graph { white-space: pre; font-size: 1.15em; line-height: 1.22; }
-    .r0 { color: var(--accent); }
-    .r1 { color: var(--syn-type); }
-    .r2 { color: #3ecf6e; }
+    .lg-graph { align-self: stretch; display: flex; }
+    .lg-graph :global(svg) { height: 100%; overflow: visible; fill: none; stroke-width: 1.1; stroke-linecap: square; }
+    .lg-graph :global(g) { stroke: currentColor; }
+    .lg-graph :global(.r0) { color: var(--accent); }
+    .lg-graph :global(.r1) { color: var(--syn-type); }
+    .lg-graph :global(.r2) { color: #3ecf6e; }
+    .lg-graph :global(.r3) { color: var(--syn-kw); }
 
     .lg-label { margin-right: 0.5em; font-weight: 600; }
     .lg-label.head { color: var(--syn-type); }
@@ -511,67 +468,49 @@ const selected = commits.findIndex((c) => c.job?.current);
       .lg-keys { margin-top: 0 !important; }
     }
 
-    /* Contact */
-    #contact { padding-bottom: 7rem; }
-    .contact-grid { display: grid; grid-template-columns: 1fr 1.1fr; gap: 4rem; align-items: start; }
+    /* Contact: a mail(1) prompt drawn with the same lazygit panels as Experience */
+    .mail { font-size: 0.8rem; line-height: 1.65; }
+    .mail p { margin: 0; }
+    .mail-note { color: var(--fg-faint); }
+    .mail-to { margin: 0.4rem 0 1.6rem !important; color: var(--fg-muted); }
 
-    .contact-heading {
-      margin: 0;
-      font-family: var(--font-display);
-      font-weight: 600;
-      font-size: clamp(2.2rem, 4.5vw, 3.2rem);
-      letter-spacing: -0.04em;
-      line-height: 1.05;
-      color: var(--fg);
-    }
+    .copy-email { padding: 0; font: inherit; color: var(--accent); background: none; border: none; cursor: pointer; }
+    .copy-email:hover { text-decoration: underline; text-underline-offset: 3px; }
+    .copy-hint { color: var(--fg-faint); }
+    .mail-to:has(.copy-email:hover) .copy-hint { color: var(--accent); }
 
-    .copy-email {
-      margin-top: 1.75rem;
+    #contact-form { display: flex; flex-direction: column; gap: 1.4rem; }
+    .mail-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem 0.6rem; }
+    .mail-field { display: block; padding: 0.8rem 0.9rem 0.7rem; cursor: text; }
+    .mail-field:focus-within { border-color: var(--syn-type); }
+    .mail-field:focus-within .lg-title { color: var(--syn-type); }
+
+    .mail-field input,
+    .mail-field textarea {
+      display: block;
+      width: 100%;
       padding: 0;
-      font-size: 0.95rem;
-      color: var(--accent);
+      font: inherit;
+      color: var(--fg);
       background: none;
       border: none;
-      cursor: pointer;
-    }
-
-    .copy-hint { color: var(--fg-faint); }
-    .copy-email:hover .copy-hint { color: var(--accent); }
-
-    .form-body { display: flex; flex-direction: column; gap: 1.1rem; padding: 1.25rem; }
-    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-    .field { display: flex; flex-direction: column; gap: 0.35rem; }
-    .field > span { font-size: 0.75rem; color: var(--syn-kw); }
-    .contact-form .btn { align-self: flex-start; }
-
-    .field input,
-    .field textarea {
-      padding: 0.6rem 0.75rem;
-      font: 0.9rem "Geist Variable", sans-serif;
-      color: var(--fg);
-      background: var(--body-bg);
-      border: 1px solid var(--border);
-      border-radius: 6px;
       outline: none;
       resize: vertical;
-      transition: border-color 0.2s;
+      caret-color: var(--accent);
     }
 
-    .field input::placeholder,
-    .field textarea::placeholder { color: var(--fg-faint); }
-    .field input:focus,
-    .field textarea:focus { border-color: var(--accent); }
+    .mail-field input::placeholder,
+    .mail-field textarea::placeholder { color: var(--fg-faint); }
 
-    .contact-success { padding: 1.25rem; font-size: 0.88rem; color: var(--fg); }
-    .contact-success p { margin: 0; }
+    .mail-keys { margin-top: -0.4rem !important; }
+    .mail-send { padding: 0.1rem 0.4rem; margin-left: -0.4rem; font: inherit; color: var(--fg); background: none; border: none; border-radius: 3px; cursor: pointer; }
+    .mail-send:hover, .mail-send:focus-visible { background: var(--accent-soft); outline: none; }
+
+    .mail-ok { color: var(--fg); }
     .ok { color: #3ecf6e; }
 
-    @media (max-width: 860px) {
-      .contact-grid { grid-template-columns: 1fr; gap: 2.5rem; }
-    }
-
     @media (max-width: 560px) {
-      .form-row { grid-template-columns: 1fr; }
+      .mail-row { grid-template-columns: 1fr; gap: 1.4rem; }
     }
   </style>
 </Layout>
@@ -642,8 +581,8 @@ const selected = commits.findIndex((c) => c.job?.current);
       e.preventDefault();
       const data = new URLSearchParams(new FormData(form) as unknown as Record<string, string>);
       await fetch('/', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: data.toString() });
-      form.style.display = 'none';
-      success.style.display = 'block';
+      form.hidden = true;
+      success.hidden = false;
     });
   }
 
