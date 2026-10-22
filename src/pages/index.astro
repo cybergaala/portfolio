@@ -1,585 +1,547 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import Sky from "../components/Sky.astro";
 import { getCollection } from 'astro:content';
-import { experience } from '../data/experience';
+import { experience, type Role } from '../data/experience';
 import { projects } from '../data/projects';
+// ANSI half-block art, generated with scripts/ascii-art.py --ansi (the .ascii.json files keep the earlier ASCII take)
+import art from '../data/hero-art.json';
+// color blocks taken from the art itself (scripts/ascii-art.py --palette)
+import palette from '../data/hero-palette.json';
+
+// art only holds ASCII and hex colors from our own script, so it is safe as raw HTML
+const toHtml = (rows: typeof art) =>
+  rows.map((row) => row.map(([fg, bg, t]) => (fg ? `<span style="color:${fg}${bg ? `;background:${bg}` : ''}">${t}</span>` : t)).join('')).join('\n');
 
 const posts = (await getCollection('blog', ({ id, data }) => id.startsWith('en/') && !data.draft))
   .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
-  .slice(0, 4);
+  .slice(0, 3);
 
 const email = 'contact@edgarmejia.com';
+
+// fastfetch-style hero; keys follow fastfetch's module names
+const fetch: [string, string][] = [
+  ['User', 'Edgar Mejía'],
+  ['Host', 'PBS El Salvador'],
+  ['Kernel', 'Mobile Developer'],
+  ['Uptime', '6+ years shipping'],
+  ['Packages', 'Swift, Kotlin, Flutter'],
+  ['CPU', 'Coca-Cola 🥤 (no coffee)'],
+  ['Memory', 'girl dad 👧🏻 · cat 🐱'],
+];
+
+// lazygit-style commit hashes, derived from the company name so they never change
+const hash = (str: string) => {
+  let h = 5381;
+  for (const c of str) h = ((h * 33) ^ c.charCodeAt(0)) >>> 0;
+  return h.toString(16).padStart(8, '0').slice(0, 7);
+};
+
+// lazygit graph: one string per row, a rail every 2 chars (main, a side branch, life).
+// The side rail is freelance (2019-22) and later fullstack (2023-24); `side` picks its color.
+const role = Object.fromEntries(experience.map((e) => [e.id, e]));
+type Label = [string, 'head' | 'branch' | 'tag'];
+type Commit = { graph: string; side?: string; labels?: Label[]; msg?: string; date?: string; desc?: string; job?: Role; parents?: [string, string] };
+
+const jobMsg = (j: Role) => `feat: ${j.role} @ ${j.company}${j.client ? ` (${j.client})` : ''}`;
+const FULL = 'r1', FREE = 'r3';
+
+const commits: Commit[] = ([
+  { graph: '⏣─╮ │', side: FULL, labels: [['HEAD -> main', 'head']], msg: "Merge branch 'fullstack' into main", date: 'Apr 2024', desc: 'Wrapped up the ERP work and went back to mobile full time.', parents: ['pbs', 'thinkforward'] },
+  { graph: '◯ │ │', side: FULL, labels: [['v3.0', 'tag']], job: role.pbs },
+  { graph: '│ │ ◯', side: FULL, labels: [['life', 'branch']], msg: 'feat(life): girl dad 👧🏻', desc: 'Best release so far. Zero patience for loading spinners.' },
+  { graph: '◯ │ │', side: FULL, labels: [['v2.1', 'tag']], job: role.serfinsa },
+  { graph: '│ ◯ │', side: FULL, labels: [['fullstack', 'branch']], job: role.thinkforward },
+  { graph: '◯─╯ │', side: FULL, labels: [['v2.0', 'tag']], job: role.hightech },
+  { graph: '⏣─╮ │', side: FREE, msg: "Merge branch 'freelance' into main", date: 'Jun 2022', desc: 'Freelance and Creativa wrap up; mobile becomes the main branch.', parents: ['aes-analyst', 'freelance-ios'] },
+  { graph: '◯ │ │', side: FREE, job: role.aeroman },
+  { graph: '◯ │ │', side: FREE, job: role['aes-analyst'] },
+  { graph: '│ ◯ │', side: FREE, labels: [['freelance', 'branch']], job: role['freelance-ios'] },
+  { graph: '│ │ ◯', side: FREE, msg: 'feat(life): adopt a cat 🐱', desc: 'Chief keyboard inspector. Reviews every PR by walking on it.' },
+  { graph: '◯ │ │', side: FREE, job: role['aes-python'] },
+  { graph: '│ ◯ │', side: FREE, job: role['freelance-android'] },
+  { graph: '◯─╯ │', side: FREE, labels: [['v1.0', 'tag']], job: role.creativa },
+  { graph: '◯   │', job: role.betterride },
+  { graph: '◯───╯', side: 'r2', labels: [['v0.1', 'tag']], msg: 'init: hello, world', date: 'a long time ago', desc: 'First line of code. Probably a missing semicolon.' },
+] as Commit[]).map((c) => (c.job ? { ...c, msg: jobMsg(c.job), date: c.job.period, desc: c.job.desc } : c));
+
+// color each graph char by the rail it belongs to
+const rail = (i: number, c: Commit) => (i === 0 ? 'r0' : i <= 2 ? (c.side ?? 'r1') : 'r2');
+
+// Draw each row's graph as SVG instead of box-drawing glyphs: font glyphs leave gaps between
+// rows and around ◯, while SVG cells span the full row height so rails always connect.
+const CW = 6.9, CH = 14, CX = CW / 2, CY = CH / 2, R = 2.4;
+const line = (x1: number, y1: number, x2: number, y2: number) => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/>`;
+const graphSvg = (i: number) => {
+  const c = commits[i];
+  const chars = [...c.graph];
+  const at = (row: number, col: number) => [...(commits[row]?.graph ?? '')][col] ?? ' ';
+  const cells = chars.map((ch, col) => {
+    let d = '';
+    if (ch === '│') d = line(CX, 0, CX, CH);
+    else if (ch === '─') d = line(0, CY, CW, CY);
+    else if (ch === '╮') d = line(0, CY, CX, CY) + line(CX, CY, CX, CH);
+    else if (ch === '╯') d = line(0, CY, CX, CY) + line(CX, 0, CX, CY);
+    else if (ch === '◯' || ch === '⏣') {
+      if ('│◯⏣╮'.includes(at(i - 1, col))) d += line(CX, 0, CX, CY - R);
+      if ('│◯⏣╯'.includes(at(i + 1, col))) d += line(CX, CY + R, CX, CH);
+      if (chars[col + 1] === '─') d += line(CX + R, CY, CW, CY);
+      d += ch === '◯'
+        ? `<circle cx="${CX}" cy="${CY}" r="${R}"/>`
+        : `<polygon points="${[0, 60, 120, 180, 240, 300].map((a) => `${(CX + R * Math.cos((a * Math.PI) / 180)).toFixed(2)},${(CY + R * Math.sin((a * Math.PI) / 180)).toFixed(2)}`).join(' ')}"/>`;
+    }
+    return d && `<g class="${rail(col, c)}" transform="translate(${col * CW} 0)">${d}</g>`;
+  });
+  return `<svg viewBox="0 0 ${chars.length * CW} ${CH}" style="width:${chars.length * 0.69}em">${cells.join('')}</svg>`;
+};
+
+// 'Mar 2024 — Present' -> '2024-03 → now'
+const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const shortDate = (d: string) => {
+  const [m, y] = d.trim().split(' ');
+  return m === 'Present' ? 'now' : `${y}-${String(months.indexOf(m) + 1).padStart(2, '0')}`;
+};
+const shortPeriod = (p: string) => p.split('—').map(shortDate).join(' → ');
+
+// `ls -l` columns for projects and posts
+const lsDate = (d: Date) => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' }).replace(',', '');
+const lsSize = (bytes: number) => `${(bytes / 1024).toFixed(1)}K`;
+const linkTarget = (url: string) => url.replace(/^https?:\/\//, '');
+
+// open on the current job instead of the merge commit
+const selected = commits.findIndex((c) => c.job?.current);
 ---
 
 <Layout
-  title="Edgar Mejía - Portfolio"
-  description="Personal portfolio of Edgar Mejía, software developer from El Salvador."
+  title="Edgar Mejía — Mobile Developer"
+  description="Edgar Mejía, mobile developer from El Salvador building iOS, Android and Flutter apps."
   lang="en"
 >
-  <section class="hero">
-    <div class="page-container hero-grid">
-      <div class="hero-copy">
-        <h1 class="about-h1 reveal">
-          <span>Hi there 👋!</span>
-          <span>I'm Edgar Mejía,</span>
-          <span class="about-sub"><span class="gitch-text"></span></span>
-          <span class="about-last">from El Salvador 🇸🇻</span>
-        </h1>
-        <p class="lead reveal" style="--d:120ms">
-          I build mobile apps — iOS, Android and Flutter — and I've been doing it for six-plus years.
-          Off the clock I'm a dad, a cat person and an Overwatch player who drinks Coke, never coffee.
-        </p>
-        <p class="hero-links reveal" style="--d:200ms">
-          <a href="#projects" class="btn">See what I've made</a>
-          <a href="/about" class="ulink">More about me →</a>
-        </p>
+  <section id="hero" class="hero">
+    <Sky />
+    <div class="page-container">
+      <h1 class="sr-only">Edgar Mejía — mobile developer in San Salvador</h1>
+      <div class="term reveal">
+        <div class="term-body mono">
+          <p class="term-cmd"><span class="path">~</span> $ fastfetch</p>
+          <div class="ff">
+            <pre class="ff-art" aria-hidden="true" set:html={toHtml(art)} />
+            <div class="ff-info">
+              <p class="ff-title"><span class="ff-key">edgar</span>@<span class="ff-key">san-salvador</span></p>
+              <p class="ff-rule" aria-hidden="true">------------------</p>
+              {fetch.map(([k, v]) => <p><span class="ff-key">{k}</span>: {v}</p>)}
+              <p><span class="ff-key">Status</span>: <span class="dot" aria-hidden="true"></span> open to new projects</p>
+              <p class="ff-colors" aria-hidden="true">{palette.map((c) => <span style={`background:${c}`}></span>)}</p>
+            </div>
+          </div>
+          <p class="term-cmd"><span class="path">~</span> $ ls ~/links</p>
+          <p class="ff-links">
+            <a href="#contact">say-hi.sh</a>
+            <a href="https://github.com/cybergaala" target="_blank" rel="noopener">github ↗</a>
+            <a href="https://www.linkedin.com/in/mejia-edgar/" target="_blank" rel="noopener">linkedin ↗</a>
+          </p>
+        </div>
       </div>
-
-      <figure class="polaroid reveal" style="--d:160ms">
-        <img src="/img/main.webp" alt="Edgar at his desk with an Overwatch match on the second monitor" width="1200" height="1256" />
-        <figcaption>me, "working". (that's Overwatch on the right)</figcaption>
-        <span class="note n1">girl dad 👧🏻</span>
-        <span class="note n2">cat person 🐱</span>
-        <span class="note n3">Coke &gt; coffee 🥤</span>
-      </figure>
     </div>
   </section>
 
-  {projects.length > 0 && (
-    <section id="projects" class="section">
+  <nav class="history mono" aria-label="Sections">
+    <ol>
+      <li><a href="#hero" data-sec="hero"><span class="hp">~ $</span> fastfetch</a></li>
+      <li><a href="#projects" data-sec="projects"><span class="hp">~ $</span> ls -l ~/projects</a></li>
+      <li><a href="#writing" data-sec="writing"><span class="hp">~ $</span> ls -lt ~/blog</a></li>
+      <li><a href="#experience" data-sec="experience"><span class="hp">~ $</span> lazygit</a></li>
+      <li><a href="#contact" data-sec="contact"><span class="hp">~ $</span> mail edgar</a></li>
+    </ol>
+  </nav>
+
+  <section id="projects" class="section">
       <div class="page-container">
-        <h2 class="sec-title reveal">Things I've <em>made</em></h2>
-        <ul class="shelf">
-          {projects.map((p, i) => (
-            <li class="reveal" style={`--d:${i * 80}ms`}>
-              <a href={p.href ?? p.code ?? '#'} class="shelf-row" {...(p.href || p.code ? { target: '_blank', rel: 'noopener' } : {})}>
-                <span class="shelf-name">{p.title}</span>
-                <span class="shelf-desc">{p.desc}</span>
-                <span class="shelf-stack">{p.tags.join(' · ')}</span>
-                <span class="shelf-arrow">↗</span>
+        <header class="sec-head reveal">
+          <p class="cmd">$ ls -l ~/projects</p>
+          <h2 class="sec-title">Projects</h2>
+        </header>
+        <div class="ls ls-dirs mono reveal">
+          <p class="ls-total">total {projects.length}</p>
+          {projects.length === 0 && <p class="ls-wip"><span class="ls-wip-tag">[WIP]</span> # still polishing these, check back soon</p>}
+          {projects.map((p) => {
+            const link = p.href ?? p.code;
+            return (
+              <a href={link ?? '#'} class="ls-row" {...(link ? { target: '_blank', rel: 'noopener' } : {})}>
+                <span class="ls-perm">{link ? 'lrwxr-xr-x' : 'drwxr-xr-x'}</span>
+                <span class="ls-owner">edgar</span>
+                <span class="ls-group">{p.tags[0].toLowerCase()}</span>
+                <span class="ls-size">4.0K</span>
+                <span class="ls-name dir">{link ? <>{p.title} <span class="ls-arrow">-&gt; {linkTarget(link)}</span></> : `${p.title}/`}</span>
+                <span class="ls-note"># {p.desc}</span>
               </a>
-            </li>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+
+  {posts.length > 0 && (
+    <section id="writing" class="section">
+      <div class="page-container">
+        <header class="sec-head reveal">
+          <p class="cmd">$ ls -lt ~/blog | head -3</p>
+          <h2 class="sec-title">Writing</h2>
+        </header>
+        <div class="ls mono reveal">
+          {posts.map((post) => (
+            <a href={`/blog/${post.slug.replace('en/', '')}`} class="ls-row">
+              <span class="ls-perm">-rw-r--r--</span>
+              <span class="ls-owner">edgar</span>
+              <span class="ls-group">staff</span>
+              <span class="ls-size">{lsSize(post.body.length)}</span>
+              <span class="ls-date">{lsDate(post.data.pubDate)}</span>
+              <span class="ls-name">{post.slug.replace('en/', '')}.md</span>
+              <span class="ls-note"># {post.data.title}</span>
+            </a>
           ))}
-        </ul>
+        </div>
+        <a href="/blog" class="more mono">all posts →</a>
       </div>
     </section>
   )}
 
-  <section id="writing" class="section">
-    <div class="page-container">
-      <h2 class="sec-title reveal">Things I've <em>written</em></h2>
-      <div class="post-list">
-        {posts.map((post, i) => {
-          const date = post.data.pubDate.toLocaleDateString('en-US', {
-            year: 'numeric', month: 'short', day: 'numeric',
-          });
-          return (
-            <a href={`/blog/${post.slug.replace('en/', '')}`} class="post-item reveal" style={`--d:${i * 90}ms`}>
-              <p class="post-title">{post.data.title}<span class="arrow"> ↗</span></p>
-              <p class="post-meta">{date}</p>
-              <p class="post-desc">{post.data.description}</p>
-            </a>
-          );
-        })}
-      </div>
-      {posts.length > 0 && (
-        <a href="/blog" class="ulink more">All posts →</a>
-      )}
-    </div>
-  </section>
-
   <section id="experience" class="section">
     <div class="page-container">
-      <h2 class="sec-title reveal">Where I've <em>worked</em></h2>
-      <div class="ledger">
-        {experience.map((e, i) => (
-          <div class="ledger-row reveal" style={`--d:${i * 80}ms`}>
-            <p class="ledger-when">{e.period}{e.current && <span class="now">now</span>}</p>
-            <div>
-              <p class="ledger-co">{e.company}</p>
-              <p class="ledger-role">{e.role}</p>
-              <p class="ledger-desc">{e.desc}</p>
+      <header class="sec-head reveal">
+        <p class="cmd">$ lazygit</p>
+        <h2 class="sec-title">Experience</h2>
+      </header>
+      <div class="lg mono reveal" data-lazygit>
+        <div class="lg-panel lg-commits">
+          <span class="lg-title">[4] Commits</span>
+          <ul class="lg-list" role="listbox" aria-label="Experience" tabindex="0">
+            {commits.map((c, i) => (
+              <li role="option" aria-selected={i === selected ? 'true' : 'false'} class:list={{ job: c.job }} data-i={i}>
+                <span class="lg-hash">{hash(c.msg!)}</span>
+                <span class="lg-graph" aria-hidden="true" set:html={graphSvg(i)} />
+                <span class="lg-msg">
+                  {c.labels?.map(([t, k]) => <span class={`lg-label ${k}`}>{t}</span>)}
+                  {c.job
+                    ? <><span class="lg-co">{c.job.client ?? c.job.company}</span> <span class="lg-role">{c.job.role}</span></>
+                    : <span class="lg-note">{c.msg}</span>}
+                </span>
+                {c.job && <span class="lg-date">{shortPeriod(c.job.period)}</span>}
+              </li>
+            ))}
+          </ul>
+          <span class="lg-count"><span data-pos>{selected + 1}</span> of {commits.length}</span>
+        </div>
+
+        <div class="lg-panel lg-patch">
+          <span class="lg-title">Patch</span>
+          {commits.map((c, i) => (
+            <div class="lg-detail" data-detail={i} hidden={i !== selected}>
+              <p><span class="lg-hash">commit {hash(c.msg!)}</span>{c.labels && <span> ({c.labels.map(([t]) => t).join(', ')})</span>}</p>
+              {c.parents && <p>{'Merge:  '}{c.parents.map((id) => hash(jobMsg(role[id]))).join(' ')}</p>}
+              <p>Author: Edgar Mejía &lt;contact@edgarmejia.com&gt;</p>
+              {c.date && <p>{'Date:   '}{c.date}</p>}
+              <p class="lg-body">{c.msg}</p>
+              {c.job && <p class="lg-body lg-desc">{c.job.meta}</p>}
+              {c.desc && <p class="lg-body lg-desc">{c.desc}</p>}
+              {c.job && c.job.tags.length > 0 && (
+                <>
+                  <p class="lg-file">--- a/stack.txt<br />+++ b/stack.txt</p>
+                  {c.job.tags.map((t) => <p class="lg-add">+ {t}</p>)}
+                </>
+              )}
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
+
+        <p class="lg-keys">navigate: <span>↑/↓</span> <span>j/k</span> · select: <span>click</span></p>
       </div>
-      <a href="/experience" class="ulink more">Full experience →</a>
     </div>
   </section>
 
-  <section id="contact" class="section section-contact">
+  <section id="contact" class="section">
     <div class="page-container">
-      <h2 class="contact-heading reveal">Say <em>hi.</em></h2>
-      <p class="contact-lead reveal">
-        Have a project, a job, or just want to talk about cats?
-        <button type="button" class="copy-email" data-email={email}><span class="copy-label">{email}</span></button>
-      </p>
-      <form class="contact-form reveal" id="contact-form" name="contact" method="POST" data-netlify="true">
-        <input type="hidden" name="form-name" value="contact" />
-        <div class="form-row">
-          <div class="form-field">
-            <label for="name">Name</label>
-            <input type="text" id="name" name="name" placeholder="Your name" required />
+      <header class="sec-head reveal">
+        <p class="cmd">$ mail edgar</p>
+        <h2 class="sec-title">Contact</h2>
+      </header>
+      <div class="mail mono reveal">
+        <p class="mail-note"># freelance, a full-time role, or just cats. I usually reply within a day.</p>
+        <p class="mail-to"><span class="ff-key">To</span>: edgar &lt;<button type="button" class="copy-email" data-email={email}><span class="copy-label">{email}</span></button>&gt; <span class="copy-hint">[copy]</span></p>
+        <form id="contact-form" name="contact" method="POST" data-netlify="true">
+          <input type="hidden" name="form-name" value="contact" />
+          <div class="mail-row">
+            <label class="lg-panel mail-field"><span class="lg-title">[1] From</span><input type="text" name="name" placeholder="your name" required /></label>
+            <label class="lg-panel mail-field"><span class="lg-title">[2] Reply-To</span><input type="email" name="email" placeholder="you@example.com" required /></label>
           </div>
-          <div class="form-field">
-            <label for="email">Email</label>
-            <input type="email" id="email" name="email" placeholder="your@email.com" required />
-          </div>
-        </div>
-        <div class="form-field">
-          <label for="message">Message</label>
-          <textarea id="message" name="message" rows="5" placeholder="Tell me about your project..." required></textarea>
-        </div>
-        <button type="submit" class="btn">Send message</button>
-      </form>
-      <div id="contact-success" style="display:none;" class="contact-success">
-        <p>Thanks! I'll get back to you soon.</p>
+          <label class="lg-panel mail-field"><span class="lg-title">[3] Body</span><textarea name="message" rows="6" placeholder="tell me about your project..." required></textarea></label>
+          <p class="lg-keys mail-keys"><button type="submit" class="mail-send">send <span>⏎</span></button> · next field: <span>tab</span></p>
+        </form>
+        <p id="contact-success" class="mail-ok" hidden><span class="ok">✓</span> message queued for delivery. I'll get back to you soon.</p>
       </div>
     </div>
   </section>
 
   <style>
+    .path { color: var(--accent); }
+    .branch { color: var(--syn-kw); }
+
     /* Hero */
-    .hero { padding: 9rem 0 5rem; }
+    .hero { position: relative; overflow: hidden; padding: 5.5rem 0 5rem; }
+    .hero > .page-container { position: relative; }
 
-    .hero-grid {
-      display: grid;
-      grid-template-columns: 1.45fr 1fr;
-      gap: 3.5rem;
-      align-items: center;
-    }
 
-    .about-h1 {
-      display: flex;
-      flex-direction: column;
-      font-family: var(--font-display);
-      font-weight: 600;
-      font-size: clamp(2.4rem, 4.6vw, 4.1rem);
-      letter-spacing: -0.035em;
-      line-height: 1.02;
-      color: var(--fg);
-      text-align: left;
+    .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+    .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #3ecf6e; box-shadow: 0 0 0 3px rgba(62, 207, 110, 0.2); vertical-align: middle; }
+
+    /* fastfetch */
+    /* no window chrome: the output sits on the page, right under the header prompt */
+    .term-body { padding: 0; font-size: 0.8rem; line-height: 1.7; color: var(--fg); }
+    .term-body p { margin: 0; }
+    .term-cmd { color: var(--fg-muted); }
+
+    .ff { display: grid; grid-template-columns: auto 1fr; gap: 2rem; margin-top: 1rem; align-items: center; }
+    .ff-key { color: var(--accent); font-weight: 600; }
+    .ff-title { font-weight: 600; }
+    .ff-rule { color: var(--fg-faint); }
+    .ff-colors { display: flex; margin-top: 0.75rem !important; }
+    .ff-colors span { width: 1.4rem; height: 0.9rem; }
+
+    /* 128 columns of art: shrink the glyphs so it always fits the viewport */
+    .ff-art {
+      font: min(8.2px, calc((100vw - 5rem) / 77)) / 1 var(--font-mono);
+      letter-spacing: 0;
+      user-select: none;
       margin: 0;
     }
 
-    .about-h1 span { white-space: nowrap; }
+    /* cells exactly one row tall so the half blocks stack into square pixels */
+    .ff-art :global(span) { display: inline-block; height: 1em; vertical-align: top; }
 
-    .about-sub {
-      color: var(--accent);
-      white-space: nowrap;
+    .ff-links { display: flex; flex-wrap: wrap; gap: 0.4rem 2rem; }
+    .ff-links a { color: var(--syn-type); text-decoration: none; }
+    .ff-links a:hover { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+
+    .term-body > .term-cmd:not(:first-child) { margin-top: 1rem !important; }
+
+    @media (max-width: 960px) {
+      .ff { grid-template-columns: 1fr; gap: 1.25rem; }
     }
-
-    @media (max-width: 480px) {
-      .about-h1 { font-size: 2.2rem; }
-    }
-
-    .lead {
-      max-width: 32rem;
-      margin: 2rem 0 0;
-      font-size: 1.05rem;
-      line-height: 1.65;
-      color: var(--fg-muted);
-    }
-
-    .hero-links { display: flex; flex-wrap: wrap; align-items: center; gap: 1.5rem; margin: 2rem 0 0; }
-
-    .btn {
-      display: inline-block;
-      padding: 0.85rem 1.5rem;
-      font: 500 0.85rem/1 "Geist Variable", sans-serif;
-      letter-spacing: 0.02em;
-      text-decoration: none;
-      color: var(--body-bg);
-      background: var(--fg);
-      border: none;
-      border-radius: 2px;
-      box-shadow: 4px 4px 0 var(--accent);
-      cursor: pointer;
-      transition: transform 0.15s, box-shadow 0.15s;
-    }
-
-    .btn:hover { transform: translate(2px, 2px); box-shadow: 2px 2px 0 var(--accent); }
-
-    .ulink {
-      font-size: 0.85rem;
-      font-weight: 500;
-      color: var(--fg);
-      text-decoration: underline;
-      text-decoration-color: var(--border);
-      text-underline-offset: 5px;
-      transition: text-decoration-color 0.2s, color 0.2s;
-    }
-
-    .ulink:hover { color: var(--accent); text-decoration-color: var(--accent); }
-    .more { display: inline-block; margin-top: 2.5rem; }
-
-    /* Polaroid */
-    .polaroid {
-      position: relative;
-      margin: 0;
-      padding: 12px 12px 0;
-      background: var(--card);
-      border: 1px solid var(--border);
-      box-shadow: 0 14px 30px -14px rgba(60, 40, 10, 0.4);
-      transform: rotate(2.2deg);
-      transition: transform 0.4s cubic-bezier(0.2, 0.7, 0.2, 1);
-    }
-
-    .polaroid:hover { transform: rotate(0deg) scale(1.01); }
-
-    .polaroid::before {
-      content: "";
-      position: absolute;
-      top: -14px;
-      left: 50%;
-      width: 96px;
-      height: 28px;
-      margin-left: -48px;
-      background: rgba(226, 180, 80, 0.55);
-      transform: rotate(-4deg);
-    }
-
-    .polaroid img {
-      display: block;
-      width: 100%;
-      aspect-ratio: 4 / 4.2;
-      object-fit: cover;
-      object-position: 30% 40%;
-    }
-
-    .polaroid figcaption {
-      padding: 0.6rem 0 0.7rem;
-      font-size: 0.82rem;
-      line-height: 1.4;
-      color: var(--fg-muted);
-      text-align: center;
-    }
-
-    .note {
-      position: absolute;
-      padding: 0.15rem 0.7rem;
-      font-size: 0.8rem;
-      font-weight: 500;
-      line-height: 1.5;
-      color: #3a2d12;
-      background: #f7d774;
-      box-shadow: 2px 3px 6px rgba(60, 40, 10, 0.25);
-      white-space: nowrap;
-    }
-
-    .n1 { left: -2.2rem; top: 18%; transform: rotate(-7deg); }
-    .n2 { right: -1.2rem; top: 46%; transform: rotate(5deg); background: #f4b6a0; }
-    .n3 { left: -1rem; bottom: 22%; transform: rotate(-3deg); background: #bfe0c0; }
-
-    @media (max-width: 860px) {
-      .hero-grid { grid-template-columns: 1fr; gap: 3.5rem; }
-      .polaroid { max-width: 22rem; margin-inline: auto; }
-      .n1 { left: -0.5rem; }
-      .n2 { right: -0.5rem; }
-      .n3 { left: -0.3rem; }
-    }
-
-    /* Sections */
-    .section { padding: 5.5rem 0; border-top: 1px dashed var(--border); }
-
-    .sec-title {
-      margin: 0 0 3rem;
-      font-family: var(--font-display);
-      font-weight: 500;
-      font-size: clamp(1.9rem, 3.6vw, 2.75rem);
-      letter-spacing: -0.03em;
-      line-height: 1.1;
-      color: var(--fg);
-    }
-
-    .sec-title em, .contact-heading em { color: var(--accent); font-style: normal; }
-
-    /* Projects shelf */
-    .shelf { list-style: none; margin: 0; padding: 0; }
-    .shelf li { border-bottom: 1px dashed var(--border); }
-
-    .shelf-row {
-      display: grid;
-      grid-template-columns: 1.1fr 1.6fr 1fr auto;
-      gap: 1.5rem;
-      align-items: baseline;
-      padding: 1.4rem 0;
-      text-decoration: none;
-      transition: padding-left 0.25s, color 0.25s;
-    }
-
-    .shelf-row:hover { padding-left: 0.75rem; }
-    .shelf-row:hover .shelf-name, .shelf-row:hover .shelf-arrow { color: var(--accent); }
-
-    .shelf-name { font-family: var(--font-display); font-size: 1.5rem; font-weight: 500; letter-spacing: -0.02em; color: var(--fg); transition: color 0.25s; }
-    .shelf-desc { font-size: 0.9rem; line-height: 1.55; color: var(--fg-muted); }
-    .shelf-stack { font-size: 0.78rem; color: var(--fg-faint); }
-    .shelf-arrow { color: var(--fg-faint); transition: color 0.25s; }
-
-    @media (max-width: 760px) {
-      .shelf-row { grid-template-columns: 1fr auto; gap: 0.3rem 1rem; }
-      .shelf-desc, .shelf-stack { grid-column: 1; }
-      .shelf-arrow { grid-row: 1; grid-column: 2; }
-    }
-
-    /* Posts (layout kept) */
-    .post-list { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0 3rem; }
-    .post-item { display: flex; flex-direction: column; text-decoration: none; }
-
-    .post-title {
-      font-size: 1.05rem;
-      font-weight: 600;
-      color: var(--fg);
-      letter-spacing: -0.02em;
-      margin: 0 0 0.5rem 0;
-      line-height: 1.3;
-      transition: color 0.2s;
-    }
-
-    .post-item .arrow { opacity: 0; display: inline-block; transition: opacity 0.2s, transform 0.2s; }
-    .post-item:hover .post-title { color: var(--accent); }
-    .post-item:hover .arrow { opacity: 1; transform: translate(2px, -2px); }
-
-    .post-meta { font-size: 0.75rem; color: var(--fg-faint); margin: 0 0 0.75rem 0; letter-spacing: 0.03em; }
-    .post-desc { font-size: 0.875rem; color: var(--fg-muted); line-height: 1.65; margin: 0; }
 
     @media (max-width: 900px) {
-      .post-list { grid-template-columns: repeat(2, 1fr); gap: 2rem; }
+      .hero { padding-top: 6rem; }
     }
+
+    /* Command history: section links as a timeline of executed commands (wide screens only) */
+    .history { display: none; }
+
+    @media (min-width: 1360px) {
+      .history {
+        display: block;
+        position: fixed;
+        top: 50%;
+        left: 2rem;
+        z-index: 5;
+        transform: translateY(-50%);
+        font-size: 0.75rem;
+        transition: opacity 0.3s;
+      }
+    }
+
+    /* faded when no command is running (e.g. between sections) */
+    .history:not(:has(.active)) { opacity: 0.45; }
+
+    .history ol { list-style: none; margin: 0; padding: 0; border-left: 1px solid var(--border); }
+    .history li { position: relative; padding: 0.55rem 0 0.55rem 1.1rem; }
+
+    .history li::before {
+      content: "";
+      position: absolute;
+      left: -4.5px;
+      top: 50%;
+      width: 8px;
+      height: 8px;
+      margin-top: -4px;
+      border-radius: 50%;
+      background: var(--body-bg);
+      border: 1px solid var(--fg-faint);
+    }
+
+    .history a { color: var(--fg-faint); text-decoration: none; white-space: nowrap; transition: color 0.2s; }
+    .history a:hover { color: var(--fg); }
+    .hp { color: inherit; }
+
+    /* already ran: every command before the running one */
+    .history li:has(~ li .active) a { color: var(--fg-muted); }
+    .history li:has(~ li .active)::before { background: var(--fg-faint); }
+
+    /* running now */
+    .history a.active { color: var(--fg); }
+    .history a.active .hp { color: var(--accent); }
+    .history li:has(.active)::before { background: var(--accent); border-color: var(--accent); }
+
+    /* Sections */
+    .section { padding: 5rem 0; border-top: 1px solid var(--border); }
+
+    .ls-wip { grid-column: 1 / -1; margin: 0; color: var(--fg-faint); }
+    .ls-wip-tag { color: var(--syn-num); font-weight: 600; }
+
+    /* lazygit */
+    .lg { display: grid; grid-template-columns: 1.75fr 1fr; gap: 0.6rem; font-size: 0.8rem; line-height: 1.65; }
+    .lg p { margin: 0; }
+
+    .lg-panel {
+      position: relative;
+      min-width: 0;
+      padding: 1rem 0.9rem 1.1rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+
+    /* the focused panel gets lazygit's highlighted border */
+    .lg-commits:focus-within, .lg-commits:hover { border-color: var(--syn-type); }
+
+    .lg-title, .lg-count {
+      position: absolute;
+      padding: 0 0.35rem;
+      font-size: 0.75rem;
+      background: var(--body-bg);
+    }
+
+    .lg-title { top: -0.6rem; left: 0.7rem; color: var(--fg); font-weight: 600; }
+    .lg-count { bottom: -0.6rem; right: 0.7rem; color: var(--fg-faint); }
+    .lg-commits:focus-within .lg-title, .lg-commits:hover .lg-title { color: var(--syn-type); }
+
+    .lg-list { list-style: none; margin: 0; padding: 0; outline: none; }
+
+    /* tight rows so the box-drawing rails connect like terminal cells */
+    .lg-list li {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      height: 1.4em;
+      padding: 0 0.4rem;
+      line-height: 1.4;
+      white-space: nowrap;
+      cursor: pointer;
+      border-radius: 3px;
+    }
+
+    .lg-list li:hover { background: var(--accent-soft); }
+    .lg-list li[aria-selected="true"] { background: color-mix(in srgb, var(--syn-type) 22%, transparent); }
+
+    .lg-hash { color: var(--syn-num); }
+    .lg-graph { align-self: stretch; display: flex; }
+    .lg-graph :global(svg) { height: 100%; overflow: visible; fill: none; stroke-width: 1.1; stroke-linecap: square; }
+    .lg-graph :global(g) { stroke: currentColor; }
+    .lg-graph :global(.r0) { color: var(--accent); }
+    .lg-graph :global(.r1) { color: var(--syn-type); }
+    .lg-graph :global(.r2) { color: #3ecf6e; }
+    .lg-graph :global(.r3) { color: var(--syn-kw); }
+
+    .lg-label { margin-right: 0.5em; font-weight: 600; }
+    .lg-label.head { color: var(--syn-type); }
+    .lg-label.branch { color: #3ecf6e; }
+    .lg-label.tag { color: var(--syn-num); }
+    .lg-label.tag::before { content: "#"; }
+    .lg-msg { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; color: var(--fg); }
+    .lg-co { font-weight: 600; color: var(--fg); }
+    .lg-role { color: var(--fg-muted); }
+    .lg-note { color: var(--fg-faint); }
+    .lg-date { flex-shrink: 0; width: 17ch; text-align: right; color: var(--syn-type); }
+    .lg-list li:not(.job) .lg-hash { opacity: 0.55; }
+
+    .lg-detail { color: var(--fg-muted); }
+    .lg-detail p { white-space: pre-wrap; }
+    .lg-head { color: var(--fg-muted); }
+    .lg-ok, .lg-add { color: #3ecf6e; }
+    .lg-body { margin-top: 0.9rem !important; padding-left: 2rem; color: var(--fg); }
+    .lg-desc { margin-top: 0.5rem !important; color: var(--fg-muted); white-space: normal; }
+    .lg-file { margin-top: 1rem !important; color: var(--fg); font-weight: 600; }
+
+    .lg-keys { grid-column: 1 / -1; margin-top: 0.6rem !important; font-size: 0.72rem; color: var(--fg-faint); }
+    .lg-keys span { color: var(--syn-type); }
+
+    @media (max-width: 860px) {
+      .lg { grid-template-columns: 1fr; gap: 1.4rem; }
+      .lg-keys { margin-top: 0 !important; }
+    }
+
+    /* Contact: a mail(1) prompt drawn with the same lazygit panels as Experience */
+    .mail { font-size: 0.8rem; line-height: 1.65; }
+    .mail p { margin: 0; }
+    .mail-note { color: var(--fg-faint); }
+    .mail-to { margin: 0.4rem 0 1.6rem !important; color: var(--fg-muted); }
+
+    .copy-email { padding: 0; font: inherit; color: var(--accent); background: none; border: none; cursor: pointer; }
+    .copy-email:hover { text-decoration: underline; text-underline-offset: 3px; }
+    .copy-hint { color: var(--fg-faint); }
+    .mail-to:has(.copy-email:hover) .copy-hint { color: var(--accent); }
+
+    #contact-form { display: flex; flex-direction: column; gap: 1.4rem; }
+    .mail-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem 0.6rem; }
+    .mail-field { display: block; padding: 0.8rem 0.9rem 0.7rem; cursor: text; }
+    .mail-field:focus-within { border-color: var(--syn-type); }
+    .mail-field:focus-within .lg-title { color: var(--syn-type); }
+
+    .mail-field input,
+    .mail-field textarea {
+      display: block;
+      width: 100%;
+      padding: 0;
+      font: inherit;
+      color: var(--fg);
+      background: none;
+      border: none;
+      outline: none;
+      resize: vertical;
+      caret-color: var(--accent);
+    }
+
+    .mail-field input::placeholder,
+    .mail-field textarea::placeholder { color: var(--fg-faint); }
+
+    .mail-keys { margin-top: -0.4rem !important; }
+    .mail-send { padding: 0.1rem 0.4rem; margin-left: -0.4rem; font: inherit; color: var(--fg); background: none; border: none; border-radius: 3px; cursor: pointer; }
+    .mail-send:hover, .mail-send:focus-visible { background: var(--accent-soft); outline: none; }
+
+    .mail-ok { color: var(--fg); }
+    .ok { color: #3ecf6e; }
 
     @media (max-width: 560px) {
-      .post-list { grid-template-columns: 1fr; gap: 0; }
-      .post-item { padding: 1.5rem 0; border-top: 1px dashed var(--border); }
+      .mail-row { grid-template-columns: 1fr; gap: 1.4rem; }
     }
-
-    /* Experience ledger */
-    .ledger-row {
-      display: grid;
-      grid-template-columns: 11rem 1fr;
-      gap: 1.5rem;
-      padding: 1.75rem 0;
-      border-bottom: 1px dashed var(--border);
-    }
-
-    .ledger-row:first-child { padding-top: 0; }
-    .ledger-row p { margin: 0; }
-
-    .ledger-when { font-size: 0.82rem; color: var(--fg-faint); padding-top: 0.55rem !important; }
-
-    .now {
-      margin-left: 0.5rem;
-      padding: 0 0.4rem;
-      font-size: 0.7rem;
-      font-weight: 600;
-      color: #3a2d12;
-      background: #f7d774;
-      transform: rotate(-3deg);
-      display: inline-block;
-    }
-
-    .ledger-co { font-family: var(--font-display); font-size: 1.7rem; font-weight: 500; letter-spacing: -0.02em; color: var(--fg); }
-    .ledger-role { font-size: 0.88rem; color: var(--accent); margin: 0.1rem 0 0.6rem !important; }
-    .ledger-desc { font-size: 0.95rem; line-height: 1.7; color: var(--fg-muted); max-width: 60ch; }
-
-    @media (max-width: 640px) {
-      .ledger-row { grid-template-columns: 1fr; gap: 0.3rem; }
-      .ledger-when { padding-top: 0 !important; }
-    }
-
-    /* Contact */
-    .section-contact { padding-bottom: 8rem; }
-
-    .contact-heading {
-      margin: 0 0 1.5rem;
-      font-family: var(--font-display);
-      font-weight: 600;
-      font-size: clamp(3.5rem, 11vw, 8rem);
-      letter-spacing: -0.045em;
-      line-height: 0.95;
-      color: var(--fg);
-    }
-
-    .contact-lead { max-width: 34rem; margin: 0 0 3rem; font-size: 1.05rem; line-height: 1.7; color: var(--fg-muted); }
-
-    .copy-email {
-      display: block;
-      margin-top: 0.4rem;
-      padding: 0;
-      font-family: var(--font-display);
-      font-size: 1.5rem;
-      font-weight: 500;
-      color: var(--fg);
-      background: none;
-      border: none;
-      border-bottom: 2px solid var(--accent);
-      cursor: pointer;
-      transition: color 0.2s;
-    }
-
-    .copy-email:hover { color: var(--accent); }
-
-    .contact-form { display: flex; flex-direction: column; gap: 1.5rem; max-width: 640px; }
-    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
-    .form-field { display: flex; flex-direction: column; gap: 0.4rem; }
-    .contact-form .btn { align-self: flex-start; }
-
-    .form-field label { font-size: 0.75rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--fg-faint); }
-
-    .form-field input,
-    .form-field textarea {
-      background: none;
-      border: none;
-      border-bottom: 1px solid var(--border);
-      padding: 0.5rem 0;
-      font-size: 0.95rem;
-      color: var(--fg);
-      outline: none;
-      resize: none;
-      font-family: inherit;
-      transition: border-color 0.2s;
-    }
-
-    .form-field input::placeholder,
-    .form-field textarea::placeholder { color: var(--fg-faint); opacity: 0.6; }
-    .form-field input:focus,
-    .form-field textarea:focus { border-bottom-color: var(--accent); }
-
-    .contact-success { margin-top: 1.5rem; font-size: 1rem; opacity: 0.7; }
-
-    @media (max-width: 640px) {
-      .form-row { grid-template-columns: 1fr; }
-    }
-  </style>
-
-  <style is:global>
-    .dud { color: var(--accent) !important; opacity: 0.5; }
   </style>
 </Layout>
 
 <script>
-  // Thanks: https://codepen.io/soulwire/pen/mEMPrK
+  function initLazygit() {
+    const root = document.querySelector<HTMLElement>('[data-lazygit]');
+    if (!root) return;
+    const list = root.querySelector<HTMLElement>('.lg-list')!;
+    const rows = [...list.querySelectorAll<HTMLElement>('li')];
+    const details = [...root.querySelectorAll<HTMLElement>('[data-detail]')];
+    const pos = root.querySelector('[data-pos]')!;
+    let current = Math.max(0, rows.findIndex((r) => r.getAttribute('aria-selected') === 'true'));
 
-  class TextScramble {
-    el: HTMLElement;
-    chars: string;
-    resolve!: () => void;
-    queue: { from: string; to: string; start: number; end: number; char?: string }[] = [];
-    frame: number = 0;
-    frameRequest: number = 0;
-
-    constructor(el: HTMLElement) {
-      this.el = el;
-      this.chars = '!<>-_\\/[]{}—=+*^?#火木中大小力__';
-      this.update = this.update.bind(this);
-    }
-
-    setText(newText: string) {
-      const oldText = Array.from(this.el.innerText);
-      const newTextArr = Array.from(newText);
-      const length = Math.max(oldText.length, newTextArr.length);
-      const promise = new Promise<void>((resolve) => (this.resolve = resolve));
-      this.queue = [];
-
-      for (let i = 0; i < length; i++) {
-        const from = oldText[i] || '';
-        const to = newTextArr[i] || '';
-        if (from === to) {
-          this.queue.push({ from, to, start: 0, end: 0 });
-        } else {
-          const start = Math.floor(Math.random() * 40);
-          const end = start + Math.floor(Math.random() * 40);
-          this.queue.push({ from, to, start, end });
-        }
-      }
-
-      cancelAnimationFrame(this.frameRequest);
-      this.frame = 0;
-      this.update();
-      return promise;
-    }
-
-    update() {
-      let output = '';
-      let complete = 0;
-
-      for (let i = 0, n = this.queue.length; i < n; i++) {
-        let { from, to, start, end, char } = this.queue[i];
-        if (this.frame >= end) {
-          complete++;
-          output += to;
-        } else if (this.frame >= start) {
-          if (!char || Math.random() < 0.28) {
-            char = this.randomChar();
-            this.queue[i].char = char;
-          }
-          output += `<span class="dud">${char}</span>`;
-        } else {
-          output += from;
-        }
-      }
-
-      this.el.innerHTML = output;
-
-      if (complete === this.queue.length) {
-        this.resolve();
-      } else {
-        this.frameRequest = requestAnimationFrame(this.update);
-        this.frame++;
-      }
-    }
-
-    randomChar() {
-      return this.chars[Math.floor(Math.random() * this.chars.length)];
-    }
-  }
-
-  const phrases = [
-    'a Java hater ☕',
-    'a Python dev 🐍',
-    'a .Net dev',
-    'a Swift dev',
-    'a Kotlin lover',
-    'a Flutter dev',
-    'a JS enthusiast',
-    'a TS fan or hater?',
-    'a Web dev',
-    'an OW player 🧡',
-    'a Coffee hater :)',
-    'a Pre-AI dev 🗿',
-    'a Coke lover 🥤',
-    'a Girl dad 👧🏻',
-    'a Cat lover 🐱',
-  ];
-
-  function initScramble() {
-    const el = document.querySelector<HTMLElement>('.gitch-text');
-    if (!el) return;
-
-    // ponytail: reduced motion gets a static phrase instead of the endless loop
-    if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      el.textContent = phrases[3];
-      return;
-    }
-
-    const fx = new TextScramble(el);
-    let lastIndex = -1;
-
-    const next = () => {
-      let randomIndex: number;
-      do {
-        randomIndex = Math.floor(Math.random() * phrases.length);
-      } while (randomIndex === lastIndex);
-
-      lastIndex = randomIndex;
-      fx.setText(phrases[randomIndex]).then(() => {
-        setTimeout(next, 1200);
-      });
+    const select = (i: number) => {
+      current = (i + rows.length) % rows.length;
+      rows.forEach((r, j) => r.setAttribute('aria-selected', String(j === current)));
+      details.forEach((d, j) => (d.hidden = j !== current));
+      pos.textContent = String(current + 1);
     };
 
-    next();
+    rows.forEach((r, i) => r.addEventListener('click', () => { select(i); list.focus(); }));
+    list.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowDown' || e.key === 'j') select(current + 1);
+      else if (e.key === 'ArrowUp' || e.key === 'k') select(current - 1);
+      else return;
+      e.preventDefault();
+    });
   }
 
-  document.addEventListener('astro:page-load', initScramble);
+  document.addEventListener('astro:page-load', initLazygit);
 
   function initReveal() {
     const els = document.querySelectorAll<HTMLElement>('.reveal');
@@ -606,7 +568,7 @@ const email = 'contact@edgarmejia.com';
     btn?.addEventListener('click', async () => {
       const label = btn.querySelector('.copy-label')!;
       const email = btn.dataset.email!;
-      try { await navigator.clipboard.writeText(email); label.textContent = 'Copied ✓'; }
+      try { await navigator.clipboard.writeText(email); label.textContent = 'copied ✓'; }
       catch { location.href = `mailto:${email}`; return; }
       setTimeout(() => (label.textContent = email), 1600);
     });
@@ -619,8 +581,8 @@ const email = 'contact@edgarmejia.com';
       e.preventDefault();
       const data = new URLSearchParams(new FormData(form) as unknown as Record<string, string>);
       await fetch('/', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: data.toString() });
-      form.style.display = 'none';
-      success.style.display = 'block';
+      form.hidden = true;
+      success.hidden = false;
     });
   }
 

@@ -1,78 +1,75 @@
 ---
+// SEELE logo as one-ink ANSI half blocks, generated with scripts/ascii-art.py --line --ansi (footer-icon.ascii.json keeps the ASCII take)
+import icon from '../data/footer-icon.json';
+import Sky from './Sky.astro';
 ---
 
 <footer class="site-footer">
+  <Sky count={45} seed={23} class="footer-sky" />
   <div class="page-container">
-    <!-- <p class="section-label">Based in El Salvador</p> -->
-    <p class="footer-name">Swift · Kotlin · Flutter · Python · .NET</p>
-    <div class="footer-bottom">
-      <span class="footer-copy">© 2026</span>
-      <div class="footer-links">
-        <a href="https://github.com/cybergaala" target="_blank" rel="noopener">GitHub</a>
-        <a href="https://www.linkedin.com/in/mejia-edgar/" target="_blank" rel="noopener">LinkedIn</a>
-        <a href="mailto:contact@edgarmejia.com">Email</a>
+    <div class="footer-main">
+      <div class="session">
+        <pre class="icon" aria-hidden="true">{icon.join('\n')}</pre>
+        <div>
+          <p><span class="accent">~</span> $ exit</p>
+          <p class="faint">logout</p>
+          <p class="faint">[Process completed]</p>
+        </div>
       </div>
+      <ul class="footer-links">
+        <li><a href="https://github.com/cybergaala" target="_blank" rel="noopener">github ↗</a></li>
+        <li><a href="https://www.linkedin.com/in/mejia-edgar/" target="_blank" rel="noopener">linkedin ↗</a></li>
+        <li><a href="mailto:contact@edgarmejia.com">email</a></li>
+        <li><a href="/blog">blog</a></li>
+      </ul>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Edgar Mejía · San Salvador, SV</span>
+      <span>swift · kotlin · flutter · python · .net</span>
     </div>
   </div>
 </footer>
 
 <style>
   .site-footer {
-    border-top: 1px solid rgba(0,0,0,0.07);
-    padding: 6rem 0 3rem;
+    position: relative;
+    padding: 4rem 0 2.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--fg-muted);
+    border-top: 1px solid var(--border);
   }
 
-  .section-label {
-    font-size: 0.7rem;
-    font-weight: 500;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: rgba(0,0,0,0.3);
-    margin: 0 0 2.5rem 0;
+  .site-footer > .page-container { position: relative; }
+
+  /* the page ends in the same sky it starts with: stars fade in toward the bottom */
+  .site-footer :global(.footer-sky) {
+    -webkit-mask: linear-gradient(to bottom, transparent, #000 75%);
+    mask: linear-gradient(to bottom, transparent, #000 75%);
   }
 
-  .footer-name {
-    font-family: var(--font-display);
-    font-weight: 500 !important;
-    font-size: clamp(2.5rem, 6vw, 5rem);
-    font-weight: 700;
-    letter-spacing: -0.03em;
-    color: #111;
-    line-height: 1.05;
-    margin: 0 0 3rem 0;
-  }
+  .site-footer p { margin: 0; line-height: 1.7; }
+
+  .footer-main { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2.5rem; }
+
+  .session { display: flex; align-items: center; gap: 1.75rem; }
+  .icon { margin: 0; font: 3.8px/1 var(--font-mono); letter-spacing: 0; color: var(--accent); }
+  .accent { color: var(--accent); }
+  .faint { color: var(--fg-faint); }
+
+  .footer-links { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: auto auto; gap: 0.5rem 2.5rem; align-content: center; }
+  .footer-links a { color: var(--fg-muted); text-decoration: none; transition: color 0.2s; }
+  .footer-links a:hover { color: var(--accent); }
 
   .footer-bottom {
     display: flex;
-    align-items: center;
+    flex-wrap: wrap;
     justify-content: space-between;
+    gap: 0.5rem 2rem;
+    margin-top: 3rem;
+    padding-top: 1.25rem;
+    font-size: 0.72rem;
+    color: var(--fg-faint);
+    border-top: 1px dashed var(--border);
   }
-
-  .footer-links {
-    display: flex;
-    gap: 1.75rem;
-  }
-
-  .footer-links a {
-    font-size: 0.82rem;
-    color: rgba(0,0,0,0.4);
-    text-decoration: none;
-    transition: color 0.2s;
-  }
-
-  .footer-links a:hover {
-    color: #111;
-  }
-
-  .footer-copy {
-    font-size: 0.78rem;
-    color: rgba(0,0,0,0.25);
-  }
-
-  :global(html.dark) .site-footer { border-top-color: rgba(255, 255, 255, 0.08); }
-  :global(html.dark) .section-label { color: rgba(255, 255, 255, 0.3); }
-  :global(html.dark) .footer-name { color: #f0f0f0; }
-  :global(html.dark) .footer-links a { color: rgba(255, 255, 255, 0.4); }
-  :global(html.dark) .footer-links a:hover { color: #f0f0f0; }
-  :global(html.dark) .footer-copy { color: rgba(255, 255, 255, 0.25); }
 </style>
