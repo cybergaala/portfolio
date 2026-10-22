@@ -8,6 +8,11 @@ and every color is pulled darker and more saturated so it reads as ink on white.
 --ansi draws with half blocks like chafa does: every cell is two pixels, the top one in
 the text color and the bottom one in the background, so it doubles vertical detail.
 
+--line renders line art (bright strokes on black, e.g. a logo) as one-ink ASCII:
+it crops to the drawing and thickens strokes so they survive the shrink.
+With --ansi too, each cell is two on/off pixels drawn with ▀ ▄ █.
+Output is then a JSON list of plain strings: > src/data/footer-icon.json
+
 --palette prints the image's 8 representative colors (dark to light) instead,
 for the color blocks under the fastfetch info: > src/data/hero-palette.json
 
@@ -18,7 +23,7 @@ import colorsys
 import json
 import sys
 
-from PIL import Image, ImageEnhance
+from PIL import Image, ImageEnhance, ImageFilter
 
 # dense glyphs only: on a dark page the color draws the picture, thin glyphs would hide it
 RAMP = "=+*#%@"
@@ -77,13 +82,33 @@ def ansi(im, cols, light):
     return out
 
 
+def line(path, cols, ansi=False):
+    im = Image.open(path).convert("HSV").getchannel("V")  # brightness of any stroke color
+    im = im.crop(im.point(lambda v: 255 if v > 150 else 0).getbbox())
+    rows = round(cols * im.height / im.width * CELL)
+    cell = im.width // cols
+    if ansi:
+        im = im.filter(ImageFilter.MaxFilter(cell // 6 * 2 + 1)).resize((cols, rows * 2), Image.BOX)
+        on = lambda x, y: im.getpixel((x, y)) > 70
+        blocks = {(False, False): " ", (True, False): "▀", (False, True): "▄", (True, True): "█"}
+        return ["".join(blocks[on(x, 2 * y), on(x, 2 * y + 1)] for x in range(cols)).rstrip() for y in range(rows)]
+    im = im.filter(ImageFilter.MaxFilter(cell // 2 * 2 + 1)).resize((cols, rows), Image.BOX)
+    ramp = " .:-=+*#%@"
+    n = len(ramp)
+    return ["".join(ramp[min(n - 1, im.getpixel((x, y)) * n // 256)] for x in range(cols)).rstrip() for y in range(rows)]
+
+
 def main():
-    flags = {"--light", "--ansi", "--palette"}
+    flags = {"--light", "--ansi", "--palette", "--line"}
     args = [a for a in sys.argv[1:] if a not in flags]
     light = "--light" in sys.argv
     path = args[0]
     cols = int(args[1]) if len(args) > 1 else 110
     ramp = LIGHT_RAMP if light else RAMP
+
+    if "--line" in sys.argv:
+        json.dump(line(path, cols, "--ansi" in sys.argv), sys.stdout, separators=(",", ":"), ensure_ascii=False)
+        return
 
     im = Image.open(path).convert("RGB")
     im = ImageEnhance.Color(im).enhance(1.35)

@@ -1,16 +1,13 @@
 ---
-const cat = [
-  ' /\\_/\\ ',
-  '( o.o )',
-  ' > ^ < ',
-].join('\n');
+// SEELE logo as one-ink ANSI half blocks, generated with scripts/ascii-art.py --line --ansi (footer-icon.ascii.json keeps the ASCII take)
+import icon from '../data/footer-icon.json';
 ---
 
 <footer class="site-footer">
   <div class="page-container">
     <div class="footer-main">
       <div class="session">
-        <pre class="cat" aria-hidden="true">{cat}</pre>
+        <pre class="icon" aria-hidden="true">{icon.join('\n')}</pre>
         <div>
           <p><span class="accent">~</span> $ exit</p>
           <p class="faint">logout</p>
@@ -45,7 +42,7 @@ const cat = [
   .footer-main { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2.5rem; }
 
   .session { display: flex; align-items: center; gap: 1.75rem; }
-  .cat { margin: 0; font: inherit; font-size: 0.95rem; line-height: 1.25; color: var(--accent); }
+  .icon { margin: 0; font: 3.8px/1 var(--font-mono); letter-spacing: 0; color: var(--accent); }
   .accent { color: var(--accent); }
   .faint { color: var(--fg-faint); }
 

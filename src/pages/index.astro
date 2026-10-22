@@ -78,6 +78,11 @@ const shortDate = (d: string) => {
 };
 const shortPeriod = (p: string) => p.split('—').map(shortDate).join(' → ');
 
+// `ls -l` columns for projects and posts
+const lsDate = (d: Date) => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' }).replace(',', '');
+const lsSize = (bytes: number) => `${(bytes / 1024).toFixed(1)}K`;
+const linkTarget = (url: string) => url.replace(/^https?:\/\//, '');
+
 // open on the current job instead of the merge commit
 const selected = commits.findIndex((c) => c.job?.current);
 ---
@@ -124,21 +129,25 @@ const selected = commits.findIndex((c) => c.job?.current);
     <section id="projects" class="section">
       <div class="page-container">
         <header class="sec-head reveal">
-          <p class="cmd">$ ls ~/projects</p>
+          <p class="cmd">$ ls -l ~/projects</p>
           <h2 class="sec-title">Projects</h2>
         </header>
-        <ul class="rows">
-          {projects.map((p, i) => (
-            <li class="reveal" style={`--d:${i * 70}ms`}>
-              <a href={p.href ?? p.code ?? '#'} class="row" {...(p.href || p.code ? { target: '_blank', rel: 'noopener' } : {})}>
-                <span class="row-name mono">{p.title}/</span>
-                <span class="row-desc">{p.desc}</span>
-                <span class="row-meta mono">{p.tags.join(' · ')}</span>
-                <span class="row-arrow" aria-hidden="true">↗</span>
+        <div class="ls ls-dirs mono reveal">
+          <p class="ls-total">total {projects.length}</p>
+          {projects.map((p) => {
+            const link = p.href ?? p.code;
+            return (
+              <a href={link ?? '#'} class="ls-row" {...(link ? { target: '_blank', rel: 'noopener' } : {})}>
+                <span class="ls-perm">{link ? 'lrwxr-xr-x' : 'drwxr-xr-x'}</span>
+                <span class="ls-owner">edgar</span>
+                <span class="ls-group">{p.tags[0].toLowerCase()}</span>
+                <span class="ls-size">4.0K</span>
+                <span class="ls-name dir">{link ? <>{p.title} <span class="ls-arrow">-&gt; {linkTarget(link)}</span></> : `${p.title}/`}</span>
+                <span class="ls-note"># {p.desc}</span>
               </a>
-            </li>
-          ))}
-        </ul>
+            );
+          })}
+        </div>
       </div>
     </section>
   )}
@@ -200,19 +209,22 @@ const selected = commits.findIndex((c) => c.job?.current);
     <section id="writing" class="section">
       <div class="page-container">
         <header class="sec-head reveal">
-          <p class="cmd">$ ls -t ~/blog | head -3</p>
+          <p class="cmd">$ ls -lt ~/blog | head -3</p>
           <h2 class="sec-title">Writing</h2>
         </header>
-        <ul class="rows">
+        <div class="ls mono reveal">
           {posts.map((post) => (
-            <li class="reveal">
-              <a href={`/blog/${post.slug.replace('en/', '')}`} class="row row-post">
-                <span class="row-name">{post.data.title}</span>
-                <span class="row-meta mono">{post.data.pubDate.toISOString().slice(0, 10)}</span>
-              </a>
-            </li>
+            <a href={`/blog/${post.slug.replace('en/', '')}`} class="ls-row">
+              <span class="ls-perm">-rw-r--r--</span>
+              <span class="ls-owner">edgar</span>
+              <span class="ls-group">staff</span>
+              <span class="ls-size">{lsSize(post.body.length)}</span>
+              <span class="ls-date">{lsDate(post.data.pubDate)}</span>
+              <span class="ls-name">{post.slug.replace('en/', '')}.md</span>
+              <span class="ls-note"># {post.data.title}</span>
+            </a>
           ))}
-        </ul>
+        </div>
         <a href="/blog" class="more mono">all posts →</a>
       </div>
     </section>
@@ -379,36 +391,46 @@ const selected = commits.findIndex((c) => c.job?.current);
     .more { display: inline-block; margin-top: 1.75rem; font-size: 0.8rem; color: var(--accent); text-decoration: none; }
     .more:hover { text-decoration: underline; text-underline-offset: 4px; }
 
-    /* Rows (projects + posts) */
-    .rows { list-style: none; margin: 0; padding: 0; }
-    .rows li { border-bottom: 1px solid var(--border); }
-    .rows li:first-child { border-top: 1px solid var(--border); }
-
-    .row {
+    /* ls -l (projects + posts): rows share one grid so columns line up like a terminal */
+    .ls {
       display: grid;
-      grid-template-columns: 12rem 1fr auto auto;
-      gap: 1.5rem;
-      align-items: baseline;
-      padding: 1.1rem 0.25rem;
-      text-decoration: none;
-      transition: background-color 0.15s;
+      grid-template-columns: repeat(6, auto) 1fr;
+      column-gap: 1.5ch;
+      font-size: 0.82rem;
+      line-height: 1.6;
     }
 
-    .row:hover { background: var(--accent-soft); }
-    .row-name { font-size: 0.95rem; font-weight: 500; color: var(--fg); }
-    .row-name.mono { color: var(--accent); }
-    .row-desc { font-size: 0.9rem; line-height: 1.55; color: var(--fg-muted); }
-    .row-meta { font-size: 0.72rem; color: var(--fg-faint); white-space: nowrap; }
-    .row-arrow { color: var(--fg-faint); }
-    .row:hover .row-arrow { color: var(--accent); }
+    .ls-dirs { grid-template-columns: repeat(5, auto) 1fr; }
+    .ls-total { grid-column: 1 / -1; margin: 0 0 0.25rem; color: var(--fg-faint); }
 
-    .row-post { grid-template-columns: 1fr auto; }
-    .row-post:hover .row-name { color: var(--accent); }
+    .ls-row {
+      display: grid;
+      grid-column: 1 / -1;
+      grid-template-columns: subgrid;
+      padding: 0.2rem 0.4rem;
+      margin: 0 -0.4rem;
+      color: var(--fg-muted);
+      text-decoration: none;
+      white-space: nowrap;
+      border-radius: 3px;
+    }
+
+    .ls-row:hover { background: var(--accent-soft); }
+    .ls-perm, .ls-owner, .ls-group { color: var(--fg-faint); }
+    .ls-size { text-align: right; }
+    .ls-date { color: var(--syn-type); }
+    .ls-name { color: var(--fg); font-weight: 600; }
+    .ls-name.dir { color: var(--accent); }
+    .ls-arrow { font-weight: 400; color: var(--fg-muted); }
+    .ls-note { min-width: 0; overflow: hidden; text-overflow: ellipsis; color: var(--fg-faint); }
+    .ls-row:hover .ls-name { text-decoration: underline; text-underline-offset: 3px; }
 
     @media (max-width: 720px) {
-      .row { grid-template-columns: 1fr auto; gap: 0.3rem 1rem; }
-      .row-desc, .row-meta { grid-column: 1; }
-      .row-arrow { grid-row: 1; grid-column: 2; }
+      .ls-perm, .ls-owner, .ls-group { display: none; }
+      .ls { grid-template-columns: auto auto 1fr; }
+      .ls-dirs { grid-template-columns: auto 1fr; }
+      .ls-dirs .ls-size { display: none; }
+      .ls:not(.ls-dirs) .ls-note { display: none; }
     }
 
     /* lazygit */
