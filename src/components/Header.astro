@@ -3,30 +3,19 @@
 
 <header>
   <nav id="mainNav">
-    <div class="nav-inner page-container">
-      <a href="/" class="nav-logo"><span class="nav-logo-box">EM</span></a>
+    <div class="bar page-container">
+      <a href="/" class="nav-logo" aria-label="Edgar Mejía, home"><span class="accent">edgar</span>@sv<span class="faint">:~$</span><span class="cursor" aria-hidden="true"></span></a>
       <ul class="nav-links">
-        <li><a href="/#projects">Projects</a></li>
-        <li><a href="/#experience">Experience</a></li>
-        <li><a href="/#contact">Contact</a></li>
+        <li><a href="/#projects" data-sec="projects">./projects</a></li>
+        <li><a href="/#experience" data-sec="experience">./experience</a></li>
+        <li><a href="/blog" data-sec="blog">./blog</a></li>
+        <li><a href="/#contact" data-sec="contact" class="say-hi">[ say hi ]</a></li>
       </ul>
-      <a href="/blog" class="nav-blog">Blog</a>
       <button id="theme-toggle" aria-label="Toggle theme">
-        <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-        </svg>
-        <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="5"/>
-          <line x1="12" y1="1" x2="12" y2="3"/>
-          <line x1="12" y1="21" x2="12" y2="23"/>
-          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
-          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-          <line x1="1" y1="12" x2="3" y2="12"/>
-          <line x1="21" y1="12" x2="23" y2="12"/>
-          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
-          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-        </svg>
+        <span class="icon-moon">[dark]</span>
+        <span class="icon-sun">[light]</span>
       </button>
+      <button id="menu-btn" aria-label="Menu" aria-expanded="false"></button>
     </div>
   </nav>
 </header>
@@ -37,160 +26,98 @@
     top: 0;
     left: 0;
     right: 0;
-    width: 100%;
-    padding: 0;
     z-index: 10;
-    transition: border-bottom 0.2s;
+    font-family: var(--font-mono);
+    border-bottom: 1px solid transparent;
+    transition: background-color 0.2s, border-color 0.2s;
   }
 
-  nav.nav-scrolled {
-    background-color: rgba(244, 238, 226, 0.85);
-    backdrop-filter: saturate(180%) blur(16px);
-    -webkit-backdrop-filter: saturate(180%) blur(16px);
-    border-bottom: 1px solid rgba(0,0,0,0.07);
+  nav.nav-scrolled, nav.open {
+    background-color: color-mix(in srgb, var(--body-bg) 85%, transparent);
+    backdrop-filter: blur(8px);
+    border-bottom-color: var(--border);
   }
 
-  .nav-inner {
-    display: flex;
-    align-items: center;
-    height: 52px;
-  }
+  .bar { display: flex; align-items: center; height: 56px; }
 
   .nav-logo {
+    display: flex;
+    align-items: center;
+    margin-right: auto;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--fg);
     text-decoration: none;
-    transition: opacity 0.2s;
   }
 
-  .nav-logo-box {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.875rem;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    color: #111;
-    border: 1.5px solid #111;
-    padding: 0 6px;
-    line-height: 1.6;
-    transition: background 0.15s ease, color 0.15s ease;
-  }
+  .accent { color: var(--accent); }
+  .faint { color: var(--fg-faint); font-weight: 400; }
 
-  .nav-logo:hover .nav-logo-box {
-    background: #111;
-    color: #fff;
-    opacity: 1;
-  }
+  .cursor { width: 0.5em; height: 1.05em; margin-left: 0.3em; background: var(--accent); opacity: 0; transition: opacity 0.15s; }
+  .nav-logo:hover .cursor { opacity: 1; }
 
-  .nav-links {
-    list-style: none;
-    margin: 0 auto 0 2rem;
-    padding: 0;
-    display: flex;
-    align-items: center;
-    gap: 0;
-  }
+  .nav-links { list-style: none; margin: 0; padding: 0; display: flex; align-items: center; gap: 1.5rem; }
 
-  .nav-links li {
-    display: flex;
-    align-items: center;
-  }
-
-  .nav-links a,
-  .nav-blog {
-    display: flex;
-    align-items: center;
+  .nav-links a {
+    font-size: 0.8rem;
+    color: var(--fg-muted);
     text-decoration: none;
-    font-size: 0.875rem;
-    font-weight: 400;
-    color: rgba(0,0,0,0.5);
-    padding: 0 14px;
     transition: color 0.2s;
   }
 
-  .nav-links a:hover,
-  .nav-blog:hover {
-    color: #111;
-  }
+  .nav-links a:hover { color: var(--fg); }
+  .nav-links a.active { color: var(--accent); }
+  .nav-links a.say-hi { color: var(--accent); }
+  .nav-links a.say-hi:hover { color: var(--fg); }
 
-  .nav-blog {
-    padding-right: 0;
-    font-weight: 400;
-    color: rgba(0,0,0,0.5);
-  }
-
-  #theme-toggle {
+  #theme-toggle, #menu-btn {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 32px;
     height: 32px;
-    margin-left: 16px;
+    margin-left: 1.25rem;
+    padding: 0;
+    font: 0.8rem var(--font-mono);
+    color: var(--fg-faint);
     background: none;
     border: none;
     cursor: pointer;
-    color: rgba(0,0,0,0.45);
-    border-radius: 50%;
-    transition: color 0.2s, background 0.2s;
     flex-shrink: 0;
-    padding: 0;
+    transition: color 0.2s;
   }
 
-  #theme-toggle:hover {
-    color: #111;
-    background: rgba(0,0,0,0.06);
-  }
+  #theme-toggle:hover, #menu-btn:hover { color: var(--fg); }
 
   .icon-sun { display: none; }
   .icon-moon { display: block; }
-
-  /* Solid fallback during theme transition — backdrop-filter can't render inside view-transition snapshots */
-  :global(html[data-theme-transition]) nav.nav-scrolled {
-    background-color: rgba(244, 238, 226, 0.97);
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-    transition: none;
-  }
-  :global(html[data-theme-transition].dark) nav.nav-scrolled {
-    background-color: rgba(22, 19, 15, 0.97);
-  }
-
-  /* Dark mode styles */
-  :global(html.dark) nav.nav-scrolled {
-    background-color: rgba(22, 19, 15, 0.85);
-    border-bottom-color: rgba(255, 255, 255, 0.08);
-  }
-
-  :global(html.dark) .nav-logo-box {
-    color: #f0f0f0;
-    border-color: #f0f0f0;
-  }
-
-  :global(html.dark) .nav-logo:hover .nav-logo-box {
-    background: #f0f0f0;
-    color: #111;
-  }
-
-  :global(html.dark) .nav-links a,
-  :global(html.dark) .nav-blog {
-    color: rgba(255, 255, 255, 0.45);
-  }
-
-  :global(html.dark) .nav-links a:hover,
-  :global(html.dark) .nav-blog:hover {
-    color: #f0f0f0;
-  }
-
-  :global(html.dark) #theme-toggle {
-    color: rgba(255, 255, 255, 0.5);
-  }
-
-  :global(html.dark) #theme-toggle:hover {
-    color: #f0f0f0;
-    background: rgba(255, 255, 255, 0.08);
-  }
-
   :global(html.dark) .icon-sun { display: block; }
   :global(html.dark) .icon-moon { display: none; }
+
+  #menu-btn { display: none; margin-left: 0.75rem; }
+  #menu-btn::before { content: "[menu]"; }
+  nav.open #menu-btn::before { content: "[close]"; }
+
+  @media (max-width: 720px) {
+    #theme-toggle { margin-left: 0; }
+    #menu-btn { display: flex; }
+
+    .nav-links {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0;
+      padding: 0.5rem 1rem 1.25rem;
+      background: var(--body-bg);
+      border-bottom: 1px solid var(--border);
+    }
+
+    nav.open .nav-links { display: flex; }
+    .nav-links a { display: block; padding: 0.55rem 0; font-size: 1rem; }
+  }
 </style>
 
 <script>
@@ -198,7 +125,45 @@
   // correctly after ViewTransitions swaps the page body.
   window.addEventListener('scroll', () => {
     const nav = document.getElementById('mainNav');
-    if (nav) nav.classList.toggle('nav-scrolled', window.scrollY > 0);
+    if (nav) nav.classList.toggle('nav-scrolled', window.scrollY > 40);
+  });
+
+  let secObserver: IntersectionObserver | undefined;
+
+  function initNavState() {
+    const nav = document.getElementById('mainNav');
+    const links = document.querySelectorAll<HTMLAnchorElement>('.nav-links a');
+    const setActive = (id: string) => links.forEach((a) => a.classList.toggle('active', a.dataset.sec === id));
+
+    nav?.classList.remove('open');
+    document.getElementById('menu-btn')?.setAttribute('aria-expanded', 'false');
+    secObserver?.disconnect();
+
+    if (location.pathname.startsWith('/blog')) return setActive('blog');
+    setActive('');
+    if (location.pathname !== '/') return;
+    secObserver = new IntersectionObserver((entries) => {
+      entries.forEach((en) => { if (en.isIntersecting) setActive(en.target.id); });
+    }, { rootMargin: '-40% 0px -55% 0px' });
+    ['projects', 'experience', 'contact'].forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) secObserver!.observe(el);
+    });
+  }
+
+  document.addEventListener('astro:page-load', initNavState);
+
+  // event delegation so the handler survives ViewTransitions body swaps
+  document.addEventListener('click', (e) => {
+    const t = e.target as HTMLElement;
+    const nav = document.getElementById('mainNav');
+    if (!nav) return;
+    if (t.closest('#menu-btn')) {
+      const open = nav.classList.toggle('open');
+      document.getElementById('menu-btn')!.setAttribute('aria-expanded', String(open));
+    } else if (t.closest('.nav-links a')) {
+      nav.classList.remove('open');
+    }
   });
 
   function initHeader() {
@@ -207,7 +172,7 @@
     const html = document.documentElement;
 
     // Re-apply scroll class immediately in case the page loaded while scrolled.
-    if (mainNav) mainNav.classList.toggle('nav-scrolled', window.scrollY > 0);
+    if (mainNav) mainNav.classList.toggle('nav-scrolled', window.scrollY > 40);
 
     if (!toggleBtn) return;
 

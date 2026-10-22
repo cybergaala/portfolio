@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "@fontsource-variable/geist";
+@import "@fontsource-variable/geist-mono";
 @import "@fontsource-variable/bricolage-grotesque";
 
 html {
@@ -7,14 +8,21 @@ html {
 }
 
 :root {
-  --accent: #d9480f;
-  --accent-soft: rgba(217, 72, 15, 0.12);
-  --fg: #1c1712;
-  --fg-muted: rgba(28, 23, 18, 0.66);
-  --fg-faint: rgba(28, 23, 18, 0.46);
-  --border: rgba(28, 23, 18, 0.16);
-  --card: #fffdf8;
-  --font-display: "Bricolage Grotesque Variable", "Geist Variable", sans-serif;
+  /* accent: red (Edgar's favorite); syntax colors follow Xcode's default themes */
+  --accent: #e06c75;
+  --accent-soft: rgba(224, 108, 117, 0.1);
+  --fg: #1d1d1f;
+  --fg-muted: rgba(29, 29, 31, 0.68);
+  --fg-faint: rgba(29, 29, 31, 0.5);
+  --border: rgba(29, 29, 31, 0.12);
+  --card: #ffffff;
+  --syn-kw: #9b2393;
+  --syn-str: #c41a16;
+  --syn-type: #0b4f79;
+  --syn-num: #1c00cf;
+  --syn-com: #5d6c79;
+  --font-display: "Geist Variable", sans-serif;
+  --font-mono: "Geist Mono Variable", ui-monospace, monospace;
   --accent-dark: #000d8a;
   --black: 15, 18, 25;
   --gray: 96, 115, 159;
@@ -23,18 +31,23 @@ html {
   --gray-gradient: rgba(var(--gray-light), 50%), #fff;
   --box-shadow: 0 2px 6px rgba(var(--gray), 25%),
     0 8px 24px rgba(var(--gray), 33%), 0 16px 32px rgba(var(--gray), 33%);
-  --body-bg: #f4eee2;
+  --body-bg: #f6f6f4;
 }
 
 html.dark {
-  --accent: #ff8a4c;
-  --accent-soft: rgba(255, 138, 76, 0.16);
-  --fg: #f3ebde;
-  --fg-muted: rgba(243, 235, 222, 0.66);
-  --fg-faint: rgba(243, 235, 222, 0.46);
-  --border: rgba(243, 235, 222, 0.16);
-  --card: #221d17;
-  --body-bg: #16130f;
+  --accent: #ff9e9e;
+  --accent-soft: rgba(255, 158, 158, 0.1);
+  --fg: #e8e8ea;
+  --fg-muted: rgba(232, 232, 234, 0.68);
+  --fg-faint: rgba(232, 232, 234, 0.46);
+  --border: rgba(232, 232, 234, 0.09);
+  --card: #1c1c21;
+  --syn-kw: #ff7ab2;
+  --syn-str: #fc6a5d;
+  --syn-type: #6bdfff;
+  --syn-num: #d0bf69;
+  --syn-com: #7f8c98;
+  --body-bg: #141417;
   --gray: 200, 210, 240;
   --gray-light: 45, 50, 70;
   --gray-dark: 229, 233, 240;
@@ -44,7 +57,6 @@ html.dark {
 
 body {
   background-color: var(--body-bg);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .4 0 0 0 0 .3 0 0 0 0 .2 0 0 0 .07 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   font-family: "Geist Variable", sans-serif;
   overflow-x: hidden;
   margin: 0;

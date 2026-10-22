@@ -21,8 +21,7 @@ const { title, description, lang = 'en' } = Astro.props;
     <script is:inline>
       (function applyTheme() {
         const saved = localStorage.getItem('theme');
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        if (saved === 'dark' || (!saved && prefersDark)) {
+        if (saved !== 'light') {
           document.documentElement.classList.add('dark');
         } else {
           document.documentElement.classList.remove('dark');
@@ -30,8 +29,7 @@ const { title, description, lang = 'en' } = Astro.props;
       })();
       document.addEventListener('astro:after-swap', function() {
         const saved = localStorage.getItem('theme');
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        if (saved === 'dark' || (!saved && prefersDark)) {
+        if (saved !== 'light') {
           document.documentElement.classList.add('dark');
         } else {
           document.documentElement.classList.remove('dark');
