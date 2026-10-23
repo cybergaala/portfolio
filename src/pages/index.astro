@@ -6,8 +6,8 @@ import { experience, type Role } from '../data/experience';
 import { projects } from '../data/projects';
 // ANSI half-block art, generated with scripts/ascii-art.py --ansi (the .ascii.json files keep the earlier ASCII take)
 import art from '../data/hero-art.json';
-// color blocks taken from the art itself (scripts/ascii-art.py --palette)
-import palette from '../data/hero-palette.json';
+// fastfetch color blocks, drawn from the theme tokens so they follow light/dark
+const palette = ['--accent', '--syn-str', '--syn-kw', '--syn-type', '--syn-num', '--syn-com', '--fg'];
 
 // art only holds ASCII and hex colors from our own script, so it is safe as raw HTML
 const toHtml = (rows: typeof art) =>
@@ -24,7 +24,7 @@ const fetch: [string, string][] = [
   ['User', 'Edgar Mejía'],
   ['Host', 'PBS El Salvador'],
   ['Kernel', 'Mobile Developer'],
-  ['Uptime', '6+ years shipping'],
+  ['Uptime', '8+ years shipping'],
   ['Packages', 'Swift, Kotlin, Flutter'],
   ['CPU', 'Coca-Cola 🥤 (no coffee)'],
   ['Memory', 'girl dad 👧🏻 · cat 🐱'],
@@ -127,11 +127,11 @@ const selected = commits.findIndex((c) => c.job?.current);
           <div class="ff">
             <pre class="ff-art" aria-hidden="true" set:html={toHtml(art)} />
             <div class="ff-info">
-              <p class="ff-title"><span class="ff-key">edgar</span>@<span class="ff-key">san-salvador</span></p>
+              <p class="ff-title"><span class="ff-key">user</span>@<span class="ff-key">localhost</span></p>
               <p class="ff-rule" aria-hidden="true">------------------</p>
               {fetch.map(([k, v]) => <p><span class="ff-key">{k}</span>: {v}</p>)}
               <p><span class="ff-key">Status</span>: <span class="dot" aria-hidden="true"></span> open to new projects</p>
-              <p class="ff-colors" aria-hidden="true">{palette.map((c) => <span style={`background:${c}`}></span>)}</p>
+              <p class="ff-colors" aria-hidden="true">{palette.map((c) => <span style={`background:var(${c})`}></span>)}</p>
             </div>
           </div>
           <p class="term-cmd"><span class="path">~</span> $ ls ~/links</p>
@@ -147,11 +147,11 @@ const selected = commits.findIndex((c) => c.job?.current);
 
   <nav class="history mono" aria-label="Sections">
     <ol>
-      <li><a href="#hero" data-sec="hero"><span class="hp">~ $</span> fastfetch</a></li>
-      <li><a href="#projects" data-sec="projects"><span class="hp">~ $</span> ls -l ~/projects</a></li>
-      <li><a href="#writing" data-sec="writing"><span class="hp">~ $</span> ls -lt ~/blog</a></li>
-      <li><a href="#experience" data-sec="experience"><span class="hp">~ $</span> lazygit</a></li>
-      <li><a href="#contact" data-sec="contact"><span class="hp">~ $</span> mail edgar</a></li>
+      <li><a href="#hero" data-sec="hero">Home</a></li>
+      <li><a href="#projects" data-sec="projects">Projects</a></li>
+      <li><a href="#writing" data-sec="writing">Writing</a></li>
+      <li><a href="#experience" data-sec="experience">Experience</a></li>
+      <li><a href="#contact" data-sec="contact">Contact</a></li>
     </ol>
   </nav>
 
@@ -169,7 +169,7 @@ const selected = commits.findIndex((c) => c.job?.current);
             return (
               <a href={link ?? '#'} class="ls-row" {...(link ? { target: '_blank', rel: 'noopener' } : {})}>
                 <span class="ls-perm">{link ? 'lrwxr-xr-x' : 'drwxr-xr-x'}</span>
-                <span class="ls-owner">edgar</span>
+                <span class="ls-owner">dev</span>
                 <span class="ls-group">{p.tags[0].toLowerCase()}</span>
                 <span class="ls-size">4.0K</span>
                 <span class="ls-name dir">{link ? <>{p.title} <span class="ls-arrow">-&gt; {linkTarget(link)}</span></> : `${p.title}/`}</span>
@@ -192,7 +192,7 @@ const selected = commits.findIndex((c) => c.job?.current);
           {posts.map((post) => (
             <a href={`/blog/${post.slug.replace('en/', '')}`} class="ls-row">
               <span class="ls-perm">-rw-r--r--</span>
-              <span class="ls-owner">edgar</span>
+              <span class="ls-owner">dev</span>
               <span class="ls-group">staff</span>
               <span class="ls-size">{lsSize(post.body.length)}</span>
               <span class="ls-date">{lsDate(post.data.pubDate)}</span>
@@ -239,7 +239,7 @@ const selected = commits.findIndex((c) => c.job?.current);
             <div class="lg-detail" data-detail={i} hidden={i !== selected}>
               <p><span class="lg-hash">commit {hash(c.msg!)}</span>{c.labels && <span> ({c.labels.map(([t]) => t).join(', ')})</span>}</p>
               {c.parents && <p>{'Merge:  '}{c.parents.map((id) => hash(jobMsg(role[id]))).join(' ')}</p>}
-              <p>Author: Edgar Mejía &lt;contact@edgarmejia.com&gt;</p>
+              <p>Author: &lt;{email}&gt;</p>
               {c.date && <p>{'Date:   '}{c.date}</p>}
               <p class="lg-body">{c.msg}</p>
               {c.job && <p class="lg-body lg-desc">{c.job.meta}</p>}
@@ -262,12 +262,12 @@ const selected = commits.findIndex((c) => c.job?.current);
   <section id="contact" class="section">
     <div class="page-container">
       <header class="sec-head reveal">
-        <p class="cmd">$ mail edgar</p>
+        <p class="cmd">$ mail dev</p>
         <h2 class="sec-title">Contact</h2>
       </header>
       <div class="mail mono reveal">
         <p class="mail-note"># freelance, a full-time role, or just cats. I usually reply within a day.</p>
-        <p class="mail-to"><span class="ff-key">To</span>: edgar &lt;<button type="button" class="copy-email" data-email={email}><span class="copy-label">{email}</span></button>&gt; <span class="copy-hint">[copy]</span></p>
+        <p class="mail-to"><span class="ff-key">To</span>: &lt;<button type="button" class="copy-email" data-email={email}><span class="copy-label">{email}</span></button>&gt; <span class="copy-hint">[copy]</span></p>
         <form id="contact-form" name="contact" method="POST" data-netlify="true">
           <input type="hidden" name="form-name" value="contact" />
           <div class="mail-row">
@@ -333,7 +333,7 @@ const selected = commits.findIndex((c) => c.job?.current);
       .hero { padding-top: 6rem; }
     }
 
-    /* Command history: section links as a timeline of executed commands (wide screens only) */
+    /* Section timeline (wide screens only) */
     .history { display: none; }
 
     @media (min-width: 1360px) {
@@ -370,7 +370,6 @@ const selected = commits.findIndex((c) => c.job?.current);
 
     .history a { color: var(--fg-faint); text-decoration: none; white-space: nowrap; transition: color 0.2s; }
     .history a:hover { color: var(--fg); }
-    .hp { color: inherit; }
 
     /* already ran: every command before the running one */
     .history li:has(~ li .active) a { color: var(--fg-muted); }
@@ -378,7 +377,6 @@ const selected = commits.findIndex((c) => c.job?.current);
 
     /* running now */
     .history a.active { color: var(--fg); }
-    .history a.active .hp { color: var(--accent); }
     .history li:has(.active)::before { background: var(--accent); border-color: var(--accent); }
 
     /* Sections */
