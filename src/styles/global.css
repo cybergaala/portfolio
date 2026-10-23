@@ -1,7 +1,5 @@
 @import "tailwindcss";
-@import "@fontsource-variable/geist";
 @import "@fontsource-variable/geist-mono";
-@import "@fontsource-variable/bricolage-grotesque";
 
 html {
   scroll-behavior: smooth;
@@ -21,7 +19,6 @@ html {
   --syn-type: #0b4f79;
   --syn-num: #1c00cf;
   --syn-com: #5d6c79;
-  --font-display: "Geist Variable", sans-serif;
   --font-mono: "Geist Mono Variable", ui-monospace, monospace;
   --accent-dark: #000d8a;
   --black: 15, 18, 25;
@@ -57,7 +54,7 @@ html.dark {
 
 body {
   background-color: var(--body-bg);
-  font-family: "Geist Variable", sans-serif;
+  font-family: var(--font-mono);
   overflow-x: hidden;
   margin: 0;
   padding: 0;
@@ -212,10 +209,8 @@ html:not([data-theme-transition])::view-transition-new(root) {
 
 .sec-title {
   margin: 0;
-  font-family: var(--font-display);
   font-weight: 600;
   font-size: clamp(1.6rem, 3vw, 2rem);
-  letter-spacing: -0.03em;
   color: var(--fg);
 }
 
