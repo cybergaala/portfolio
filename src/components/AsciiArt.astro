@@ -1,0 +1,38 @@
+---
+import { artToHtml } from '../data/art-html';
+
+// Renders art from scripts/ascii-art.py in a post.
+// paper pins the background the art was made for, so it reads the same in either site theme.
+interface Props {
+  rows: string[][][];
+  paper?: 'dark' | 'light';
+  label: string;
+}
+
+const { rows, paper = 'dark', label } = Astro.props;
+
+const html = artToHtml(rows);
+---
+
+<figure class="ascii-art">
+  <pre class={paper} role="img" aria-label={label} set:html={html} />
+</figure>
+
+<style>
+  .ascii-art { margin: 1.5rem 0; }
+
+  /* 128 columns: shrink the glyphs so the whole piece fits the post column; .ascii-art pre outranks the post's code block styles */
+  .ascii-art pre {
+    margin: 0;
+    padding: 1rem;
+    overflow: hidden;
+    font: min(9px, calc((100vw - 4rem) / 77)) / 1 var(--font-mono);
+    letter-spacing: 0;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    user-select: none;
+  }
+
+  .dark { background: #141417; }
+  .light { background: #f6f6f4; }
+</style>
