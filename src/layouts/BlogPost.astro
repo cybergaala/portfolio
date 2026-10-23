@@ -29,7 +29,7 @@ const formatted = pubDate.toLocaleDateString(dateLocale, {
 ---
 
 <Layout title={`${title} — Edgar Mejía`} description={description} lang={lang}>
-  <div id="reading-progress-bar" aria-hidden="true"></div>
+  <p id="reading-progress" aria-hidden="true"><span>{slug ?? 'post'}.md <span class="rp-ro">[RO]</span></span><span class="rp-pos">Top</span></p>
   <article class="post-article">
     <div class="page-container">
       <a href={basePath} class="back-link">{t('blog.back')}</a>
@@ -43,6 +43,29 @@ const formatted = pubDate.toLocaleDateString(dateLocale, {
         </p>
         <h1 class="post-title">{title}</h1>
         <p class="post-desc">{description}</p>
+        <p class="post-author">
+          <button type="button" class="post-avatar" id="profile-open" aria-haspopup="dialog" aria-label="Open profile"></button>
+          Edgar Mejía
+        </p>
+        <dialog class="profile" id="profile" aria-labelledby="profile-title">
+          <span class="profile-title" id="profile-title">Profile</span>
+          <form method="dialog"><button class="profile-close" aria-label="Close">[x]</button></form>
+          <div class="profile-body">
+            <img src="/img/main.webp" alt="" class="profile-photo" loading="lazy" />
+            <div class="profile-info">
+              <p class="profile-name">Edgar Mejía</p>
+              <p>Mobile Developer</p>
+              <p>San Salvador, SV</p>
+              <p>8+ years shipping</p>
+              <p>Swift, Kotlin, Flutter</p>
+              <p class="profile-links">
+                <a href="https://github.com/cybergaala" target="_blank" rel="noopener">github ↗</a>
+                <a href="https://www.linkedin.com/in/mejia-edgar/" target="_blank" rel="noopener">linkedin ↗</a>
+                <a href="mailto:contact@edgarmejia.com">email</a>
+              </p>
+            </div>
+          </div>
+        </dialog>
         {tags && tags.length > 0 && (
           <div class="post-tags">
             {tags.map(tag => <span class="post-tag">{tag}</span>)}
@@ -103,16 +126,27 @@ const formatted = pubDate.toLocaleDateString(dateLocale, {
 
 <style>
   /* colors come from the theme tokens in global.css, so dark mode needs no overrides */
-  #reading-progress-bar {
+  /* vim-style status line: file name on the left, scroll position (Top / NN% / Bot) on the right */
+  #reading-progress {
     position: fixed;
-    top: 0;
     left: 0;
-    width: 0%;
-    height: 2px;
-    background: var(--accent);
-    z-index: 9999;
-    transition: width 0.1s linear;
+    right: 0;
+    bottom: 0;
+    z-index: 50;
+    display: flex;
+    justify-content: space-between;
+    margin: 0;
+    padding: 0.3rem 1rem;
+    font: 0.75rem var(--font-mono);
+    color: var(--fg-muted);
+    background-color: color-mix(in srgb, var(--body-bg) 85%, transparent);
+    backdrop-filter: blur(8px);
+    border-top: 1px solid var(--border);
+    pointer-events: none;
   }
+
+  .rp-ro { color: var(--fg-faint); }
+  .rp-pos { color: var(--accent); }
 
   .post-article { padding: 8rem 0; }
 
@@ -146,10 +180,8 @@ const formatted = pubDate.toLocaleDateString(dateLocale, {
 
   .post-title {
     margin: 0 0 1rem;
-    font-family: var(--font-display);
     font-size: clamp(2rem, 5vw, 3.25rem);
     font-weight: 600;
-    letter-spacing: -0.03em;
     line-height: 1.08;
     color: var(--fg);
   }
@@ -160,6 +192,75 @@ const formatted = pubDate.toLocaleDateString(dateLocale, {
     line-height: 1.6;
     color: var(--fg-muted);
   }
+
+  .post-author { display: flex; align-items: center; gap: 0.6rem; margin: 0 0 1.25rem; font-size: 0.85rem; color: var(--fg); }
+
+  /* ponytail: crops the head out of the about photo with CSS; swap for a real square avatar file if one exists */
+  .post-avatar {
+    width: 2.5rem;
+    height: 2.5rem;
+    flex-shrink: 0;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    padding: 0;
+    cursor: pointer;
+    background: url('/img/main.webp') 0% 22% / 214% auto no-repeat;
+  }
+
+  .post-avatar:hover, .post-avatar:focus-visible { border-color: var(--accent); outline: none; }
+
+  /* Profile: a lazygit-style panel in a native <dialog> */
+  .profile {
+    width: min(36rem, calc(100vw - 2rem));
+    margin: auto; /* Tailwind's reset zeroes it, which pins the dialog top-left */
+    padding: 1.4rem 1.1rem 1.1rem;
+    overflow: visible;
+    font: 0.8rem/1.65 var(--font-mono);
+    color: var(--fg-muted);
+    background: var(--body-bg);
+    border: 1px solid var(--syn-type);
+    border-radius: 8px;
+  }
+
+  .profile::backdrop { background: rgba(0, 0, 0, 0.55); }
+  .profile p { margin: 0; }
+
+  .profile-title {
+    position: absolute;
+    top: -0.6rem;
+    left: 0.7rem;
+    padding: 0 0.35rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--syn-type);
+    background: var(--body-bg);
+  }
+
+  .profile-close {
+    position: absolute;
+    top: 0.4rem;
+    right: 0.6rem;
+    font: inherit;
+    color: var(--fg-faint);
+    background: none;
+    border: none;
+    cursor: pointer;
+  }
+
+  .profile-close:hover, .profile-close:focus-visible { color: var(--accent); outline: none; }
+
+  .profile-body { display: flex; align-items: center; gap: 1.25rem; }
+  .profile-photo { width: 45%; aspect-ratio: 1; flex-shrink: 0; object-fit: cover; border: 1px solid var(--border); border-radius: 6px; }
+  .profile-info { min-width: 0; }
+  .profile-name { font-weight: 600; color: var(--fg); margin-bottom: 0.4rem !important; }
+  .profile-links { display: flex; flex-wrap: wrap; gap: 0 2ch; margin-top: 1rem !important; }
+
+  @media (max-width: 480px) {
+    .profile-body { flex-direction: column; align-items: stretch; }
+    .profile-photo { width: 100%; }
+  }
+  .profile-links a { color: var(--accent); text-decoration: none; }
+  .profile-links a:hover { text-decoration: underline; }
 
   .post-tags { display: flex; flex-wrap: wrap; gap: 0.3rem 1.5ch; font: 0.75rem var(--font-mono); }
   .post-tag { color: var(--syn-kw); }
@@ -232,8 +333,6 @@ const formatted = pubDate.toLocaleDateString(dateLocale, {
 
   .post-body :global(h2),
   .post-body :global(h3) {
-    font-family: var(--font-display);
-    letter-spacing: -0.02em;
     color: var(--fg);
     text-align: left;
   }
@@ -252,7 +351,6 @@ const formatted = pubDate.toLocaleDateString(dateLocale, {
   .post-body :global(> p:first-of-type::first-letter) {
     float: left;
     margin: 0.05em 0.1em 0 0;
-    font-family: var(--font-display);
     font-size: 4.5em;
     font-weight: 600;
     line-height: 0.8;
@@ -404,14 +502,17 @@ const formatted = pubDate.toLocaleDateString(dateLocale, {
   }
 
   function initProgressBar() {
-    const bar = document.getElementById('reading-progress-bar');
+    const bar = document.getElementById('reading-progress');
     if (!bar) return;
+    const pos = bar.querySelector('.rp-pos')!;
 
     const update = () => {
       const scrollTop = window.scrollY;
       const docHeight = document.documentElement.scrollHeight - window.innerHeight;
       const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
-      bar.style.width = `${Math.min(100, progress)}%`;
+      const p = Math.min(100, Math.round(progress));
+      // same words vim uses in its ruler
+      pos.textContent = docHeight <= 0 ? 'All' : p === 0 ? 'Top' : p === 100 ? 'Bot' : `${p}%`;
     };
 
     window.addEventListener('scroll', update, { passive: true });
@@ -465,6 +566,17 @@ const formatted = pubDate.toLocaleDateString(dateLocale, {
     btn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
   }
 
+  function initProfile() {
+    const dialog = document.getElementById('profile') as HTMLDialogElement | null;
+    if (!dialog) return;
+    document.getElementById('profile-open')?.addEventListener('click', () => dialog.showModal());
+    // close on backdrop click: the click lands on the dialog element itself, outside its panel box
+    dialog.addEventListener('click', (e) => {
+      const r = dialog.getBoundingClientRect();
+      if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) dialog.close();
+    });
+  }
+
   function initBlurUp() {
     const images = document.querySelectorAll<HTMLImageElement>('.post-banner img, .post-body img');
     const observer = new IntersectionObserver((entries) => {
@@ -488,6 +600,7 @@ const formatted = pubDate.toLocaleDateString(dateLocale, {
     initReadingTime();
     initProgressBar();
     initBackToTop();
+    initProfile();
     initBlurUp();
   });
 </script>

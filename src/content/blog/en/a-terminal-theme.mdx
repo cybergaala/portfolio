@@ -1,0 +1,80 @@
+---
+title: "A terminal theme for this site"
+description: "I swapped the editorial look for a shell session: fastfetch, ls, lazygit and one monospace font everywhere."
+pubDate: 2026-10-22
+tags: ["design", "web", "astro", "terminal"]
+---
+
+import AsciiArt from '../../../components/AsciiArt.astro';
+import heroAscii from '../../../data/hero-art.ascii.json';
+import heroAsciiLight from '../../../data/hero-art-light.ascii.json';
+
+When I [first built this portfolio](/blog/building-this-portfolio) I went for an editorial look: big type, lots of whitespace, a typewriter effect. It worked, but it never felt like mine. I spend most of my day in a terminal, so this update turns the whole site into one.
+
+## The landing is a shell session
+
+Every section on the homepage is now the output of a command you'd actually run:
+
+- **`fastfetch`** is the hero. ASCII art on the left, system info on the right. The keys follow fastfetch's real modules, so `Kernel` is my role, `Uptime` is how long I've been shipping, and `Packages` is the stack I use.
+- **`ls -l ~/projects`** lists projects as directories, with symlinks pointing to where each one lives.
+- **`ls -lt ~/blog | head -3`** shows the latest three posts, newest first.
+- **`lazygit`** is my experience. Each job is a commit, and the patch panel shows the details for the selected one.
+- **`mail`** is the contact form, built with the same panels as lazygit.
+
+On wide screens there's a small timeline on the left that tracks where you are on the page. At first it showed the commands too, but that repeated what every section header already says, so now it only shows the section titles.
+
+## One font
+
+The previous version mixed a sans serif for headings with a monospace for code. Now everything uses Geist Mono: headings, body text, blog posts. A terminal has one font, so the site does too. I also dropped two font packages I no longer needed.
+
+## Colors from the theme
+
+Red is the accent color, and the rest of the palette comes from the syntax highlighting colors. The color blocks under fastfetch used to be sampled from the ASCII art, so they never matched anything else. Now they're drawn from the same theme tokens as everything else, so they follow light and dark mode.
+
+## ASCII everywhere
+
+Decoration is made of characters, not images: the starry sky behind the page, the icon in the footer, and now a vim-style status line at the bottom of every post that shows the file you're reading and how far in you are:
+
+```
+a-terminal-theme.md [RO]                                  42%
+```
+
+### What didn't make it
+
+Not every piece of ASCII survived. The first fastfetch logo was my initials in the ANSI Shadow figlet font, the way a distro shows its logo:
+
+{/* line-height 1 so the box-drawing rows join up */}
+<pre style="line-height: 1">{`███████╗███╗   ███╗
+██╔════╝████╗ ████║
+█████╗  ██╔████╔██║
+██╔══╝  ██║╚██╔╝██║
+███████╗██║ ╚═╝ ██║
+╚══════╝╚═╝     ╚═╝`}</pre>
+
+Then came the picture. The first take used plain ASCII characters, each one colored to draw the image:
+
+<AsciiArt rows={heroAscii} label="Earlier hero art drawn with colored ASCII characters" />
+
+It had a twin for light mode, with near-white areas left blank and every color pulled darker so it read as ink on paper:
+
+<AsciiArt rows={heroAsciiLight} paper="light" label="Light mode version of the earlier hero art" />
+
+Both got replaced by the ANSI half-block version that's there now. Each character cell holds two pixels, one in the text color and one in the background, so it has twice the vertical detail.
+
+The footer had a cat for a while, before the current icon took its place:
+
+```
+ /\_/\
+( o.o )
+ > ^ <
+```
+
+I also tried a Matrix-style rain of falling characters as the background. It was too busy, so the stars stayed.
+
+## The blog
+
+Each post now opens like `cat post-name.md` and shows the author with a small avatar. Click the avatar and a profile panel opens. It's a native `<dialog>` element, so Escape, focus handling and the backdrop come for free.
+
+## Less of my name
+
+My name used to show up in the header, the fastfetch title, the file owners in every `ls` and the footer. That was too much. Now the header is just `~/`, the fastfetch title is a generic `user@localhost`, and my name appears once, in the `User` row, where it belongs.

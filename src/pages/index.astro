@@ -4,14 +4,11 @@ import Sky from "../components/Sky.astro";
 import { getCollection } from 'astro:content';
 import { experience, type Role } from '../data/experience';
 import { projects } from '../data/projects';
-// ANSI half-block art, generated with scripts/ascii-art.py --ansi (the .ascii.json files keep the earlier ASCII take)
+// ANSI half-block art, generated with scripts/ascii-art.py --ansi; hovering it reveals the earlier ASCII take
 import art from '../data/hero-art.json';
+import { artToHtml } from '../data/art-html';
 // fastfetch color blocks, drawn from the theme tokens so they follow light/dark
 const palette = ['--accent', '--syn-str', '--syn-kw', '--syn-type', '--syn-num', '--syn-com', '--fg'];
-
-// art only holds ASCII and hex colors from our own script, so it is safe as raw HTML
-const toHtml = (rows: typeof art) =>
-  rows.map((row) => row.map(([fg, bg, t]) => (fg ? `<span style="color:${fg}${bg ? `;background:${bg}` : ''}">${t}</span>` : t)).join('')).join('\n');
 
 const posts = (await getCollection('blog', ({ id, data }) => id.startsWith('en/') && !data.draft))
   .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
@@ -125,7 +122,10 @@ const selected = commits.findIndex((c) => c.job?.current);
         <div class="term-body mono">
           <p class="term-cmd"><span class="path">~</span> $ fastfetch</p>
           <div class="ff">
-            <pre class="ff-art" aria-hidden="true" set:html={toHtml(art)} />
+            <div class="ff-art-wrap" aria-hidden="true">
+              <pre class="ff-art" set:html={artToHtml(art)} />
+              <canvas class="ff-ascii"></canvas>
+            </div>
             <div class="ff-info">
               <p class="ff-title"><span class="ff-key">user</span>@<span class="ff-key">localhost</span></p>
               <p class="ff-rule" aria-hidden="true">------------------</p>
@@ -319,6 +319,31 @@ const selected = commits.findIndex((c) => c.job?.current);
     /* cells exactly one row tall so the half blocks stack into square pixels */
     .ff-art :global(span) { display: inline-block; height: 1em; vertical-align: top; }
 
+    /* Hover lens: the ASCII take sits on top of the ANSI art, same 128x43 grid, and only
+       shows inside a circle that follows the pointer (--x/--y set from JS) */
+    @property --lens { syntax: '<length>'; inherits: true; initial-value: 0px; }
+
+    .ff-art-wrap { position: relative; --lens: 0px; transition: --lens 0.35s ease-out; -webkit-touch-callout: none; }
+
+    /* set from JS for mouse pointers only, see initArtLens */
+    .ff-art-wrap.hovering { --lens: 70px; }
+
+    /* Press and hold (mouse or finger) grows the lens, starting slow and speeding up the bigger it gets
+       (ease-in that keeps accelerating until the end); letting go shrinks it back with the transition above */
+    .ff-art-wrap.pressing { --lens: 700px; transition: --lens 1.1s cubic-bezier(0.7, 0, 0.84, 0); }
+
+    /* the ASCII take is drawn once into a canvas (see drawAscii): animating the mask over 3k text spans
+       repainted all of them every frame and stuttered, a canvas repaints as a single bitmap */
+    .ff-ascii {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      -webkit-mask-image: radial-gradient(circle var(--lens) at var(--x, 50%) var(--y, 50%), #000 calc(100% - 6px), transparent 100%);
+      mask-image: radial-gradient(circle var(--lens) at var(--x, 50%) var(--y, 50%), #000 calc(100% - 6px), transparent 100%);
+      pointer-events: none;
+    }
+
     .ff-links { display: flex; flex-wrap: wrap; gap: 0.4rem 2rem; }
     .ff-links a { color: var(--syn-type); text-decoration: none; }
     .ff-links a:hover { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
@@ -327,6 +352,10 @@ const selected = commits.findIndex((c) => c.job?.current);
 
     @media (max-width: 960px) {
       .ff { grid-template-columns: 1fr; gap: 1.25rem; }
+
+      /* stacked layout: the art bleeds past the container padding and fills the screen width (128 cols ≈ 77em) */
+      .ff-art-wrap { margin-inline: -1rem; }
+      .ff-art { font-size: calc(100vw / 77); }
     }
 
     @media (max-width: 900px) {
@@ -514,6 +543,33 @@ const selected = commits.findIndex((c) => c.job?.current);
 </Layout>
 
 <script>
+  import artAscii from '../data/hero-art.ascii.json';
+  import artAsciiLight from '../data/hero-art-light.ascii.json';
+
+  // paints the ASCII take on the same 128x43 grid as the ANSI art; each theme gets the take made for its paper
+  function drawAscii(canvas: HTMLCanvasElement, art: HTMLElement) {
+    const rows = document.documentElement.classList.contains('dark') ? artAscii : artAsciiLight;
+    const { width, height } = art.getBoundingClientRect();
+    const dpr = devicePixelRatio || 1;
+    canvas.width = Math.round(width * dpr);
+    canvas.height = Math.round(height * dpr);
+    const ctx = canvas.getContext('2d')!;
+    const cw = width / 128, ch = height / rows.length;
+    ctx.scale(dpr, dpr);
+    ctx.fillStyle = getComputedStyle(document.body).backgroundColor;
+    ctx.fillRect(0, 0, width, height);
+    ctx.font = `${ch}px ${getComputedStyle(art).fontFamily}`;
+    ctx.textBaseline = 'middle';
+    rows.forEach((row, y) => {
+      let x = 0;
+      for (const [color, text] of row) {
+        ctx.fillStyle = color || 'transparent';
+        // one glyph per cell so the canvas grid can't drift from the DOM grid
+        for (const c of text) ctx.fillText(c, (x++) * cw, (y + 0.5) * ch);
+      }
+    });
+  }
+
   function initLazygit() {
     const root = document.querySelector<HTMLElement>('[data-lazygit]');
     if (!root) return;
@@ -560,6 +616,63 @@ const selected = commits.findIndex((c) => c.job?.current);
   }
 
   document.addEventListener('astro:page-load', initReveal);
+
+  let lensCleanup: (() => void) | undefined;
+
+  function initArtLens() {
+    lensCleanup?.();
+    const wrap = document.querySelector<HTMLElement>('.ff-art-wrap');
+    if (!wrap) return;
+    const canvas = wrap.querySelector<HTMLCanvasElement>('.ff-ascii')!;
+    const art = wrap.querySelector<HTMLElement>('.ff-art')!;
+    const redraw = () => drawAscii(canvas, art);
+    // redraw when the font is ready, the art resizes (mobile scales it) or the theme flips
+    document.fonts.ready.then(redraw);
+    const resized = new ResizeObserver(redraw);
+    resized.observe(art);
+    const themed = new MutationObserver(redraw);
+    themed.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    // hover is tracked by hand, not with :hover: a wheel or trackpad scroll moves the art under a still
+    // cursor without firing pointer events, so the last cursor position is rechecked on every scroll
+    let last: { x: number; y: number } | undefined;
+    const place = () => {
+      if (!last) return;
+      const r = wrap.getBoundingClientRect();
+      const inside = last.x >= r.left && last.x <= r.right && last.y >= r.top && last.y <= r.bottom;
+      wrap.classList.toggle('hovering', inside);
+      if (!inside) return wrap.classList.remove('pressing');
+      wrap.style.setProperty('--x', `${last.x - r.left}px`);
+      wrap.style.setProperty('--y', `${last.y - r.top}px`);
+    };
+    // the whole page, so scrolling the art back under a resting cursor reopens the lens
+    const track = (e: PointerEvent) => {
+      // touch has no hover: the lens only opens while a finger holds it down
+      if (e.pointerType !== 'mouse' && !wrap.classList.contains('pressing')) return;
+      last = { x: e.clientX, y: e.clientY };
+      place();
+    };
+    const close = () => wrap.classList.remove('pressing', 'hovering');
+
+    wrap.addEventListener('pointerdown', (e) => { wrap.classList.add('pressing'); track(e); });
+    wrap.addEventListener('pointerup', (e) => { wrap.classList.remove('pressing'); if (e.pointerType !== 'mouse') close(); });
+    wrap.addEventListener('pointercancel', close);
+    // a long press on a phone would otherwise open the image/text menu
+    wrap.addEventListener('contextmenu', (e) => e.preventDefault());
+    document.addEventListener('pointermove', track);
+    // leaving the browser window fires no pointermove, so close on the page's own leave
+    const leave = () => { last = undefined; close(); };
+    document.documentElement.addEventListener('pointerleave', leave);
+    addEventListener('scroll', place, { passive: true });
+    lensCleanup = () => {
+      resized.disconnect();
+      themed.disconnect();
+      document.removeEventListener('pointermove', track);
+      document.documentElement.removeEventListener('pointerleave', leave);
+      removeEventListener('scroll', place);
+    };
+  }
+
+  document.addEventListener('astro:page-load', initArtLens);
 
   function initContact() {
     const btn = document.querySelector<HTMLButtonElement>('.copy-email');

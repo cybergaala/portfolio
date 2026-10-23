@@ -6,17 +6,12 @@
     <div class="bar page-container">
       <a href="/" class="nav-logo" aria-label="Edgar Mejía, home"><span class="accent">~/</span><span class="cursor" aria-hidden="true"></span></a>
       <ul class="nav-links">
-        <li><a href="/#hero" data-sec="hero">./fastfetch</a></li>
-        <li><a href="/#projects" data-sec="projects">./projects</a></li>
-        <li><a href="/#writing" data-sec="writing">./blog</a></li>
-        <li><a href="/#experience" data-sec="experience">./experience</a></li>
         <li><a href="/#contact" data-sec="contact" class="say-hi">[ say hi ]</a></li>
       </ul>
       <button id="theme-toggle" aria-label="Toggle theme">
         <span class="icon-moon">[dark]</span>
         <span class="icon-sun">[light]</span>
       </button>
-      <button id="menu-btn" aria-label="Menu" aria-expanded="false"></button>
     </div>
   </nav>
 </header>
@@ -33,7 +28,7 @@
     transition: background-color 0.2s, border-color 0.2s;
   }
 
-  nav.nav-scrolled, nav.open {
+  nav.nav-scrolled {
     background-color: color-mix(in srgb, var(--body-bg) 85%, transparent);
     backdrop-filter: blur(8px);
     border-bottom-color: var(--border);
@@ -69,14 +64,10 @@
   .nav-links a:hover { color: var(--fg); }
   .nav-links a.active { color: var(--accent); }
 
-  /* on wide screens the home page shows these as a command history on the left */
-  @media (min-width: 1360px) {
-    :global(body:has(.history)) .nav-links li:has(a:not(.say-hi)) { display: none; }
-  }
   .nav-links a.say-hi { color: var(--accent); }
   .nav-links a.say-hi:hover { color: var(--fg); }
 
-  #theme-toggle, #menu-btn {
+  #theme-toggle {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -92,38 +83,13 @@
     transition: color 0.2s;
   }
 
-  #theme-toggle:hover, #menu-btn:hover { color: var(--fg); }
+  #theme-toggle:hover { color: var(--fg); }
 
   .icon-sun { display: none; }
   .icon-moon { display: block; }
   :global(html.dark) .icon-sun { display: block; }
   :global(html.dark) .icon-moon { display: none; }
 
-  #menu-btn { display: none; margin-left: 0.75rem; }
-  #menu-btn::before { content: "[menu]"; }
-  nav.open #menu-btn::before { content: "[close]"; }
-
-  @media (max-width: 720px) {
-    #theme-toggle { margin-left: 0; }
-    #menu-btn { display: flex; }
-
-    .nav-links {
-      display: none;
-      position: absolute;
-      top: 100%;
-      left: 0;
-      right: 0;
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 0;
-      padding: 0.5rem 1rem 1.25rem;
-      background: var(--body-bg);
-      border-bottom: 1px solid var(--border);
-    }
-
-    nav.open .nav-links { display: flex; }
-    .nav-links a { display: block; padding: 0.55rem 0; font-size: 1rem; }
-  }
 </style>
 
 <script>
@@ -137,13 +103,10 @@
   let secObserver: IntersectionObserver | undefined;
 
   function initNavState() {
-    const nav = document.getElementById('mainNav');
-    // every section link on the page, so the home page's command history lights up too
+    // every section link on the page: [ say hi ] here and the home page's section timeline
     const links = document.querySelectorAll<HTMLAnchorElement>('a[data-sec]');
     const setActive = (id: string) => links.forEach((a) => a.classList.toggle('active', a.dataset.sec === id));
 
-    nav?.classList.remove('open');
-    document.getElementById('menu-btn')?.setAttribute('aria-expanded', 'false');
     secObserver?.disconnect();
 
     if (location.pathname.startsWith('/blog')) return setActive('writing');
@@ -159,19 +122,6 @@
   }
 
   document.addEventListener('astro:page-load', initNavState);
-
-  // event delegation so the handler survives ViewTransitions body swaps
-  document.addEventListener('click', (e) => {
-    const t = e.target as HTMLElement;
-    const nav = document.getElementById('mainNav');
-    if (!nav) return;
-    if (t.closest('#menu-btn')) {
-      const open = nav.classList.toggle('open');
-      document.getElementById('menu-btn')!.setAttribute('aria-expanded', String(open));
-    } else if (t.closest('.nav-links a')) {
-      nav.classList.remove('open');
-    }
-  });
 
   function initHeader() {
     const mainNav = document.getElementById('mainNav');
