@@ -4,7 +4,8 @@ import Sky from "../components/Sky.astro";
 import { getCollection } from 'astro:content';
 import { experience, type Role } from '../data/experience';
 import { projects } from '../data/projects';
-// ANSI half-block art, generated with scripts/ascii-art.py --ansi; hovering it reveals the earlier ASCII take
+// ANSI half-block art, generated with scripts/ascii-art.py --ansi; the earlier ASCII take covers it by default
+// and hovering reveals it (holding the lens swaps which one is the default, see initArtLens)
 import art from '../data/hero-art.json';
 import { artToHtml } from '../data/art-html';
 // fastfetch color blocks, drawn from the theme tokens so they follow light/dark
@@ -18,13 +19,15 @@ const email = 'contact@edgarmejia.com';
 
 // fastfetch-style hero; keys follow fastfetch's module names
 const fetch: [string, string][] = [
-  ['User', 'Edgar Mejía'],
-  ['Host', 'PBS El Salvador'],
-  ['Kernel', 'Mobile Developer'],
-  ['Uptime', '8+ years shipping'],
-  ['Packages', 'Swift, Kotlin, Flutter'],
-  ['CPU', 'Coca-Cola 🥤 (no coffee)'],
-  ['Memory', 'girl dad 👧🏻 · cat 🐱'],
+  ['User', 'Edgar Mejía, mobile developer'],
+  ['OS', 'iOS · Android'],
+  ['Kernel', 'Swift · Kotlin · Flutter'],
+  ['Packages', 'Jetpack Compose, Firebase, Clean Architecture'],
+  ['Host', 'PBS El Salvador (remote)'],
+  ['Uptime', '8+ years shipping apps'],
+  ['Locale', 'es_SV, en_US'],
+  ['CPU', 'Coca-Cola, never coffee'],
+  ['Memory', 'girl dad, one cat'],
 ];
 
 // lazygit-style commit hashes, derived from the company name so they never change
@@ -122,7 +125,7 @@ const selected = commits.findIndex((c) => c.job?.current);
         <div class="term-body mono">
           <p class="term-cmd"><span class="path">~</span> $ fastfetch</p>
           <div class="ff">
-            <div class="ff-art-wrap" aria-hidden="true">
+            <div class="ff-art-wrap swapped" aria-hidden="true">
               <pre class="ff-art" set:html={artToHtml(art)} />
               <canvas class="ff-ascii"></canvas>
             </div>
@@ -314,6 +317,8 @@ const selected = commits.findIndex((c) => c.job?.current);
       letter-spacing: 0;
       user-select: none;
       margin: 0;
+      /* the half-block glyphs are taller than their 1em cells and peek past the box, above the lens canvas */
+      overflow: clip;
     }
 
     /* cells exactly one row tall so the half blocks stack into square pixels */
@@ -323,14 +328,13 @@ const selected = commits.findIndex((c) => c.job?.current);
        shows inside a circle that follows the pointer (--x/--y set from JS) */
     @property --lens { syntax: '<length>'; inherits: true; initial-value: 0px; }
 
-    .ff-art-wrap { position: relative; --lens: 0px; transition: --lens 0.35s ease-out; -webkit-touch-callout: none; }
-
-    /* set from JS for mouse pointers only, see initArtLens */
-    .ff-art-wrap.hovering { --lens: 70px; }
+    /* the lens rests at its hover size and is shown/hidden instantly with visibility; only the
+       press-and-hold growth animates. 70px matches LENS_RADIUS in initArtLens */
+    .ff-art-wrap { position: relative; --lens: 70px; transition: --lens 0.35s ease-out; -webkit-touch-callout: none; }
 
     /* Press and hold (mouse or finger) grows the lens, starting slow and speeding up the bigger it gets
        (ease-in that keeps accelerating until the end); letting go shrinks it back with the transition above */
-    .ff-art-wrap.pressing { --lens: 700px; transition: --lens 1.1s cubic-bezier(0.7, 0, 0.84, 0); }
+    .ff-art-wrap.pressing { --lens: 800px; transition: --lens 1.1s cubic-bezier(0.7, 0, 0.84, 0); }
 
     /* the ASCII take is drawn once into a canvas (see drawAscii): animating the mask over 3k text spans
        repainted all of them every frame and stuttered, a canvas repaints as a single bitmap */
@@ -342,6 +346,22 @@ const selected = commits.findIndex((c) => c.job?.current);
       -webkit-mask-image: radial-gradient(circle var(--lens) at var(--x, 50%) var(--y, 50%), #000 calc(100% - 6px), transparent 100%);
       mask-image: radial-gradient(circle var(--lens) at var(--x, 50%) var(--y, 50%), #000 calc(100% - 6px), transparent 100%);
       pointer-events: none;
+      visibility: hidden;
+    }
+
+    /* set from JS, see initArtLens */
+    .ff-art-wrap:is(.hovering, .pressing) .ff-ascii { visibility: visible; }
+
+    /* swapped is the default (set in the markup): the ASCII take covers the art and the lens cuts a hole
+       showing the ANSI art underneath; holding the full lens for 5s toggles it */
+    /* the canvas is only painted once the font loads: until then hide the ANSI art too, so a refresh
+       doesn't flash it before the ASCII default covers it */
+    .ff-art-wrap:not(.ready) .ff-art { visibility: hidden; }
+
+    .ff-art-wrap.swapped .ff-ascii { visibility: visible; -webkit-mask-image: none; mask-image: none; }
+    .ff-art-wrap.swapped:is(.hovering, .pressing) .ff-ascii {
+      -webkit-mask-image: radial-gradient(circle var(--lens) at var(--x, 50%) var(--y, 50%), transparent calc(100% - 6px), #000 100%);
+      mask-image: radial-gradient(circle var(--lens) at var(--x, 50%) var(--y, 50%), transparent calc(100% - 6px), #000 100%);
     }
 
     .ff-links { display: flex; flex-wrap: wrap; gap: 0.4rem 2rem; }
@@ -617,6 +637,7 @@ const selected = commits.findIndex((c) => c.job?.current);
 
   document.addEventListener('astro:page-load', initReveal);
 
+  const LENS_RADIUS = 70;
   let lensCleanup: (() => void) | undefined;
 
   function initArtLens() {
@@ -625,7 +646,9 @@ const selected = commits.findIndex((c) => c.job?.current);
     if (!wrap) return;
     const canvas = wrap.querySelector<HTMLCanvasElement>('.ff-ascii')!;
     const art = wrap.querySelector<HTMLElement>('.ff-art')!;
-    const redraw = () => drawAscii(canvas, art);
+    const redraw = () => { drawAscii(canvas, art); wrap.classList.add('ready'); };
+    // the visitor's last swap is remembered; storage can throw in private windows, then ASCII stays the default
+    try { if (localStorage.getItem('hero-art') === 'ansi') wrap.classList.remove('swapped'); } catch {}
     // redraw when the font is ready, the art resizes (mobile scales it) or the theme flips
     document.fonts.ready.then(redraw);
     const resized = new ResizeObserver(redraw);
@@ -638,9 +661,12 @@ const selected = commits.findIndex((c) => c.job?.current);
     const place = () => {
       if (!last) return;
       const r = wrap.getBoundingClientRect();
-      const inside = last.x >= r.left && last.x <= r.right && last.y >= r.top && last.y <= r.bottom;
+      // the lens opens as soon as its circle touches the art, before the cursor itself is over it
+      const dx = Math.max(r.left - last.x, 0, last.x - r.right);
+      const dy = Math.max(r.top - last.y, 0, last.y - r.bottom);
+      const inside = Math.hypot(dx, dy) <= LENS_RADIUS;
       wrap.classList.toggle('hovering', inside);
-      if (!inside) return wrap.classList.remove('pressing');
+      if (!inside) return unpress();
       wrap.style.setProperty('--x', `${last.x - r.left}px`);
       wrap.style.setProperty('--y', `${last.y - r.top}px`);
     };
@@ -651,10 +677,28 @@ const selected = commits.findIndex((c) => c.job?.current);
       last = { x: e.clientX, y: e.clientY };
       place();
     };
-    const close = () => wrap.classList.remove('pressing', 'hovering');
+    let hold: ReturnType<typeof setTimeout> | undefined;
+    const unpress = () => { clearTimeout(hold); wrap.classList.remove('pressing'); };
+    const close = () => { unpress(); wrap.classList.remove('hovering'); };
+    // once the press has grown the lens over the whole art, 5 more seconds of holding swaps the default
+    wrap.addEventListener('transitionend', (e) => {
+      if (e.target !== wrap || e.propertyName !== '--lens' || !wrap.classList.contains('pressing')) return;
+      hold = setTimeout(() => {
+        const swapped = wrap.classList.toggle('swapped');
+        try { localStorage.setItem('hero-art', swapped ? 'ascii' : 'ansi'); } catch {}
+        // snap the lens shut without the shrink, so the swap doesn't flash the other art, then let it
+        // inflate back to hover size with the base transition
+        wrap.style.transition = 'none';
+        wrap.style.setProperty('--lens', '0px');
+        unpress();
+        wrap.offsetWidth;
+        wrap.style.transition = '';
+        wrap.style.removeProperty('--lens');
+      }, 5000);
+    });
 
     wrap.addEventListener('pointerdown', (e) => { wrap.classList.add('pressing'); track(e); });
-    wrap.addEventListener('pointerup', (e) => { wrap.classList.remove('pressing'); if (e.pointerType !== 'mouse') close(); });
+    wrap.addEventListener('pointerup', (e) => { unpress(); if (e.pointerType !== 'mouse') close(); });
     wrap.addEventListener('pointercancel', close);
     // a long press on a phone would otherwise open the image/text menu
     wrap.addEventListener('contextmenu', (e) => e.preventDefault());
