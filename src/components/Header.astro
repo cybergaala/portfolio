@@ -164,7 +164,14 @@
       const now = Date.now();
       const rect = toggleBtn.getBoundingClientRect();
       const cx = Math.round(rect.left + rect.width / 2);
-      const cy = Math.round(rect.top + rect.height / 2);
+      // Chrome Android draws view transitions in a box that starts behind the
+      // top URL bar (100lvh), while rect is measured from the visible viewport.
+      const lvhProbe = document.createElement('div');
+      lvhProbe.style.cssText = 'position:fixed;top:0;height:100lvh;visibility:hidden';
+      document.body.append(lvhProbe);
+      const urlBar = Math.max(0, lvhProbe.offsetHeight - window.innerHeight);
+      lvhProbe.remove();
+      const cy = Math.round(rect.top + rect.height / 2 + urlBar);
       html.style.setProperty('--theme-x', cx + 'px');
       html.style.setProperty('--theme-y', cy + 'px');
 
