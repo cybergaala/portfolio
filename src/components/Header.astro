@@ -6,7 +6,7 @@
     <div class="bar page-container">
       <a href="/" class="nav-logo" aria-label="Edgar Mejía, home"><span class="accent">~/home</span><span class="cursor" aria-hidden="true"></span></a>
       <ul class="nav-links">
-        <li><a href="/#contact" data-sec="contact" class="say-hi">[ say hi ]</a></li>
+        <li><a href="/#contact" data-sec="contact" class="say-hi">[ contact ]</a></li>
       </ul>
       <button id="theme-toggle" aria-label="Toggle theme">
         <span class="icon-moon">[dark]</span>
@@ -103,7 +103,7 @@
   let secObserver: IntersectionObserver | undefined;
 
   function initNavState() {
-    // every section link on the page: [ say hi ] here and the home page's section timeline
+    // every section link on the page: [ contact ] here and the home page's section timeline
     const links = document.querySelectorAll<HTMLAnchorElement>('a[data-sec]');
     const setActive = (id: string) => links.forEach((a) => a.classList.toggle('active', a.dataset.sec === id));
 
