@@ -248,13 +248,15 @@ html:not([data-theme-transition])::view-transition-new(root) {
 .ls-name { color: var(--fg); font-weight: 600; }
 .ls-name.dir { color: var(--accent); }
 .ls-arrow { font-weight: 400; color: var(--fg-muted); }
-.ls-note { min-width: 0; overflow: hidden; text-overflow: ellipsis; color: var(--fg-faint); }
+.ls-name, .ls-note { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.ls-note { color: var(--fg-faint); }
 .ls-row:hover .ls-name { text-decoration: underline; text-underline-offset: 3px; }
 
 @media (max-width: 720px) {
   .ls-perm, .ls-owner, .ls-group { display: none; }
-  .ls { grid-template-columns: auto auto 1fr; }
-  .ls-dirs { grid-template-columns: auto 1fr; }
+  .ls { grid-template-columns: auto auto minmax(0, 1fr); }
+  /* name + note stack in one column so long names truncate instead of scrolling the page */
+  .ls-dirs { grid-template-columns: minmax(0, 1fr); }
   .ls-dirs .ls-size { display: none; }
   .ls:not(.ls-dirs) .ls-note { display: none; }
 }
