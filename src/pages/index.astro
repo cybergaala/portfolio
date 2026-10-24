@@ -8,8 +8,10 @@ import { projects } from '../data/projects';
 // and hovering reveals it (holding the lens swaps which one is the default, see initArtLens)
 import art from '../data/hero-art.json';
 import { artToHtml } from '../data/art-html';
-// fastfetch color blocks, drawn from the theme tokens so they follow light/dark
-const palette = ['--accent', '--syn-str', '--syn-kw', '--syn-type', '--syn-num', '--syn-com', '--fg'];
+// fastfetch color blocks laid out like a terminal's 8 normal + 8 bright colors, drawn from the theme tokens
+// so they follow light/dark; the bright row is each color mixed with white
+const palette = ['var(--syn-com)', 'var(--syn-str)', '#3ecf6e', 'var(--syn-num)', 'var(--syn-type)', 'var(--syn-kw)', 'var(--accent)', 'var(--fg)'];
+const paletteRows = [palette, palette.map((c) => `color-mix(in oklab, ${c} 65%, white)`)];
 
 const posts = (await getCollection('blog', ({ id, data }) => id.startsWith('en/') && !data.draft))
   .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
@@ -134,7 +136,7 @@ const selected = commits.findIndex((c) => c.job?.current);
               <p class="ff-rule" aria-hidden="true">------------------</p>
               {fetch.map(([k, v]) => <p><span class="ff-key">{k}</span>: {v}</p>)}
               <p><span class="ff-key">Status</span>: <span class="dot" aria-hidden="true"></span> open to new projects</p>
-              <p class="ff-colors" aria-hidden="true">{palette.map((c) => <span style={`background:var(${c})`}></span>)}</p>
+              {paletteRows.map((row) => <p class="ff-colors" aria-hidden="true">{row.map((c) => <span style={`background:${c}`}></span>)}</p>)}
             </div>
           </div>
           <p class="term-cmd"><span class="path">~</span> $ ls ~/links</p>
@@ -216,7 +218,7 @@ const selected = commits.findIndex((c) => c.job?.current);
         <h2 class="sec-title">Experience</h2>
       </header>
       <div class="lg mono reveal" data-lazygit>
-        <div class="lg-panel lg-commits">
+        <div class="lg-panel lg-commits" style={`--rows:${commits.length}`}>
           <span class="lg-title">[4] Commits</span>
           <ul class="lg-list" role="listbox" aria-label="Experience" tabindex="0">
             {commits.map((c, i) => (
@@ -308,7 +310,8 @@ const selected = commits.findIndex((c) => c.job?.current);
     .ff-key { color: var(--accent); font-weight: 600; }
     .ff-title { font-weight: 600; }
     .ff-rule { color: var(--fg-faint); }
-    .ff-colors { display: flex; margin-top: 0.75rem !important; }
+    .ff-colors { display: flex; }
+    .ff-colors:not(.ff-colors + .ff-colors) { margin-top: 0.75rem !important; }
     .ff-colors span { width: 1.4rem; height: 0.9rem; }
 
     /* 128 columns of art: shrink the glyphs so it always fits the viewport */
@@ -509,6 +512,14 @@ const selected = commits.findIndex((c) => c.job?.current);
 
     .lg-keys { grid-column: 1 / -1; margin-top: 0.6rem !important; font-size: 0.72rem; color: var(--fg-faint); }
     .lg-keys span { color: var(--syn-type); }
+
+    /* side by side, the commit list alone sets the height; a long patch scrolls instead of growing the box */
+    @media (min-width: 861px) {
+      /* 55% taller than the rows need (1.4em each + panel padding and border), leaving room for the patch */
+      .lg-commits { min-height: calc((var(--rows) * 1.4em + 2.1rem + 2px) * 1.55); }
+      .lg-patch { contain: size; }
+      .lg-detail { height: 100%; overflow-y: auto; }
+    }
 
     @media (max-width: 860px) {
       .lg { grid-template-columns: 1fr; gap: 1.4rem; }
