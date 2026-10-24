@@ -1,80 +1,92 @@
 ---
 title: "A terminal theme for this site"
-description: "I swapped the editorial look for a shell session: fastfetch, ls, lazygit and one monospace font everywhere."
+description: "How the site became a shell session: images turned into ANSI art with Python, canvas rendering, a CSS mask lens and a theme switch built on view transitions."
 pubDate: 2026-10-22
-tags: ["design", "web", "astro", "terminal"]
+tags: ["astro", "canvas", "css", "python"]
 ---
 
 import AsciiArt from '../../../components/AsciiArt.astro';
 import heroAscii from '../../../data/hero-art.ascii.json';
 import heroAsciiLight from '../../../data/hero-art-light.ascii.json';
+import heroAnsi from '../../../data/hero-art.json';
 
-When I [first built this portfolio](/blog/building-this-portfolio) I went for an editorial look: big type, lots of whitespace, a typewriter effect. It worked, but it never felt like mine. I spend most of my day in a terminal, so this update turns the whole site into one.
+This update turns the [original portfolio](/blog/building-this-portfolio) into a terminal: every homepage section is the output of a command (`fastfetch`, `ls -l`, `lazygit`, `mail`) and the whole site uses one monospace font, Geist Mono. This post covers the parts that took real engineering.
 
-## The landing is a shell session
+## From image to ANSI art
 
-Every section on the homepage is now the output of a command you'd actually run:
+The `fastfetch` hero is a photo converted to characters by a small Python script, [`scripts/ascii-art.py`](https://github.com/cybergaala/portfolio/blob/master/scripts/ascii-art.py). It uses Pillow, and its output is a JSON file committed with the site. Three of its modes produce the hero art.
 
-- **`fastfetch`** is the hero. ASCII art on the left, system info on the right. The keys follow fastfetch's real modules, so `Kernel` is my role, `Uptime` is how long I've been shipping, and `Packages` is the stack I use.
-- **`ls -l ~/projects`** lists projects as directories, with symlinks pointing to where each one lives.
-- **`ls -lt ~/blog | head -3`** shows the latest three posts, newest first.
-- **`lazygit`** is my experience. Each job is a commit, and the patch panel shows the details for the selected one.
-- **`mail`** is the contact form, built with the same panels as lazygit.
+**ASCII.** The image is resized to the grid, and each cell gets a glyph from a brightness ramp plus the pixel's color. Monospace cells are taller than they are wide, so the row count is scaled by `0.6` to keep the aspect ratio:
 
-On wide screens there's a small timeline on the left that tracks where you are on the page. At first it showed the commands too, but that repeated what every section header already says, so now it only shows the section titles.
-
-## One font
-
-The previous version mixed a sans serif for headings with a monospace for code. Now everything uses Geist Mono: headings, body text, blog posts. A terminal has one font, so the site does too. I also dropped two font packages I no longer needed.
-
-## Colors from the theme
-
-Red is the accent color, and the rest of the palette comes from the syntax highlighting colors. The color blocks under fastfetch used to be sampled from the ASCII art, so they never matched anything else. Now they're drawn from the same theme tokens as everything else, so they follow light and dark mode.
-
-## ASCII everywhere
-
-Decoration is made of characters, not images: the starry sky behind the page, the icon in the footer, and now a vim-style status line at the bottom of every post that shows the file you're reading and how far in you are:
-
-```
-a-terminal-theme.md [RO]                                  42%
+```python
+RAMP = "=+*#%@"  # dense glyphs only: on a dark page the color draws the picture
+CELL = 0.6       # mono glyph width / line height
+rows = round(cols * im.height / im.width * CELL)
 ```
 
-### What didn't make it
+<AsciiArt rows={heroAscii} label="Hero art drawn with colored ASCII characters" />
 
-Not every piece of ASCII survived. The first fastfetch logo was my initials in the ANSI Shadow figlet font, the way a distro shows its logo:
+**Light mode.** Bright pixels on a white page disappear, so `--light` inverts the logic. Near-white areas stay blank (the paper is the light), and every color is capped in HLS lightness and pushed in saturation so it reads as ink:
 
-{/* line-height 1 so the box-drawing rows join up */}
-<pre style="line-height: 1">{`███████╗███╗   ███╗
-██╔════╝████╗ ████║
-█████╗  ██╔████╔██║
-██╔══╝  ██║╚██╔╝██║
-███████╗██║ ╚═╝ ██║
-╚══════╝╚═╝     ╚═╝`}</pre>
-
-Then came the picture. The first take used plain ASCII characters, each one colored to draw the image:
-
-<AsciiArt rows={heroAscii} label="Earlier hero art drawn with colored ASCII characters" />
-
-It had a twin for light mode, with near-white areas left blank and every color pulled darker so it read as ink on paper:
-
-<AsciiArt rows={heroAsciiLight} paper="light" label="Light mode version of the earlier hero art" />
-
-Both got replaced by the ANSI half-block version that's there now. Each character cell holds two pixels, one in the text color and one in the background, so it has twice the vertical detail.
-
-The footer had a cat for a while, before the current icon took its place:
-
-```
- /\_/\
-( o.o )
- > ^ <
+```python
+def ink(r, g, b):
+    h, l, s = colorsys.rgb_to_hls(r / 255, g / 255, b / 255)
+    r, g, b = colorsys.hls_to_rgb(h, min(l, INK_MAX_L), min(1, s * 1.25))
 ```
 
-I also tried a Matrix-style rain of falling characters as the background. It was too busy, so the stars stayed.
+<AsciiArt rows={heroAsciiLight} paper="light" label="Light mode version of the hero art" />
 
-## The blog
+**ANSI half blocks.** `--ansi` works like [chafa](https://hpjansson.org/chafa/): every cell holds two pixels, drawn as `▀` with the top pixel as the text color and the bottom one as the background. That doubles the vertical resolution with the same number of characters.
 
-Each post now opens like `cat post-name.md` and shows the author with a small avatar. Click the avatar and a profile panel opens. It's a native `<dialog>` element, so Escape, focus handling and the backdrop come for free.
+<AsciiArt rows={heroAnsi} label="Hero art drawn with ANSI half blocks" />
 
-## Less of my name
+Two tricks keep the JSON small. Colors are stored with 4-bit channels (`#1af` instead of `#11aaff`), and neighboring cells with the same colors are merged into one run. The output is a list of rows, and each row is a list of `[fg, bg, text]` runs.
 
-My name used to show up in the header, the fastfetch title, the file owners in every `ls` and the footer. That was too much. Now the header is just `~/`, the fastfetch title is a generic `user@localhost`, and my name appears once, in the `User` row, where it belongs.
+## Rendering: from spans to canvas
+
+The first version rendered every run as a `<span>` with an inline color. That's about 4,000 colored elements, and every theme switch had to restyle all of them, so the toggle stuttered.
+
+Now the ANSI art is painted once into a `<canvas>` with one device pixel per art pixel, and CSS scales it up with `image-rendering: pixelated`:
+
+```ts
+for (const [fg, bg, t] of row) {
+  ctx.fillStyle = fg;
+  ctx.fillRect(x, y * 2, t.length, 1);
+  ctx.fillStyle = bg;
+  ctx.fillRect(x, y * 2 + 1, t.length, 1);
+  x += t.length;
+}
+```
+
+The ASCII versions are also drawn into canvases, but with `fillText`, one glyph per cell, so the canvas grid can't drift from the ANSI grid. They're redrawn when `document.fonts.ready` resolves (the font has to load before you can measure it) and from a `ResizeObserver` when the layout scales the art on mobile.
+
+## The lens
+
+Both versions are stacked on the same 128×43 grid. The ASCII one is on top, and hovering cuts a circular hole in it that follows the cursor, showing the ANSI art underneath. The hole is a CSS mask with a radius stored in a custom property:
+
+```css
+@property --lens { syntax: '<length>'; inherits: true; initial-value: 0px; }
+
+mask-image: radial-gradient(circle var(--lens) at var(--x) var(--y),
+  transparent calc(100% - 6px), #000 100%);
+```
+
+Registering `--lens` with `@property` is what makes it animatable. Without it, the browser treats the value as a string and the transition jumps. Pressing and holding grows the lens to cover the whole image with an ease-in curve, and holding it for 5 more seconds swaps which version is the default (saved in `localStorage`).
+
+Hover is tracked by hand instead of with `:hover`. Scrolling with a wheel or trackpad moves the art under a still cursor without firing pointer events, so the last cursor position is checked again on every scroll.
+
+## Theme switch with view transitions
+
+The light/dark toggle uses `document.startViewTransition()`. The browser takes a snapshot of the page, the theme class changes, and a `clip-path: circle()` grows from the toggle button to reveal the new theme. Getting it smooth took a few fixes:
+
+- **Interruptible.** Clicking during the animation reverses it instead of starting a second transition. The clip-path animation is paused and moved forward or backward frame by frame on the main thread with `requestAnimationFrame`. A running clip-path animation runs off the main thread, and reversing it there drew one extra frame forward before snapping back.
+- **Clicks during the transition.** While a view transition is running, Chrome hit-tests the whole page as `<html>`, so the button never receives the click. A document listener checks the click coordinates against the button and forwards it.
+- **Chrome on Android.** The transition is drawn in a box that starts behind the URL bar (`100lvh`), but `getBoundingClientRect()` measures from the visible viewport. A hidden `100lvh` element measures the difference so the circle starts at the button.
+- **Radius.** The circle only grows to the farthest corner of the viewport, so every frame of the animation is visible movement.
+
+## Small pieces
+
+- **Starry sky.** Each star is a character placed at build time with a seeded random generator (`seed * 16807 % 2147483647`), so every build renders the same sky with no client JavaScript. Some stars twinkle with a CSS animation, which is turned off with `prefers-reduced-motion`.
+- **vim status line.** Every post has a fixed line at the bottom with the file name and the scroll position, using vim's own labels (`Top`, `NN%`, `Bot`, `All`). It uses `env(safe-area-inset-bottom)` so it stays above the gesture bar on phones.
+- **Profile dialog.** The avatar opens a native `<dialog>`, so Escape, focus trapping and the backdrop work without extra code.
+- **One set of colors.** Red is the accent, and the rest of the palette comes from the syntax highlighting tokens in `global.css`. Components only use those tokens, so dark mode is one class on `<html>` with no per-component overrides.
