@@ -4,7 +4,7 @@
 <header>
   <nav id="mainNav">
     <div class="bar page-container">
-      <a href="/" class="nav-logo" aria-label="Edgar Mejía, home"><span class="accent">~/</span><span class="cursor" aria-hidden="true"></span></a>
+      <a href="/" class="nav-logo" aria-label="Edgar Mejía, home"><span class="accent">~/home</span><span class="cursor" aria-hidden="true"></span></a>
       <ul class="nav-links">
         <li><a href="/#contact" data-sec="contact" class="say-hi">[ say hi ]</a></li>
       </ul>
@@ -123,6 +123,22 @@
 
   document.addEventListener('astro:page-load', initNavState);
 
+  const overToggle = (e: MouseEvent) => {
+    const r = document.getElementById('theme-toggle')?.getBoundingClientRect();
+    return !!r && e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
+  };
+
+  // During a view transition Chrome hit-tests the whole page as <html>, so the
+  // theme toggle never sees a click there; forward clicks that land on it.
+  document.addEventListener('click', (e) => {
+    if (e.target === document.documentElement && overToggle(e)) document.getElementById('theme-toggle')!.click();
+  });
+
+  // fast repeated clicks are double/triple clicks: keep them from selecting the text nearby
+  document.addEventListener('mousedown', (e) => {
+    if (overToggle(e)) e.preventDefault();
+  });
+
   function initHeader() {
     const mainNav = document.getElementById('mainNav');
     const toggleBtn = document.getElementById('theme-toggle');
@@ -134,97 +150,90 @@
     if (!toggleBtn) return;
 
     const DURATION = 650;
-    let transitionGen = 0;
-    let transitionEndTime = 0;
-    let animStartTime = 0;
-    let animStartR = 0;
-    let animEndR = 0;
-    let animDur = DURATION;
+    // the active circle reveal: a click while it's active reverses it instead of starting over,
+    // so fast clicking never stacks transitions. `dark` is the theme the last click asked for.
+    let trans: any;
+    let dark = false;
 
-    function startThemeTransition(applyFn: () => void, interrupted: boolean) {
-      const gen = ++transitionGen;
-      if (interrupted) {
-        html.dataset.themeInterrupted = 'true';
-      } else {
-        delete html.dataset.themeInterrupted;
-      }
-      html.dataset.themeTransition = 'true';
-
-      const trans = (document as any).startViewTransition(applyFn);
-      trans.finished.finally(() => {
-        if (transitionGen === gen) {
-          transitionEndTime = 0;
-          delete html.dataset.themeTransition;
-          delete html.dataset.themeInterrupted;
-        }
-      });
-    }
+    const setTheme = (dark: boolean) => {
+      html.classList.toggle('dark', dark);
+      localStorage.setItem('theme', dark ? 'dark' : 'light');
+    };
 
     toggleBtn.addEventListener('click', () => {
-      const now = Date.now();
+      if (trans) {
+        dark = !dark;
+        return;
+      }
+
+      const toDark = (dark = !html.classList.contains('dark'));
+      if (!('startViewTransition' in document) || matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        return setTheme(toDark);
+      }
+
       const rect = toggleBtn.getBoundingClientRect();
-      const cx = Math.round(rect.left + rect.width / 2);
-      const cy = Math.round(rect.top + rect.height / 2);
-      html.style.setProperty('--theme-x', cx + 'px');
-      html.style.setProperty('--theme-y', cy + 'px');
+      // Chrome Android draws view transitions in a box that starts behind the
+      // top URL bar (100lvh), while rect is measured from the visible viewport.
+      const lvhProbe = document.createElement('div');
+      lvhProbe.style.cssText = 'position:fixed;top:0;height:100lvh;visibility:hidden';
+      document.body.append(lvhProbe);
+      const boxH = lvhProbe.offsetHeight;
+      lvhProbe.remove();
+      const x = rect.left + rect.width / 2;
+      const y = rect.top + rect.height / 2 + Math.max(0, boxH - window.innerHeight);
+      // grow only to the farthest corner, so the whole animation is visible movement
+      const r = Math.hypot(Math.max(x, window.innerWidth - x), Math.max(y, boxH - y));
+      const circles = [`circle(0px at ${x}px ${y}px)`, `circle(${r}px at ${x}px ${y}px)`];
+      html.style.setProperty('--theme-x', `${x}px`);
+      html.style.setProperty('--theme-y', `${y}px`);
 
-      if (now < transitionEndTime) {
-        const elapsed = now - animStartTime;
-        const t = Math.min(elapsed / animDur, 1);
-        const currentR = animStartR + (animEndR - animStartR) * t;
-        const newEndR = animEndR > animStartR ? 0 : 200;
-        const newDur = Math.max(80, (Math.abs(newEndR - currentR) / 200) * DURATION);
-
-        html.style.setProperty('--theme-r-interrupt', currentR.toFixed(2) + 'vmax');
-        html.style.setProperty('--theme-dur-interrupt', newDur + 'ms');
-
-        const isDarkNow = html.classList.contains('dark');
-        animStartTime = now;
-        animStartR = currentR;
-        animEndR = newEndR;
-        animDur = newDur;
-        transitionEndTime = now + newDur + 50;
-
-        startThemeTransition(() => {
-          if (isDarkNow) {
-            html.classList.remove('dark');
-            localStorage.setItem('theme', 'light');
+      html.dataset.themeTransition = 'true';
+      const t = (trans = (document as any).startViewTransition(() => setTheme(toDark)));
+      let anim: Animation | undefined;
+      t.ready.then(() => {
+        if (trans !== t) return;
+        anim = html.animate(
+          { clipPath: toDark ? circles : circles.reverse() },
+          {
+            duration: DURATION,
+            easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
+            fill: 'forwards',
+            pseudoElement: toDark ? '::view-transition-new(root)' : '::view-transition-old(root)',
+          },
+        );
+        // Driven frame by frame on the main thread: a playing clip-path animation runs off-thread,
+        // and reversing it there drew one more frame forward before snapping back (a visible jolt).
+        anim!.pause();
+        let elapsed = 0;
+        let last: number | undefined;
+        const step = (now: number) => {
+          if (trans !== t) return;
+          elapsed += (now - (last ?? now)) * (dark === toDark ? 1 : -1);
+          last = now;
+          if (elapsed >= DURATION) {
+            // free the toggle right away, not when `finished` settles a few frames later
+            trans = undefined;
+            anim!.finish();
+          } else if (elapsed <= 0 && dark !== toDark) {
+            // reversed back to where it started: restore the old theme and end without a flash
+            trans = undefined;
+            setTheme(!toDark);
+            t.skipTransition();
           } else {
-            html.classList.add('dark');
-            localStorage.setItem('theme', 'dark');
+            anim!.currentTime = elapsed;
+            requestAnimationFrame(step);
           }
-        }, true);
-        return;
-      }
-
-      const isDark = html.classList.contains('dark');
-
-      if (!('startViewTransition' in document)) {
-        if (isDark) {
-          html.classList.remove('dark');
-          localStorage.setItem('theme', 'light');
-        } else {
-          html.classList.add('dark');
-          localStorage.setItem('theme', 'dark');
-        }
-        return;
-      }
-
-      animStartTime = now;
-      animStartR = isDark ? 200 : 0;
-      animEndR = isDark ? 0 : 200;
-      animDur = DURATION;
-      transitionEndTime = now + DURATION + 50;
-
-      startThemeTransition(() => {
-        if (isDark) {
-          html.classList.remove('dark');
-          localStorage.setItem('theme', 'light');
-        } else {
-          html.classList.add('dark');
-          localStorage.setItem('theme', 'dark');
-        }
-      }, false);
+        };
+        requestAnimationFrame(step);
+      }, () => {});
+      t.finished.finally(() => {
+        // the fill keeps the end state until the transition is gone; left on <html> it would clip
+        // the next transition's fresh snapshot too (e.g. the light one, to an empty dark screen)
+        anim?.cancel();
+        if (trans === t) trans = undefined;
+        // a newer transition may already be running and still needs its theme styles
+        if (!trans) delete html.dataset.themeTransition;
+      });
     });
   }
 

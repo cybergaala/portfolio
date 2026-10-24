@@ -137,6 +137,8 @@ const formatted = pubDate.toLocaleDateString(dateLocale, {
     justify-content: space-between;
     margin: 0;
     padding: 0.3rem 1rem;
+    /* keep the text above Android's gesture bar / iOS home indicator */
+    padding-bottom: calc(0.3rem + env(safe-area-inset-bottom, 0px));
     font: 0.75rem var(--font-mono);
     color: var(--fg-muted);
     background-color: color-mix(in srgb, var(--body-bg) 85%, transparent);

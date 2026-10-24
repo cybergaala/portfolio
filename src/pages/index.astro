@@ -7,7 +7,6 @@ import { projects } from '../data/projects';
 // ANSI half-block art, generated with scripts/ascii-art.py --ansi; the earlier ASCII take covers it by default
 // and hovering reveals it (holding the lens swaps which one is the default, see initArtLens)
 import art from '../data/hero-art.json';
-import { artToHtml } from '../data/art-html';
 // fastfetch color blocks laid out like a terminal's 8 normal + 8 bright colors, drawn from the theme tokens
 // so they follow light/dark; the bright row is each color mixed with white
 const palette = ['var(--syn-com)', 'var(--syn-str)', '#3ecf6e', 'var(--syn-num)', 'var(--syn-type)', 'var(--syn-kw)', 'var(--accent)', 'var(--fg)'];
@@ -15,7 +14,7 @@ const paletteRows = [palette, palette.map((c) => `color-mix(in oklab, ${c} 65%, 
 
 const posts = (await getCollection('blog', ({ id, data }) => id.startsWith('en/') && !data.draft))
   .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
-  .slice(0, 3);
+  .slice(0, 5);
 
 const email = 'contact@edgarmejia.com';
 
@@ -120,7 +119,7 @@ const selected = commits.findIndex((c) => c.job?.current);
   lang="en"
 >
   <section id="hero" class="hero">
-    <Sky />
+    <Sky count={140} />
     <div class="page-container">
       <h1 class="sr-only">Edgar Mejía — mobile developer in San Salvador</h1>
       <div class="term reveal">
@@ -128,8 +127,12 @@ const selected = commits.findIndex((c) => c.job?.current);
           <p class="term-cmd"><span class="path">~</span> $ fastfetch</p>
           <div class="ff">
             <div class="ff-art-wrap swapped" aria-hidden="true">
-              <pre class="ff-art" set:html={artToHtml(art)} />
-              <canvas class="ff-ascii"></canvas>
+              {/* the pre only sizes the 128x43 grid (one plain span per row); the ANSI pixels are painted
+                  once into the canvas, since 4k colored spans made every theme switch restyle them all */}
+              <pre class="ff-art" set:html={art.map((row) => `<span>${row.map((run) => run[2]).join('')}</span>`).join('\n')} />
+              <canvas class="ff-ansi" width="128" height={art.length * 2} data-art={JSON.stringify(art)}></canvas>
+              <canvas class="ff-ascii" data-take="dark"></canvas>
+              <canvas class="ff-ascii" data-take="light"></canvas>
             </div>
             <div class="ff-info">
               <p class="ff-title"><span class="ff-key">user</span>@<span class="ff-key">localhost</span></p>
@@ -190,7 +193,7 @@ const selected = commits.findIndex((c) => c.job?.current);
     <section id="writing" class="section">
       <div class="page-container">
         <header class="sec-head reveal">
-          <p class="cmd">$ ls -lt ~/blog | head -3</p>
+          <p class="cmd">$ ls -lt ~/blog | head -5</p>
           <h2 class="sec-title">Writing</h2>
         </header>
         <div class="ls mono reveal">
@@ -320,9 +323,11 @@ const selected = commits.findIndex((c) => c.job?.current);
       letter-spacing: 0;
       user-select: none;
       margin: 0;
-      /* the half-block glyphs are taller than their 1em cells and peek past the box, above the lens canvas */
-      overflow: clip;
+      color: transparent;
     }
+
+    /* each ▀ cell is two pixels: foreground on top, background below */
+    .ff-ansi { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; }
 
     /* cells exactly one row tall so the half blocks stack into square pixels */
     .ff-art :global(span) { display: inline-block; height: 1em; vertical-align: top; }
@@ -341,7 +346,13 @@ const selected = commits.findIndex((c) => c.job?.current);
 
     /* the ASCII take is drawn once into a canvas (see drawAscii): animating the mask over 3k text spans
        repainted all of them every frame and stuttered, a canvas repaints as a single bitmap */
+    /* both takes are drawn up front and CSS picks one, so a theme switch doesn't redraw 5k glyphs;
+       the paper is a CSS background so each canvas follows the theme too */
+    :global(html.dark) .ff-ascii[data-take='light'],
+    :global(html:not(.dark)) .ff-ascii[data-take='dark'] { display: none; }
+
     .ff-ascii {
+      background: var(--body-bg);
       position: absolute;
       inset: 0;
       width: 100%;
@@ -359,7 +370,7 @@ const selected = commits.findIndex((c) => c.job?.current);
        showing the ANSI art underneath; holding the full lens for 5s toggles it */
     /* the canvas is only painted once the font loads: until then hide the ANSI art too, so a refresh
        doesn't flash it before the ASCII default covers it */
-    .ff-art-wrap:not(.ready) .ff-art { visibility: hidden; }
+    .ff-art-wrap:not(.ready) .ff-ansi { visibility: hidden; }
 
     .ff-art-wrap.swapped .ff-ascii { visibility: visible; -webkit-mask-image: none; mask-image: none; }
     .ff-art-wrap.swapped:is(.hovering, .pressing) .ff-ascii {
@@ -579,7 +590,7 @@ const selected = commits.findIndex((c) => c.job?.current);
 
   // paints the ASCII take on the same 128x43 grid as the ANSI art; each theme gets the take made for its paper
   function drawAscii(canvas: HTMLCanvasElement, art: HTMLElement) {
-    const rows = document.documentElement.classList.contains('dark') ? artAscii : artAsciiLight;
+    const rows = canvas.dataset.take === 'dark' ? artAscii : artAsciiLight;
     const { width, height } = art.getBoundingClientRect();
     const dpr = devicePixelRatio || 1;
     canvas.width = Math.round(width * dpr);
@@ -587,8 +598,6 @@ const selected = commits.findIndex((c) => c.job?.current);
     const ctx = canvas.getContext('2d')!;
     const cw = width / 128, ch = height / rows.length;
     ctx.scale(dpr, dpr);
-    ctx.fillStyle = getComputedStyle(document.body).backgroundColor;
-    ctx.fillRect(0, 0, width, height);
     ctx.font = `${ch}px ${getComputedStyle(art).fontFamily}`;
     ctx.textBaseline = 'middle';
     rows.forEach((row, y) => {
@@ -655,17 +664,27 @@ const selected = commits.findIndex((c) => c.job?.current);
     lensCleanup?.();
     const wrap = document.querySelector<HTMLElement>('.ff-art-wrap');
     if (!wrap) return;
-    const canvas = wrap.querySelector<HTMLCanvasElement>('.ff-ascii')!;
+    const takes = wrap.querySelectorAll<HTMLCanvasElement>('.ff-ascii');
     const art = wrap.querySelector<HTMLElement>('.ff-art')!;
-    const redraw = () => { drawAscii(canvas, art); wrap.classList.add('ready'); };
+    const ansi = wrap.querySelector<HTMLCanvasElement>('.ff-ansi')!;
+    const ctx = ansi.getContext('2d')!;
+    (JSON.parse(ansi.dataset.art!) as string[][][]).forEach((row, y) => {
+      let x = 0;
+      for (const [fg, bg, t] of row) {
+        ctx.fillStyle = fg;
+        ctx.fillRect(x, y * 2, t.length, 1);
+        ctx.fillStyle = bg;
+        ctx.fillRect(x, y * 2 + 1, t.length, 1);
+        x += t.length;
+      }
+    });
+    const redraw = () => { takes.forEach((c) => drawAscii(c, art)); wrap.classList.add('ready'); };
     // the visitor's last swap is remembered; storage can throw in private windows, then ASCII stays the default
     try { if (localStorage.getItem('hero-art') === 'ansi') wrap.classList.remove('swapped'); } catch {}
-    // redraw when the font is ready, the art resizes (mobile scales it) or the theme flips
+    // redraw when the font is ready or the art resizes (mobile scales it)
     document.fonts.ready.then(redraw);
     const resized = new ResizeObserver(redraw);
     resized.observe(art);
-    const themed = new MutationObserver(redraw);
-    themed.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
     // hover is tracked by hand, not with :hover: a wheel or trackpad scroll moves the art under a still
     // cursor without firing pointer events, so the last cursor position is rechecked on every scroll
     let last: { x: number; y: number } | undefined;
@@ -720,7 +739,6 @@ const selected = commits.findIndex((c) => c.job?.current);
     addEventListener('scroll', place, { passive: true });
     lensCleanup = () => {
       resized.disconnect();
-      themed.disconnect();
       document.removeEventListener('pointermove', track);
       document.documentElement.removeEventListener('pointerleave', leave);
       removeEventListener('scroll', place);
