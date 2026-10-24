@@ -188,11 +188,30 @@ const formatted = pubDate.toLocaleDateString(dateLocale, {
     color: var(--fg);
   }
 
+  /* speech bubble: the tail is a rotated square whose bottom-right corner points down at the avatar */
   .post-desc {
-    margin: 0 0 1.25rem;
+    position: relative;
+    margin: 0 0 1rem;
+    padding: 0.85rem 1.1rem;
     font-size: 1.05rem;
     line-height: 1.6;
     color: var(--fg-muted);
+    background: var(--body-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+  }
+
+  .post-desc::after {
+    content: '';
+    position: absolute;
+    bottom: -0.45rem;
+    left: 0.85rem; /* centers the tail over the 2.5rem avatar */
+    width: 0.8rem;
+    height: 0.8rem;
+    background: inherit;
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    transform: rotate(45deg);
   }
 
   .post-author { display: flex; align-items: center; gap: 0.6rem; margin: 0 0 1.25rem; font-size: 0.85rem; color: var(--fg); }
@@ -264,9 +283,14 @@ const formatted = pubDate.toLocaleDateString(dateLocale, {
   .profile-links a { color: var(--accent); text-decoration: none; }
   .profile-links a:hover { text-decoration: underline; }
 
-  .post-tags { display: flex; flex-wrap: wrap; gap: 0.3rem 1.5ch; font: 0.75rem var(--font-mono); }
-  .post-tag { color: var(--syn-kw); }
-  .post-tag::before { content: "#"; }
+  .post-tags { display: flex; flex-wrap: wrap; gap: 0.4rem; font: 0.72rem var(--font-mono); }
+  .post-tag {
+    padding: 0.15rem 0.55rem;
+    color: var(--fg-muted);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+  }
+  .post-tag::before { content: "#"; margin-right: 0.15ch; color: var(--accent); }
 
   .lang-switcher {
     width: fit-content;
@@ -350,13 +374,17 @@ const formatted = pubDate.toLocaleDateString(dateLocale, {
 
   .post-body :global(p) { margin: 0 0 1.25rem; }
 
+  /* drop cap as a terminal block cursor: inverted cell, exactly two body lines tall (2 × 1.8em) */
   .post-body :global(> p:first-of-type::first-letter) {
     float: left;
-    margin: 0.05em 0.1em 0 0;
-    font-size: 4.5em;
-    font-weight: 600;
-    line-height: 0.8;
-    color: var(--accent);
+    margin: 0.12em 0.3em 0 0; /* in the cap's own em: nudges it down onto the first line's x-height */
+    padding: 0 0.18em;
+    font-size: 2.5em;
+    font-weight: 700;
+    line-height: 1.3; /* 2.5 × 1.3 = 3.25em, plus the margin stays under the 3.6em of two lines */
+    color: var(--body-bg);
+    background: var(--accent);
+    border-radius: 3px;
   }
 
   .post-body :global(ul) { list-style: none; padding-left: 0; margin: 0 0 1.25rem; }
@@ -413,23 +441,22 @@ const formatted = pubDate.toLocaleDateString(dateLocale, {
     transition: filter 0.5s ease;
   }
 
-  /* Image followed by blockquote → render blockquote as caption */
+  /* Image followed by blockquote → render blockquote as caption, hanging off the photo like a tree branch */
   .post-body :global(p:has(img):has(+ blockquote)) { margin-bottom: 0; }
-  .post-body :global(p:has(img):has(+ blockquote) img) { margin-bottom: 0; border-radius: 8px 8px 0 0; }
+  .post-body :global(p:has(img):has(+ blockquote) img) { margin-bottom: 0.6rem; }
 
   .post-body :global(p:has(img) + blockquote) {
+    position: relative;
     margin: 0 0 2rem;
-    padding: 0.5rem 0.875rem 0.6rem;
-    font: normal 0.75rem var(--font-mono);
-    color: var(--fg-faint);
-    text-align: center;
-    border: 1px solid var(--border);
-    border-top: none;
-    border-radius: 0 0 8px 8px;
+    padding: 0 0 0 3.25ch; /* hanging indent so wrapped lines align after the branch */
+    font: normal 0.8rem/1.6 var(--font-mono);
+    color: var(--fg-muted);
+    border: none;
   }
 
+  .post-body :global(p:has(img) + blockquote)::before { content: "└─"; position: absolute; left: 0.25ch; color: var(--accent); }
   .post-body :global(p:has(img) + blockquote p) { margin: 0; }
-  .post-body :global(p:has(img) + blockquote p)::before { content: "# "; color: var(--accent); }
+  .post-body :global(p:has(img) + blockquote strong) { color: var(--fg); }
 
   /* End of post */
   .post-end {
