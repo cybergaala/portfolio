@@ -125,48 +125,15 @@ html[data-theme-transition]::view-transition-new(root) {
   mix-blend-mode: normal;
 }
 
-html[data-theme-transition].dark::view-transition-new(root) {
-  z-index: 2;
-  animation: theme-expand 0.65s cubic-bezier(0.4, 0, 0.2, 1);
-}
-html[data-theme-transition].dark::view-transition-old(root) {
-  z-index: 1;
-}
-
+/* the circle itself is animated from Header.astro; these only pick which snapshot sits on top */
+html[data-theme-transition].dark::view-transition-new(root),
 html[data-theme-transition]:not(.dark)::view-transition-old(root) {
   z-index: 2;
-  animation: theme-shrink 0.65s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-}
-html[data-theme-transition]:not(.dark)::view-transition-new(root) {
-  z-index: 1;
 }
 
-@keyframes theme-expand {
-  from { clip-path: circle(0px at var(--theme-x, 50%) var(--theme-y, 50%)); }
-  to   { clip-path: circle(200vmax at var(--theme-x, 50%) var(--theme-y, 50%)); }
-}
-
-@keyframes theme-shrink {
-  from { clip-path: circle(200vmax at var(--theme-x, 50%) var(--theme-y, 50%)); }
-  to   { clip-path: circle(0px at var(--theme-x, 50%) var(--theme-y, 50%)); }
-}
-
-@keyframes theme-expand-from {
-  from { clip-path: circle(var(--theme-r-interrupt) at var(--theme-x, 50%) var(--theme-y, 50%)); }
-  to   { clip-path: circle(200vmax at var(--theme-x, 50%) var(--theme-y, 50%)); }
-}
-
-@keyframes theme-shrink-from {
-  from { clip-path: circle(var(--theme-r-interrupt) at var(--theme-x, 50%) var(--theme-y, 50%)); }
-  to   { clip-path: circle(0px at var(--theme-x, 50%) var(--theme-y, 50%)); }
-}
-
-html[data-theme-transition][data-theme-interrupted].dark::view-transition-new(root) {
-  animation: theme-expand-from var(--theme-dur-interrupt, 0.65s) cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-html[data-theme-transition][data-theme-interrupted]:not(.dark)::view-transition-old(root) {
-  animation: theme-shrink-from var(--theme-dur-interrupt, 0.65s) cubic-bezier(0.4, 0, 0.2, 1) forwards;
+/* the dark view starts fully clipped: on a slow phone Chrome can paint a frame before the JS animation applies */
+html[data-theme-transition].dark::view-transition-new(root) {
+  clip-path: circle(0px at var(--theme-x) var(--theme-y));
 }
 
 /* ── Page navigation transition ─────────────────────────────────────── */
