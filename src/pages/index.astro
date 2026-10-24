@@ -15,7 +15,7 @@ const paletteRows = [palette, palette.map((c) => `color-mix(in oklab, ${c} 65%, 
 
 const posts = (await getCollection('blog', ({ id, data }) => id.startsWith('en/') && !data.draft))
   .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
-  .slice(0, 3);
+  .slice(0, 5);
 
 const email = 'contact@edgarmejia.com';
 
@@ -190,7 +190,7 @@ const selected = commits.findIndex((c) => c.job?.current);
     <section id="writing" class="section">
       <div class="page-container">
         <header class="sec-head reveal">
-          <p class="cmd">$ ls -lt ~/blog | head -3</p>
+          <p class="cmd">$ ls -lt ~/blog | head -5</p>
           <h2 class="sec-title">Writing</h2>
         </header>
         <div class="ls mono reveal">
