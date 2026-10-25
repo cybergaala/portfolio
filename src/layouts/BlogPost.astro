@@ -24,6 +24,17 @@ const lang = postLang(post);
 const slug = postSlug(post);
 const t = useTranslations(lang);
 
+const article = {
+  '@context': 'https://schema.org',
+  '@type': 'BlogPosting',
+  headline: title,
+  description,
+  datePublished: pubDate.toISOString(),
+  inLanguage: lang,
+  author: { '@type': 'Person', name: site.name, url: Astro.site?.href },
+  mainEntityOfPage: new URL(Astro.url.pathname, Astro.site).href,
+};
+
 const formatted = pubDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', {
   year: 'numeric',
   month: 'long',
@@ -32,7 +43,15 @@ const formatted = pubDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', 
 });
 ---
 
-<Layout title={`${title} — ${site.name}`} description={description} lang={lang}>
+<Layout
+  title={`${title} — ${site.name}`}
+  description={description}
+  lang={lang}
+  image={banner}
+  publishedTime={pubDate}
+  alternate={translation && { lang: postLang(translation), href: postUrl(translation) }}
+  jsonLd={article}
+>
   <ReadingStatus file={`${slug}.md`} />
   <article class="post-article">
     <div class="page-container">

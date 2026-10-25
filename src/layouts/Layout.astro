@@ -1,44 +1,34 @@
 ---
-import Head from '../components/Head.astro';
+import { ClientRouter } from 'astro:transitions';
+import Head, { type Props as HeadProps } from '../components/Head.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
-import { ViewTransitions } from 'astro:transitions';
 import type { Lang } from '../i18n/ui';
 
-interface Props {
-  title: string;
-  description?: string;
+interface Props extends HeadProps {
   lang?: Lang;
 }
 
-const { title, description, lang = 'en' } = Astro.props;
+const { lang = 'en', ...head } = Astro.props;
 ---
 
 <!doctype html>
 <html lang={lang}>
   <head>
-    <Head title={title} description={description} />
-    <ViewTransitions />
+    <Head {...head} />
+    <ClientRouter />
     <script is:inline>
-      (function applyTheme() {
-        const saved = localStorage.getItem('theme');
-        if (saved !== 'light') {
-          document.documentElement.classList.add('dark');
-        } else {
-          document.documentElement.classList.remove('dark');
-        }
-      })();
-      document.addEventListener('astro:after-swap', function() {
-        const saved = localStorage.getItem('theme');
-        if (saved !== 'light') {
-          document.documentElement.classList.add('dark');
-        } else {
-          document.documentElement.classList.remove('dark');
-        }
-      });
+      // dark is the default; runs before paint, and again after each ClientRouter swap
+      function applyTheme() {
+        document.documentElement.classList.toggle('dark', localStorage.getItem('theme') !== 'light');
+      }
+      applyTheme();
+      document.addEventListener('astro:after-swap', applyTheme);
+
+      // a link to the current page scrolls (to its hash or the top) instead of reloading through the router
       if (!window._samePageGuard) {
         window._samePageGuard = true;
-        document.addEventListener('click', function(e) {
+        document.addEventListener('click', function (e) {
           var a = e.target.closest('a[href]');
           if (!a) return;
           try {
@@ -54,11 +44,10 @@ const { title, description, lang = 'en' } = Astro.props;
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }
             }
-          } catch(_) {}
+          } catch (_) {}
         }, true);
       }
     </script>
-    <style></style>
   </head>
   <body>
     <Header />

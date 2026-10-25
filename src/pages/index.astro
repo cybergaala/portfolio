@@ -7,12 +7,26 @@ import Projects from '../components/home/Projects.astro';
 import SectionNav from '../components/home/SectionNav.astro';
 import Writing from '../components/home/Writing.astro';
 import { site } from '../data/site';
+
+const person = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: site.name,
+  jobTitle: site.role,
+  email: `mailto:${site.email}`,
+  url: Astro.site?.href,
+  image: new URL(site.photo, Astro.site).href,
+  address: { '@type': 'PostalAddress', addressLocality: 'San Salvador', addressCountry: 'SV' },
+  sameAs: [site.github, site.linkedin],
+  knowsAbout: ['iOS', 'Android', 'Flutter', 'Swift', 'Kotlin', 'Jetpack Compose'],
+};
 ---
 
 <Layout
   title={`${site.name} — ${site.role}`}
   description={`${site.name}, mobile developer from El Salvador building iOS, Android and Flutter apps.`}
   lang="en"
+  jsonLd={person}
 >
   <Hero />
   <SectionNav />
