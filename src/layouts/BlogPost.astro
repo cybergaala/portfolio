@@ -196,7 +196,8 @@ const formatted = pubDate.toLocaleDateString(dateLocale, {
     font-size: 1.05rem;
     line-height: 1.6;
     color: var(--fg-muted);
-    background: var(--body-bg);
+    /* a touch of the text color: slightly darker on the light theme, slightly lighter on the dark one */
+    background: color-mix(in srgb, var(--body-bg), var(--fg) 5%);
     border: 1px solid var(--border);
     border-radius: 12px;
   }
@@ -287,10 +288,11 @@ const formatted = pubDate.toLocaleDateString(dateLocale, {
   .post-tag {
     padding: 0.15rem 0.55rem;
     color: var(--fg-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
     border: 1px solid var(--border);
     border-radius: 4px;
   }
-  .post-tag::before { content: "#"; margin-right: 0.15ch; color: var(--accent); }
 
   .lang-switcher {
     width: fit-content;
