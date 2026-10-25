@@ -53,7 +53,29 @@ const formatted = pubDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', 
   alternate={translation && { lang: postLang(translation), href: postUrl(translation) }}
   jsonLd={article}
 >
-  <ReadingStatus file={`${slug}.md`} />
+  <ReadingStatus file={`${slug}.md`}>
+    {translation && (
+      <span class="lang-switcher">
+        {lang === 'en' ? (
+          <>
+            <strong>ENG</strong>
+            {' | '}
+            <a href={postUrl(translation)} hreflang="es">
+              SPA
+            </a>
+          </>
+        ) : (
+          <>
+            <a href={postUrl(translation)} hreflang="en">
+              ENG
+            </a>
+            {' | '}
+            <strong>SPA</strong>
+          </>
+        )}
+      </span>
+    )}
+  </ReadingStatus>
   <article class="post-article">
     <div class="page-container">
       <a href={blogUrl(lang)} class="back-link">
@@ -75,27 +97,6 @@ const formatted = pubDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', 
         <p class="post-desc">{description}</p>
         <ProfileDialog />
         <Tags tags={tags} />
-        {translation && (
-          <p class="lang-switcher">
-            {lang === 'en' ? (
-              <>
-                <strong>ENG</strong>
-                {' | '}
-                <a href={postUrl(translation)} hreflang="es">
-                  SPA
-                </a>
-              </>
-            ) : (
-              <>
-                <a href={postUrl(translation)} hreflang="en">
-                  ENG
-                </a>
-                {' | '}
-                <strong>SPA</strong>
-              </>
-            )}
-          </p>
-        )}
       </header>
 
       {banner && (
@@ -130,6 +131,16 @@ const formatted = pubDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', 
       <RelatedPosts posts={related} label={t('blog.related')} />
     </div>
   </article>
+
+  <dialog id="viewer" class="viewer">
+    <img alt="" />
+    <p class="viewer-bar">
+      <button data-step="-1">{t('blog.prev')}</button>
+      <span class="viewer-count"></span>
+      <button data-step="1">{t('blog.next')}</button>
+      <button data-close>[esc] {t('blog.close')}</button>
+    </p>
+  </dialog>
 </Layout>
 
 <style>
@@ -210,9 +221,7 @@ const formatted = pubDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', 
   }
 
   .lang-switcher {
-    width: fit-content;
-    margin: 1.25rem 0 0 auto;
-    font: 0.75rem var(--font-mono);
+    pointer-events: auto; /* the status line itself ignores the pointer */
     color: var(--fg-faint);
   }
 
@@ -253,14 +262,31 @@ const formatted = pubDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', 
   /* Layout: content + TOC */
   .post-layout {
     display: grid;
-    grid-template-columns: 42rem 1fr;
-    gap: 0 4rem;
+    /* fixed TOC width, so switching language doesn't resize the columns */
+    grid-template-columns: minmax(0, 1fr) 13rem;
+    gap: 0 2.5rem;
     align-items: start;
+  }
+
+  /* no h2s → Toc renders nothing, so the content takes the full width */
+  .post-layout:not(:has(> aside)) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* the end of the post lines up with the body column, so it only leaves room when there's a TOC */
+  .page-container:has(.post-layout > aside) > .post-end,
+  .page-container:has(.post-layout > aside) > :global(.related-posts) {
+    max-width: calc(100% - 15.5rem); /* TOC column + gap */
   }
 
   @media (max-width: 900px) {
     .post-layout {
       grid-template-columns: 1fr;
+    }
+
+    .page-container:has(.post-layout > aside) > .post-end,
+    .page-container:has(.post-layout > aside) > :global(.related-posts) {
+      max-width: none;
     }
   }
 
@@ -414,6 +440,57 @@ const formatted = pubDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', 
     border: 1px solid var(--border);
     border-radius: 8px;
     transition: filter 0.5s ease;
+    cursor: zoom-in;
+  }
+
+  /* Image viewer */
+  :global(html:has(.viewer[open])) {
+    overflow: hidden;
+  }
+
+  .viewer[open] {
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) auto;
+    width: 100vw;
+    height: 100dvh;
+    max-width: none;
+    max-height: none;
+    margin: 0;
+    padding: 1rem;
+    border: none;
+    background: var(--body-bg);
+    color: var(--fg-faint);
+    font: 0.8rem var(--font-mono);
+  }
+
+  .viewer::backdrop {
+    background: var(--body-bg);
+  }
+
+  .viewer img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .viewer-bar {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    margin: 0.75rem 0 0;
+  }
+
+  .viewer-bar button {
+    background: none;
+    border: none;
+    padding: 0;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+  }
+
+  .viewer-bar button:hover {
+    color: var(--accent);
   }
 
   /* Image followed by blockquote → render blockquote as caption, hanging off the photo like a tree branch */
@@ -452,7 +529,6 @@ const formatted = pubDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', 
     flex-direction: column;
     align-items: center;
     gap: 1.25rem;
-    max-width: 42rem;
     margin-top: 4rem;
     font-family: var(--font-mono);
   }
@@ -505,10 +581,126 @@ const formatted = pubDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', 
     images.forEach((img) => observer.observe(img));
   }
 
+  // Language switch: no fade, same scroll, and the visible text scrambles into the other language,
+  // so it feels like the same page changing instead of a new one loading.
+  const LOWER = 'abcdefghijklmnopqrstuvwxyz';
+  const UPPER = LOWER.toUpperCase();
+  const SCRAMBLE_MS = 400;
+  const SCRAMBLE_TICK = 40; // ms between glyph changes; changing every frame reads as flicker
+  const LETTER = /[\p{L}\p{N}]/u;
+  // same in both languages (command line, author, tags, ENG | SPA) or code, so they stay still
+  const NO_SCRAMBLE = 'pre, code, .cmd, .post-author, .post-tags, .lang-switcher';
+  let langSwapY: number | null = null;
+
+  document.addEventListener(
+    'click',
+    (e) => {
+      if (!(e.target as Element).closest?.('.lang-switcher a')) return;
+      langSwapY = scrollY;
+      document.documentElement.classList.add('lang-swap');
+    },
+    true,
+  );
+  document.addEventListener('astro:before-swap', (e) => {
+    if (langSwapY === null) return;
+    e.newDocument.documentElement.classList.add('lang-swap');
+    // page-load fires before the view transition ends; dropping the class sooner brings back the page fade
+    e.viewTransition.finished.finally(() => document.documentElement.classList.remove('lang-swap'));
+  });
+  document.addEventListener('astro:after-swap', () => {
+    if (langSwapY === null) return;
+    scrollTo({ top: langSwapY, behavior: 'instant' });
+    if (!matchMedia('(prefers-reduced-motion: reduce)').matches) scrambleVisibleText();
+  });
+
+  function scrambleVisibleText() {
+    const nodes: { node: Text; text: string; at: number[] }[] = [];
+    document.querySelectorAll('.post-header, .post-body, .post-toc').forEach((root) => {
+      const walk = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+      for (let n = walk.nextNode() as Text | null; n; n = walk.nextNode() as Text | null) {
+        const r = n.parentElement?.getBoundingClientRect();
+        // ponytail: on-screen text only; whatever is off-screen just swaps, nobody sees it
+        if (!r || r.bottom < 0 || r.top > innerHeight || !n.data.trim() || n.parentElement!.closest(NO_SCRAMBLE))
+          continue;
+        // each letter settles at its own time: mostly left to right, with some jitter so it doesn't read as a wipe
+        const at = [...n.data].map((_, i, a) => (i / a.length) * 0.6 + Math.random() * 0.4);
+        nodes.push({ node: n, text: n.data, at });
+      }
+    });
+    const start = performance.now();
+    let lastTick = -1;
+    const frame = (now: number) => {
+      const p = Math.min((now - start) / SCRAMBLE_MS, 1);
+      const tick = Math.floor((now - start) / SCRAMBLE_TICK);
+      if (tick === lastTick && p < 1) return void requestAnimationFrame(frame);
+      lastTick = tick;
+      for (const n of nodes) {
+        // only letters and digits scramble, so spaces and punctuation keep the shape of the text
+        const out = [...n.text]
+          .map((c, i) => {
+            if (p >= n.at[i] || !LETTER.test(c)) return c;
+            const set = c === c.toLowerCase() ? LOWER : UPPER;
+            return set[(Math.random() * set.length) | 0];
+          })
+          .join('');
+        if (n.node.data !== out) n.node.data = out;
+      }
+      if (p < 1) requestAnimationFrame(frame);
+    };
+    frame(start); // first frame right away, so the new text never shows unscrambled
+  }
+
+  // Click a post image to open it full size; arrows, swipe and the buttons move through the others.
+  function initViewer() {
+    const dialog = document.getElementById('viewer') as HTMLDialogElement | null;
+    const imgs = [...document.querySelectorAll<HTMLImageElement>('.post-body img')];
+    if (!dialog || !imgs.length) return;
+    const view = dialog.querySelector('img')!;
+    const count = dialog.querySelector('.viewer-count')!;
+    dialog.querySelectorAll<HTMLElement>('[data-step]').forEach((b) => (b.hidden = imgs.length < 2));
+    let i = 0;
+
+    const show = (n: number) => {
+      i = (n + imgs.length) % imgs.length;
+      const img = imgs[i];
+      // the size already on screen shows right away; src is the original, swapped in once it loads
+      view.src = img.currentSrc || img.src;
+      view.alt = img.alt;
+      count.textContent = `${i + 1}/${imgs.length}`;
+      const full = new Image();
+      full.onload = () => imgs[i] === img && (view.src = full.src);
+      full.src = img.src;
+    };
+
+    imgs.forEach((img, n) =>
+      img.addEventListener('click', () => {
+        show(n);
+        dialog.showModal();
+      }),
+    );
+    dialog.addEventListener('click', (e) => {
+      const el = e.target as HTMLElement;
+      if (el.dataset.step) show(i + Number(el.dataset.step));
+      else if (el !== view) dialog.close();
+    });
+    dialog.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') show(i - 1);
+      if (e.key === 'ArrowRight') show(i + 1);
+    });
+    let touchX = 0;
+    dialog.addEventListener('touchstart', (e) => (touchX = e.touches[0].clientX), { passive: true });
+    dialog.addEventListener('touchend', (e) => {
+      const dx = e.changedTouches[0].clientX - touchX;
+      if (Math.abs(dx) > 50) show(i - Math.sign(dx));
+    });
+  }
+
   onPageLoad(() => {
+    initViewer();
     document
       .getElementById('back-to-top')
       ?.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
     initBlurUp();
+    langSwapY = null;
   });
 </script>

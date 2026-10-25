@@ -1,5 +1,6 @@
 ---
-// vim-style status line: file name on the left, scroll position (Top / NN% / Bot) on the right
+// vim-style status line: file name on the left; the slot (the post's language switch) and the
+// scroll position (Top / NN% / Bot) on the right
 interface Props {
   file: string;
 }
@@ -7,11 +8,16 @@ interface Props {
 const { file } = Astro.props;
 ---
 
-<p id="reading-progress" aria-hidden="true">
-  <span>
+<p id="reading-progress">
+  <span aria-hidden="true">
     {file} <span class="rp-ro">[RO]</span>
   </span>
-  <span class="rp-pos">Top</span>
+  <span class="rp-right">
+    <slot />
+    <span class="rp-pos" aria-hidden="true">
+      Top
+    </span>
+  </span>
 </p>
 
 <style>
@@ -35,10 +41,18 @@ const { file } = Astro.props;
     pointer-events: none;
   }
 
+  .rp-right {
+    display: flex;
+    gap: 2rem;
+  }
+
   .rp-ro {
     color: var(--fg-faint);
   }
   .rp-pos {
+    /* Top / NN% / Bot / All are all at most 3 chars; a fixed width keeps the language switch still */
+    width: 3ch;
+    text-align: right;
     color: var(--accent);
   }
 </style>
