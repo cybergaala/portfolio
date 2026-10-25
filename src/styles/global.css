@@ -13,21 +13,14 @@ html {
   --fg-muted: rgba(29, 29, 31, 0.68);
   --fg-faint: rgba(29, 29, 31, 0.5);
   --border: rgba(29, 29, 31, 0.12);
-  --card: #ffffff;
   --syn-kw: #9b2393;
   --syn-str: #c41a16;
   --syn-type: #0b4f79;
   --syn-num: #1c00cf;
   --syn-com: #5d6c79;
   --font-mono: "Geist Mono Variable", ui-monospace, monospace;
-  --accent-dark: #000d8a;
-  --black: 15, 18, 25;
   --gray: 96, 115, 159;
-  --gray-light: 229, 233, 240;
   --gray-dark: 34, 41, 57;
-  --gray-gradient: rgba(var(--gray-light), 50%), #fff;
-  --box-shadow: 0 2px 6px rgba(var(--gray), 25%),
-    0 8px 24px rgba(var(--gray), 33%), 0 16px 32px rgba(var(--gray), 33%);
   --body-bg: #f6f6f4;
 }
 
@@ -38,7 +31,6 @@ html.dark {
   --fg-muted: rgba(232, 232, 234, 0.68);
   --fg-faint: rgba(232, 232, 234, 0.46);
   --border: rgba(232, 232, 234, 0.09);
-  --card: #1c1c21;
   --syn-kw: #ff7ab2;
   --syn-str: #fc6a5d;
   --syn-type: #6bdfff;
@@ -46,10 +38,7 @@ html.dark {
   --syn-com: #7f8c98;
   --body-bg: #141417;
   --gray: 200, 210, 240;
-  --gray-light: 45, 50, 70;
   --gray-dark: 229, 233, 240;
-  --box-shadow: 0 2px 6px rgba(var(--gray), 10%),
-    0 8px 24px rgba(var(--gray), 15%), 0 16px 32px rgba(var(--gray), 20%);
 }
 
 body {
@@ -66,27 +55,11 @@ body {
   line-height: 1.7;
 }
 
-main {
-  width: 100%;
-  max-width: 1280px;
-  margin: 0 auto;
-}
-
 .page-container {
   max-width: 64rem;
   margin: 0 auto;
   padding: 0 1rem;
   width: 100%;
-}
-
-.main-content {
-  padding-top: 80px;
-}
-
-@media (max-width: 768px) {
-  .main-content {
-    padding-top: 150px;
-  }
 }
 
 h1 { font-size: 2.625rem; }

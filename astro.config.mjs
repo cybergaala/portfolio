@@ -4,7 +4,6 @@ import tailwindcss from "@tailwindcss/vite";
 
 import sitemap from "@astrojs/sitemap";
 import mdx from "@astrojs/mdx";
-import preact from "@astrojs/preact";
 
 function rehypeLazyImages() {
   return (tree) => {
@@ -32,5 +31,5 @@ export default defineConfig({
       prefixDefaultLocale: false,
     },
   },
-  integrations: [sitemap(), mdx({ rehypePlugins: [rehypeLazyImages] }), preact({ compat: true })],
+  integrations: [sitemap(), mdx({ rehypePlugins: [rehypeLazyImages] })],
 });
