@@ -1,27 +1,17 @@
 // @ts-check
-import { defineConfig } from "astro/config";
-import tailwindcss from "@tailwindcss/vite";
+import { defineConfig } from 'astro/config';
+import tailwindcss from '@tailwindcss/vite';
 
-import sitemap from "@astrojs/sitemap";
-import mdx from "@astrojs/mdx";
-import preact from "@astrojs/preact";
-
-function rehypeLazyImages() {
-  return (tree) => {
-    function walk(node) {
-      if (node.type === 'element' && node.tagName === 'img') {
-        node.properties = node.properties ?? {};
-        if (!node.properties.loading) node.properties.loading = 'lazy';
-      }
-      if (node.children) node.children.forEach(walk);
-    }
-    walk(tree);
-  };
-}
+import sitemap from '@astrojs/sitemap';
+import mdx from '@astrojs/mdx';
 
 // https://astro.build/config
 export default defineConfig({
   site: 'https://edgarmejia.com',
+  // responsive srcsets for every image, including the ones in Markdown posts
+  image: {
+    layout: 'constrained',
+  },
   vite: {
     plugins: [tailwindcss()],
   },
@@ -32,5 +22,5 @@ export default defineConfig({
       prefixDefaultLocale: false,
     },
   },
-  integrations: [sitemap(), mdx({ rehypePlugins: [rehypeLazyImages] }), preact({ compat: true })],
+  integrations: [sitemap(), mdx()],
 });

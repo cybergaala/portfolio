@@ -1,0 +1,21 @@
+---
+// One `ls -l` row; the parent is the `.ls` grid from global.css.
+import { postSlug, postUrl, type Post } from '../../utils/blog';
+import { lsDate, lsSize } from '../../utils/format';
+
+interface Props {
+  post: Post;
+}
+
+const { post } = Astro.props;
+---
+
+<a href={postUrl(post)} class="ls-row">
+  <span class="ls-perm">-rw-r--r--</span>
+  <span class="ls-owner">dev</span>
+  <span class="ls-group">staff</span>
+  <span class="ls-size">{lsSize(post.body?.length ?? 0)}</span>
+  <span class="ls-date">{lsDate(post.data.pubDate)}</span>
+  <span class="ls-name">{postSlug(post)}.md</span>
+  <span class="ls-note"># {post.data.title}</span>
+</a>

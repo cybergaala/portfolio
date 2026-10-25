@@ -11,7 +11,8 @@ export type Role = {
   current?: boolean;
 };
 
-const freelanceDesc = 'Independent iOS and Android projects for various clients, working with native SDKs and Firebase.';
+const freelanceDesc =
+  'Independent iOS and Android projects for various clients, working with native SDKs and Firebase.';
 
 export const experience: Role[] = [
   {

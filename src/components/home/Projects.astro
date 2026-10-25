@@ -1,0 +1,55 @@
+---
+import { projects } from '../../data/projects';
+
+const linkTarget = (url: string) => url.replace(/^https?:\/\//, '');
+---
+
+<section id="projects" class="section">
+  <div class="page-container">
+    <header class="sec-head reveal">
+      <p class="cmd">$ ls -l ~/projects</p>
+      <h2 class="sec-title">Projects</h2>
+    </header>
+    <div class="ls ls-dirs mono reveal">
+      <p class="ls-total">total {projects.length}</p>
+      {projects.length === 0 && (
+        <p class="ls-wip">
+          <span class="ls-wip-tag">[WIP]</span> # still polishing these, check back soon
+        </p>
+      )}
+      {projects.map((p) => {
+        const link = p.href ?? p.code;
+        return (
+          <a href={link ?? '#'} class="ls-row" {...(link ? { target: '_blank', rel: 'noopener' } : {})}>
+            <span class="ls-perm">{link ? 'lrwxr-xr-x' : 'drwxr-xr-x'}</span>
+            <span class="ls-owner">dev</span>
+            <span class="ls-group">{p.tags[0].toLowerCase()}</span>
+            <span class="ls-size">4.0K</span>
+            <span class="ls-name dir">
+              {link ? (
+                <>
+                  {p.title} <span class="ls-arrow">-&gt; {linkTarget(link)}</span>
+                </>
+              ) : (
+                `${p.title}/`
+              )}
+            </span>
+            <span class="ls-note"># {p.desc}</span>
+          </a>
+        );
+      })}
+    </div>
+  </div>
+</section>
+
+<style>
+  .ls-wip {
+    grid-column: 1 / -1;
+    margin: 0;
+    color: var(--fg-faint);
+  }
+  .ls-wip-tag {
+    color: var(--syn-num);
+    font-weight: 600;
+  }
+</style>

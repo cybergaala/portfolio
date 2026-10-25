@@ -1,156 +1,142 @@
 ---
+import { Image } from 'astro:assets';
+import { render } from 'astro:content';
 import Layout from './Layout.astro';
-import type { CollectionEntry } from 'astro:content';
+import ProfileDialog from '../components/blog/ProfileDialog.astro';
+import ReadingStatus from '../components/blog/ReadingStatus.astro';
+import RelatedPosts from '../components/blog/RelatedPosts.astro';
+import Tags from '../components/blog/Tags.astro';
+import Toc from '../components/blog/Toc.astro';
+import YouTube from '../components/YouTube.astro';
+import { site } from '../data/site';
 import { useTranslations } from '../i18n/ui';
-import type { Lang } from '../i18n/ui';
+import { blogUrl, postLang, postSlug, postUrl, readingTime, type Post } from '../utils/blog';
 
 interface Props {
-  title: string;
-  description: string;
-  pubDate: Date;
-  tags?: string[];
-  banner?: string;
-  slug?: string;
-  related?: CollectionEntry<'blog'>[];
-  lang?: Lang;
-  translationUrl?: string;
-  basePath?: string;
+  post: Post;
+  related: Post[];
+  translation?: Post;
 }
 
-const { title, description, pubDate, tags, banner, slug, related, lang = 'en', translationUrl, basePath = '/blog' } = Astro.props;
+const { post, related, translation } = Astro.props;
+const { title, description, pubDate, tags, banner } = post.data;
+const { Content, headings } = await render(post);
+const lang = postLang(post);
+const slug = postSlug(post);
 const t = useTranslations(lang);
 
-const dateLocale = lang === 'es' ? 'es-ES' : 'en-US';
-const formatted = pubDate.toLocaleDateString(dateLocale, {
+const article = {
+  '@context': 'https://schema.org',
+  '@type': 'BlogPosting',
+  headline: title,
+  description,
+  datePublished: pubDate.toISOString(),
+  inLanguage: lang,
+  author: { '@type': 'Person', name: site.name, url: Astro.site?.href },
+  mainEntityOfPage: new URL(Astro.url.pathname, Astro.site).href,
+};
+
+const formatted = pubDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', {
   year: 'numeric',
   month: 'long',
   day: 'numeric',
+  timeZone: 'UTC', // pubDate is a plain date, so read it in UTC or it shows the day before
 });
 ---
 
-<Layout title={`${title} — Edgar Mejía`} description={description} lang={lang}>
-  <p id="reading-progress" aria-hidden="true"><span>{slug ?? 'post'}.md <span class="rp-ro">[RO]</span></span><span class="rp-pos">Top</span></p>
+<Layout
+  title={`${title} — ${site.name}`}
+  description={description}
+  lang={lang}
+  image={banner?.src}
+  publishedTime={pubDate}
+  alternate={translation && { lang: postLang(translation), href: postUrl(translation) }}
+  jsonLd={article}
+>
+  <ReadingStatus file={`${slug}.md`} />
   <article class="post-article">
     <div class="page-container">
-      <a href={basePath} class="back-link">{t('blog.back')}</a>
+      <a href={blogUrl(lang)} class="back-link">
+        {t('blog.back')}
+      </a>
 
       <header class="post-header">
-        {slug && <p class="cmd"><span class="path">~/blog</span> $ cat {slug}.md</p>}
+        <p class="cmd">
+          <span class="path">~/blog</span> $ cat {slug}.md
+        </p>
         <p class="section-label">
-          {formatted}
+          <time datetime={pubDate.toISOString()}>{formatted}</time>
           <span class="reading-time-sep">·</span>
-          <span id="reading-time" class="reading-time-label" data-label={t('blog.min-read')}></span>
+          <span class="reading-time-label">
+            {readingTime(post)} {t('blog.min-read')}
+          </span>
         </p>
         <h1 class="post-title">{title}</h1>
         <p class="post-desc">{description}</p>
-        <p class="post-author">
-          <button type="button" class="post-avatar" id="profile-open" aria-haspopup="dialog" aria-label="Open profile"></button>
-          Edgar Mejía
-        </p>
-        <dialog class="profile" id="profile" aria-labelledby="profile-title">
-          <span class="profile-title" id="profile-title">Profile</span>
-          <form method="dialog"><button class="profile-close" aria-label="Close">[x]</button></form>
-          <div class="profile-body">
-            <img src="/img/main.webp" alt="" class="profile-photo" loading="lazy" />
-            <div class="profile-info">
-              <p class="profile-name">Edgar Mejía</p>
-              <p>Mobile Developer</p>
-              <p>San Salvador, SV</p>
-              <p>8+ years shipping</p>
-              <p>Swift, Kotlin, Flutter</p>
-              <p class="profile-links">
-                <a href="https://github.com/cybergaala" target="_blank" rel="noopener">github ↗</a>
-                <a href="https://www.linkedin.com/in/mejia-edgar/" target="_blank" rel="noopener">linkedin ↗</a>
-                <a href="mailto:contact@edgarmejia.com">email</a>
-              </p>
-            </div>
-          </div>
-        </dialog>
-        {tags && tags.length > 0 && (
-          <div class="post-tags">
-            {tags.map(tag => <span class="post-tag">{tag}</span>)}
-          </div>
-        )}
-        {translationUrl && (
+        <ProfileDialog />
+        <Tags tags={tags} />
+        {translation && (
           <p class="lang-switcher">
-            {lang === 'en'
-              ? <><strong>ENG</strong>{' | '}<a href={translationUrl}>SPA</a></>
-              : <><a href={translationUrl}>ENG</a>{' | '}<strong>SPA</strong></>
-            }
+            {lang === 'en' ? (
+              <>
+                <strong>ENG</strong>
+                {' | '}
+                <a href={postUrl(translation)} hreflang="es">
+                  SPA
+                </a>
+              </>
+            ) : (
+              <>
+                <a href={postUrl(translation)} hreflang="en">
+                  ENG
+                </a>
+                {' | '}
+                <strong>SPA</strong>
+              </>
+            )}
           </p>
         )}
       </header>
 
       {banner && (
         <div class="post-banner">
-          <img src={banner} alt="" role="presentation" />
+          <Image
+            src={banner}
+            alt=""
+            widths={[720, 1080, 1440]}
+            sizes="(max-width: 1024px) 100vw, 1024px"
+            loading="eager"
+            fetchpriority="high"
+          />
         </div>
       )}
 
       <div class="post-layout">
         <div class="post-body">
-          <slot />
+          <Content components={{ YouTube }} />
         </div>
-        <aside class="post-toc" id="toc-aside">
-          <p class="toc-label">{t('blog.on-this-page')}</p>
-          <nav id="toc"></nav>
-        </aside>
+        <Toc headings={headings} label={t('blog.on-this-page')} />
       </div>
 
       <div class="post-end">
-        <span class="post-end-marker" aria-hidden="true">· · ·</span>
-        <button id="back-to-top" class="back-to-top">↑ {t('blog.back-to-top')}</button>
+        <span class="post-end-marker" aria-hidden="true">
+          · · ·
+        </span>
+        <button id="back-to-top" class="back-to-top">
+          ↑ {t('blog.back-to-top')}
+        </button>
       </div>
 
-      {related && related.length > 0 && (
-        <section class="related-posts">
-          <p class="section-label">{t('blog.related')}</p>
-          <div class="related-list">
-            {related.map(p => (
-              <a href={`${basePath}/${p.slug.replace(/^(en|es)\//, '')}`} class="related-item">
-                <p class="related-title">{p.data.title}</p>
-                <p class="related-desc">{p.data.description}</p>
-                {p.data.tags && (
-                  <div class="post-tags">
-                    {p.data.tags.map(t => <span class="post-tag">{t}</span>)}
-                  </div>
-                )}
-              </a>
-            ))}
-          </div>
-        </section>
-      )}
+      <RelatedPosts posts={related} label={t('blog.related')} />
     </div>
   </article>
 </Layout>
 
 <style>
   /* colors come from the theme tokens in global.css, so dark mode needs no overrides */
-  /* vim-style status line: file name on the left, scroll position (Top / NN% / Bot) on the right */
-  #reading-progress {
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 50;
-    display: flex;
-    justify-content: space-between;
-    margin: 0;
-    padding: 0.3rem 1rem;
-    /* keep the text above Android's gesture bar / iOS home indicator */
-    padding-bottom: calc(0.3rem + env(safe-area-inset-bottom, 0px));
-    font: 0.75rem var(--font-mono);
-    color: var(--fg-muted);
-    background-color: color-mix(in srgb, var(--body-bg) 85%, transparent);
-    backdrop-filter: blur(8px);
-    border-top: 1px solid var(--border);
-    pointer-events: none;
+  .post-article {
+    padding: 8rem 0;
   }
-
-  .rp-ro { color: var(--fg-faint); }
-  .rp-pos { color: var(--accent); }
-
-  .post-article { padding: 8rem 0; }
 
   .back-link {
     display: inline-block;
@@ -160,7 +146,9 @@ const formatted = pubDate.toLocaleDateString(dateLocale, {
     text-decoration: none;
   }
 
-  .back-link:hover { color: var(--accent); }
+  .back-link:hover {
+    color: var(--accent);
+  }
 
   .post-header {
     padding-bottom: 2.5rem;
@@ -168,8 +156,9 @@ const formatted = pubDate.toLocaleDateString(dateLocale, {
     border-bottom: 1px solid var(--border);
   }
 
-  .post-header .cmd { margin-bottom: 0.4rem; }
-  .path { color: var(--accent); }
+  .post-header .cmd {
+    margin-bottom: 0.4rem;
+  }
 
   .section-label {
     margin: 0 0 1rem;
@@ -177,8 +166,13 @@ const formatted = pubDate.toLocaleDateString(dateLocale, {
     color: var(--syn-type);
   }
 
-  .reading-time-sep { margin: 0 0.5ch; color: var(--fg-faint); }
-  .reading-time-label { color: var(--fg-faint); }
+  .reading-time-sep {
+    margin: 0 0.5ch;
+    color: var(--fg-faint);
+  }
+  .reading-time-label {
+    color: var(--fg-faint);
+  }
 
   .post-title {
     margin: 0 0 1rem;
@@ -215,85 +209,6 @@ const formatted = pubDate.toLocaleDateString(dateLocale, {
     transform: rotate(45deg);
   }
 
-  .post-author { display: flex; align-items: center; gap: 0.6rem; margin: 0 0 1.25rem; font-size: 0.85rem; color: var(--fg); }
-
-  /* ponytail: crops the head out of the about photo with CSS; swap for a real square avatar file if one exists */
-  .post-avatar {
-    width: 2.5rem;
-    height: 2.5rem;
-    flex-shrink: 0;
-    border-radius: 50%;
-    border: 1px solid var(--border);
-    padding: 0;
-    cursor: pointer;
-    background: url('/img/main.webp') 0% 22% / 214% auto no-repeat;
-  }
-
-  .post-avatar:hover, .post-avatar:focus-visible { border-color: var(--accent); outline: none; }
-
-  /* Profile: a lazygit-style panel in a native <dialog> */
-  .profile {
-    width: min(36rem, calc(100vw - 2rem));
-    margin: auto; /* Tailwind's reset zeroes it, which pins the dialog top-left */
-    padding: 1.4rem 1.1rem 1.1rem;
-    overflow: visible;
-    font: 0.8rem/1.65 var(--font-mono);
-    color: var(--fg-muted);
-    background: var(--body-bg);
-    border: 1px solid var(--syn-type);
-    border-radius: 8px;
-  }
-
-  .profile::backdrop { background: rgba(0, 0, 0, 0.55); }
-  .profile p { margin: 0; }
-
-  .profile-title {
-    position: absolute;
-    top: -0.6rem;
-    left: 0.7rem;
-    padding: 0 0.35rem;
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: var(--syn-type);
-    background: var(--body-bg);
-  }
-
-  .profile-close {
-    position: absolute;
-    top: 0.4rem;
-    right: 0.6rem;
-    font: inherit;
-    color: var(--fg-faint);
-    background: none;
-    border: none;
-    cursor: pointer;
-  }
-
-  .profile-close:hover, .profile-close:focus-visible { color: var(--accent); outline: none; }
-
-  .profile-body { display: flex; align-items: center; gap: 1.25rem; }
-  .profile-photo { width: 45%; aspect-ratio: 1; flex-shrink: 0; object-fit: cover; border: 1px solid var(--border); border-radius: 6px; }
-  .profile-info { min-width: 0; }
-  .profile-name { font-weight: 600; color: var(--fg); margin-bottom: 0.4rem !important; }
-  .profile-links { display: flex; flex-wrap: wrap; gap: 0 2ch; margin-top: 1rem !important; }
-
-  @media (max-width: 480px) {
-    .profile-body { flex-direction: column; align-items: stretch; }
-    .profile-photo { width: 100%; }
-  }
-  .profile-links a { color: var(--accent); text-decoration: none; }
-  .profile-links a:hover { text-decoration: underline; }
-
-  .post-tags { display: flex; flex-wrap: wrap; gap: 0.4rem; font: 0.72rem var(--font-mono); }
-  .post-tag {
-    padding: 0.15rem 0.55rem;
-    color: var(--fg-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    border: 1px solid var(--border);
-    border-radius: 4px;
-  }
-
   .lang-switcher {
     width: fit-content;
     margin: 1.25rem 0 0 auto;
@@ -301,9 +216,16 @@ const formatted = pubDate.toLocaleDateString(dateLocale, {
     color: var(--fg-faint);
   }
 
-  .lang-switcher strong { color: var(--accent); }
-  .lang-switcher a { color: var(--fg-faint); text-decoration: none; }
-  .lang-switcher a:hover { color: var(--fg); }
+  .lang-switcher strong {
+    color: var(--accent);
+  }
+  .lang-switcher a {
+    color: var(--fg-faint);
+    text-decoration: none;
+  }
+  .lang-switcher a:hover {
+    color: var(--fg);
+  }
 
   /* Banner */
   .post-banner {
@@ -315,38 +237,31 @@ const formatted = pubDate.toLocaleDateString(dateLocale, {
     border-radius: 8px;
   }
 
-  .post-banner img { display: block; width: 100%; height: 100%; object-fit: cover; transition: filter 0.5s ease; }
-
-  :global(.img-blur-load) { filter: blur(20px) !important; will-change: filter; }
-
-  /* Layout: content + TOC */
-  .post-layout { display: grid; grid-template-columns: 42rem 1fr; gap: 0 4rem; align-items: start; }
-
-  /* TOC: same timeline look as the landing's command history */
-  .post-toc { position: sticky; top: 5rem; font-family: var(--font-mono); }
-  .toc-label { margin: 0 0 0.75rem; font-size: 0.75rem; color: var(--fg-faint); }
-  .toc-label::before { content: "$ "; color: var(--accent); }
-
-  #toc { border-left: 1px solid var(--border); }
-
-  #toc :global(a) {
+  .post-banner img {
     display: block;
-    padding: 0.3rem 0 0.3rem 1rem;
-    margin-left: -1px;
-    font-size: 0.75rem;
-    line-height: 1.4;
-    color: var(--fg-faint);
-    text-decoration: none;
-    border-left: 1px solid transparent;
-    transition: color 0.15s;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: filter 0.5s ease;
   }
 
-  #toc :global(a:hover) { color: var(--fg); }
-  #toc :global(a.active) { color: var(--fg); border-left-color: var(--accent); }
+  :global(.img-blur-load) {
+    filter: blur(20px) !important;
+    will-change: filter;
+  }
+
+  /* Layout: content + TOC */
+  .post-layout {
+    display: grid;
+    grid-template-columns: 42rem 1fr;
+    gap: 0 4rem;
+    align-items: start;
+  }
 
   @media (max-width: 900px) {
-    .post-layout { grid-template-columns: 1fr; }
-    .post-toc { display: none; }
+    .post-layout {
+      grid-template-columns: 1fr;
+    }
   }
 
   /* Body */
@@ -365,16 +280,33 @@ const formatted = pubDate.toLocaleDateString(dateLocale, {
     text-align: left;
   }
 
-  .post-body :global(h2) { margin: 2.75rem 0 0.75rem; font-size: 1.4rem; font-weight: 600; }
-  .post-body :global(h3) { margin: 2rem 0 0.5rem; font-size: 1.1rem; font-weight: 600; }
+  .post-body :global(h2) {
+    margin: 2.75rem 0 0.75rem;
+    font-size: 1.4rem;
+    font-weight: 600;
+  }
+  .post-body :global(h3) {
+    margin: 2rem 0 0.5rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
 
   /* markdown heading marks, like the raw .md */
   .post-body :global(h2)::before,
-  .post-body :global(h3)::before { font: 400 0.8em var(--font-mono); color: var(--accent); }
-  .post-body :global(h2)::before { content: "## "; }
-  .post-body :global(h3)::before { content: "### "; }
+  .post-body :global(h3)::before {
+    font: 400 0.8em var(--font-mono);
+    color: var(--accent);
+  }
+  .post-body :global(h2)::before {
+    content: '## ';
+  }
+  .post-body :global(h3)::before {
+    content: '### ';
+  }
 
-  .post-body :global(p) { margin: 0 0 1.25rem; }
+  .post-body :global(p) {
+    margin: 0 0 1.25rem;
+  }
 
   /* drop cap as a terminal block cursor: inverted cell, exactly two body lines tall (2 × 1.8em) */
   .post-body :global(> p:first-of-type::first-letter) {
@@ -389,18 +321,48 @@ const formatted = pubDate.toLocaleDateString(dateLocale, {
     border-radius: 3px;
   }
 
-  .post-body :global(ul) { list-style: none; padding-left: 0; margin: 0 0 1.25rem; }
-  .post-body :global(ul li) { position: relative; padding-left: 1.5rem; margin-bottom: 0.5rem; }
-  .post-body :global(ul li::before) { content: "-"; position: absolute; left: 0.2rem; font-family: var(--font-mono); color: var(--accent); }
+  .post-body :global(ul) {
+    list-style: none;
+    padding-left: 0;
+    margin: 0 0 1.25rem;
+  }
+  .post-body :global(ul li) {
+    position: relative;
+    padding-left: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+  .post-body :global(ul li::before) {
+    content: '-';
+    position: absolute;
+    left: 0.2rem;
+    font-family: var(--font-mono);
+    color: var(--accent);
+  }
 
-  .post-body :global(ol) { padding-left: 1.25rem; margin: 0 0 1.25rem; }
-  .post-body :global(ol li) { margin-bottom: 0.5rem; }
-  .post-body :global(ol li::marker) { font-family: var(--font-mono); color: var(--accent); }
+  .post-body :global(ol) {
+    padding-left: 1.25rem;
+    margin: 0 0 1.25rem;
+  }
+  .post-body :global(ol li) {
+    margin-bottom: 0.5rem;
+  }
+  .post-body :global(ol li::marker) {
+    font-family: var(--font-mono);
+    color: var(--accent);
+  }
 
-  .post-body :global(strong) { font-weight: 600; color: var(--fg); }
+  .post-body :global(strong) {
+    font-weight: 600;
+    color: var(--fg);
+  }
 
-  .post-body :global(a) { color: var(--accent); text-underline-offset: 3px; }
-  .post-body :global(a:hover) { background: var(--accent-soft); }
+  .post-body :global(a) {
+    color: var(--accent);
+    text-underline-offset: 3px;
+  }
+  .post-body :global(a:hover) {
+    background: var(--accent-soft);
+  }
 
   .post-body :global(code) {
     padding: 0.1em 0.35em;
@@ -420,8 +382,15 @@ const formatted = pubDate.toLocaleDateString(dateLocale, {
     border-radius: 8px;
   }
 
-  .post-body :global(pre code) { padding: 0; font-size: 0.82rem; color: inherit; background: none; }
-  :global(html.dark) .post-body :global(pre .line) { background-color: transparent !important; }
+  .post-body :global(pre code) {
+    padding: 0;
+    font-size: 0.82rem;
+    color: inherit;
+    background: none;
+  }
+  :global(html.dark) .post-body :global(pre .line) {
+    background-color: transparent !important;
+  }
 
   .post-body :global(blockquote) {
     margin: 0 0 1.25rem;
@@ -431,7 +400,11 @@ const formatted = pubDate.toLocaleDateString(dateLocale, {
     border-left: 2px solid var(--accent);
   }
 
-  .post-body :global(hr) { margin: 2.5rem 0; border: none; border-top: 1px dashed var(--border); }
+  .post-body :global(hr) {
+    margin: 2.5rem 0;
+    border: none;
+    border-top: 1px dashed var(--border);
+  }
 
   .post-body :global(img) {
     display: block;
@@ -444,8 +417,12 @@ const formatted = pubDate.toLocaleDateString(dateLocale, {
   }
 
   /* Image followed by blockquote → render blockquote as caption, hanging off the photo like a tree branch */
-  .post-body :global(p:has(img):has(+ blockquote)) { margin-bottom: 0; }
-  .post-body :global(p:has(img):has(+ blockquote) img) { margin-bottom: 0.6rem; }
+  .post-body :global(p:has(img):has(+ blockquote)) {
+    margin-bottom: 0;
+  }
+  .post-body :global(p:has(img):has(+ blockquote) img) {
+    margin-bottom: 0.6rem;
+  }
 
   .post-body :global(p:has(img) + blockquote) {
     position: relative;
@@ -456,9 +433,18 @@ const formatted = pubDate.toLocaleDateString(dateLocale, {
     border: none;
   }
 
-  .post-body :global(p:has(img) + blockquote)::before { content: "└─"; position: absolute; left: 0.25ch; color: var(--accent); }
-  .post-body :global(p:has(img) + blockquote p) { margin: 0; }
-  .post-body :global(p:has(img) + blockquote strong) { color: var(--fg); }
+  .post-body :global(p:has(img) + blockquote)::before {
+    content: '└─';
+    position: absolute;
+    left: 0.25ch;
+    color: var(--accent);
+  }
+  .post-body :global(p:has(img) + blockquote p) {
+    margin: 0;
+  }
+  .post-body :global(p:has(img) + blockquote strong) {
+    color: var(--fg);
+  }
 
   /* End of post */
   .post-end {
@@ -471,7 +457,11 @@ const formatted = pubDate.toLocaleDateString(dateLocale, {
     font-family: var(--font-mono);
   }
 
-  .post-end-marker { letter-spacing: 0.4em; color: var(--fg-faint); user-select: none; }
+  .post-end-marker {
+    letter-spacing: 0.4em;
+    color: var(--fg-faint);
+    user-select: none;
+  }
 
   .back-to-top {
     padding: 0.1rem 0.5rem;
@@ -483,155 +473,42 @@ const formatted = pubDate.toLocaleDateString(dateLocale, {
     cursor: pointer;
   }
 
-  .back-to-top:hover, .back-to-top:focus-visible { color: var(--fg); background: var(--accent-soft); outline: none; }
-
-  /* Related posts: one lazygit-style panel */
-  .related-posts {
-    position: relative;
-    max-width: 42rem;
-    margin-top: 5rem;
-    padding: 0.6rem 0.5rem;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-  }
-
-  .related-posts:hover { border-color: var(--syn-type); }
-
-  .related-posts .section-label {
-    position: absolute;
-    top: -0.6rem;
-    left: 0.7rem;
-    margin: 0;
-    padding: 0 0.35rem;
-    font-size: 0.75rem;
-    font-weight: 600;
+  .back-to-top:hover,
+  .back-to-top:focus-visible {
     color: var(--fg);
-    background: var(--body-bg);
+    background: var(--accent-soft);
+    outline: none;
   }
-
-  .related-posts:hover .section-label { color: var(--syn-type); }
-
-  .related-list { display: flex; flex-direction: column; }
-
-  .related-item { display: block; padding: 0.75rem 0.5rem; text-decoration: none; border-radius: 3px; }
-  .related-item:hover { background: var(--accent-soft); }
-
-  .related-title { margin: 0 0 0.2rem; font: 600 0.85rem var(--font-mono); color: var(--fg); }
-  .related-title::before { content: "> "; color: var(--accent); }
-  .related-desc { margin: 0 0 0.4rem; font-size: 0.85rem; line-height: 1.6; color: var(--fg-muted); }
 </style>
 
 <script>
-  function initReadingTime() {
-    const body = document.querySelector('.post-body');
-    const el = document.getElementById('reading-time');
-    if (!body || !el) return;
-    const label = el.dataset.label ?? 'min read';
-    const words = (body.textContent ?? '').trim().split(/\s+/).filter(Boolean).length;
-    const minutes = Math.max(1, Math.round(words / 200));
-    el.textContent = `${minutes} ${label}`;
-  }
-
-  function initProgressBar() {
-    const bar = document.getElementById('reading-progress');
-    if (!bar) return;
-    const pos = bar.querySelector('.rp-pos')!;
-
-    const update = () => {
-      const scrollTop = window.scrollY;
-      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-      const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
-      const p = Math.min(100, Math.round(progress));
-      // same words vim uses in its ruler
-      pos.textContent = docHeight <= 0 ? 'All' : p === 0 ? 'Top' : p === 100 ? 'Bot' : `${p}%`;
-    };
-
-    window.addEventListener('scroll', update, { passive: true });
-    update();
-  }
-
-  function initToc() {
-    const toc = document.getElementById('toc');
-    const headings = document.querySelectorAll<HTMLHeadingElement>('.post-body h2');
-
-    if (!toc) return;
-
-    toc.innerHTML = '';
-
-    if (headings.length === 0) {
-      const aside = document.getElementById('toc-aside');
-      if (aside) aside.style.display = 'none';
-      return;
-    }
-
-    const aside = document.getElementById('toc-aside');
-    if (aside) aside.style.display = '';
-
-    headings.forEach((h, i) => {
-      if (!h.id) h.id = `heading-${i}`;
-      const a = document.createElement('a');
-      a.href = `#${h.id}`;
-      a.textContent = h.textContent ?? '';
-      toc.appendChild(a);
-    });
-
-    const links = Array.from(toc.querySelectorAll<HTMLAnchorElement>('a'));
-
-    const setActive = () => {
-      let current = headings[0];
-      for (const h of headings) {
-        if (h.getBoundingClientRect().top <= 120) current = h;
-      }
-      links.forEach(a => {
-        a.classList.toggle('active', a.getAttribute('href') === `#${current.id}`);
-      });
-    };
-
-    window.addEventListener('scroll', setActive, { passive: true });
-    setActive();
-  }
-
-  function initBackToTop() {
-    const btn = document.getElementById('back-to-top');
-    if (!btn) return;
-    btn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
-  }
-
-  function initProfile() {
-    const dialog = document.getElementById('profile') as HTMLDialogElement | null;
-    if (!dialog) return;
-    document.getElementById('profile-open')?.addEventListener('click', () => dialog.showModal());
-    // close on backdrop click: the click lands on the dialog element itself, outside its panel box
-    dialog.addEventListener('click', (e) => {
-      const r = dialog.getBoundingClientRect();
-      if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) dialog.close();
-    });
-  }
+  import { onPageLoad } from '../utils/page';
 
   function initBlurUp() {
     const images = document.querySelectorAll<HTMLImageElement>('.post-banner img, .post-body img');
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (!entry.isIntersecting) return;
-        const img = entry.target as HTMLImageElement;
-        observer.unobserve(img);
-        if (img.complete && img.naturalWidth > 0) return;
-        img.classList.add('img-blur-load');
-        const reveal = () => img.classList.remove('img-blur-load');
-        img.addEventListener('load', reveal, { once: true });
-        img.addEventListener('error', reveal, { once: true });
-      });
-    }, { rootMargin: '200px' });
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          const img = entry.target as HTMLImageElement;
+          observer.unobserve(img);
+          if (img.complete && img.naturalWidth > 0) return;
+          img.classList.add('img-blur-load');
+          const reveal = () => img.classList.remove('img-blur-load');
+          img.addEventListener('load', reveal, { once: true });
+          img.addEventListener('error', reveal, { once: true });
+        });
+      },
+      { rootMargin: '200px' },
+    );
 
-    images.forEach(img => observer.observe(img));
+    images.forEach((img) => observer.observe(img));
   }
 
-  document.addEventListener('astro:page-load', () => {
-    initToc();
-    initReadingTime();
-    initProgressBar();
-    initBackToTop();
-    initProfile();
+  onPageLoad(() => {
+    document
+      .getElementById('back-to-top')
+      ?.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
     initBlurUp();
   });
 </script>

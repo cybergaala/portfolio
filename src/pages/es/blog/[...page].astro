@@ -1,0 +1,9 @@
+---
+import type { GetStaticPaths } from 'astro';
+import BlogIndex from '../../../layouts/BlogIndex.astro';
+import { paginatePosts } from '../../../utils/blog';
+
+export const getStaticPaths = (({ paginate }) => paginatePosts(paginate, 'es')) satisfies GetStaticPaths;
+---
+
+<BlogIndex page={Astro.props.page} lang="es" />

@@ -1,5 +1,5 @@
-@import "tailwindcss";
-@import "@fontsource-variable/geist-mono";
+@import 'tailwindcss';
+@import '@fontsource-variable/geist-mono';
 
 html {
   scroll-behavior: smooth;
@@ -13,21 +13,15 @@ html {
   --fg-muted: rgba(29, 29, 31, 0.68);
   --fg-faint: rgba(29, 29, 31, 0.5);
   --border: rgba(29, 29, 31, 0.12);
-  --card: #ffffff;
   --syn-kw: #9b2393;
   --syn-str: #c41a16;
   --syn-type: #0b4f79;
   --syn-num: #1c00cf;
   --syn-com: #5d6c79;
-  --font-mono: "Geist Mono Variable", ui-monospace, monospace;
-  --accent-dark: #000d8a;
-  --black: 15, 18, 25;
+  --ok: #3ecf6e; /* the terminal's green, same in both themes */
+  --font-mono: 'Geist Mono Variable', ui-monospace, monospace;
   --gray: 96, 115, 159;
-  --gray-light: 229, 233, 240;
   --gray-dark: 34, 41, 57;
-  --gray-gradient: rgba(var(--gray-light), 50%), #fff;
-  --box-shadow: 0 2px 6px rgba(var(--gray), 25%),
-    0 8px 24px rgba(var(--gray), 33%), 0 16px 32px rgba(var(--gray), 33%);
   --body-bg: #f6f6f4;
 }
 
@@ -38,7 +32,6 @@ html.dark {
   --fg-muted: rgba(232, 232, 234, 0.68);
   --fg-faint: rgba(232, 232, 234, 0.46);
   --border: rgba(232, 232, 234, 0.09);
-  --card: #1c1c21;
   --syn-kw: #ff7ab2;
   --syn-str: #fc6a5d;
   --syn-type: #6bdfff;
@@ -46,10 +39,7 @@ html.dark {
   --syn-com: #7f8c98;
   --body-bg: #141417;
   --gray: 200, 210, 240;
-  --gray-light: 45, 50, 70;
   --gray-dark: 229, 233, 240;
-  --box-shadow: 0 2px 6px rgba(var(--gray), 10%),
-    0 8px 24px rgba(var(--gray), 15%), 0 16px 32px rgba(var(--gray), 20%);
 }
 
 body {
@@ -66,12 +56,6 @@ body {
   line-height: 1.7;
 }
 
-main {
-  width: 100%;
-  max-width: 1280px;
-  margin: 0 auto;
-}
-
 .page-container {
   max-width: 64rem;
   margin: 0 auto;
@@ -79,20 +63,18 @@ main {
   width: 100%;
 }
 
-.main-content {
-  padding-top: 80px;
+h1 {
+  font-size: 2.625rem;
 }
-
-@media (max-width: 768px) {
-  .main-content {
-    padding-top: 150px;
-  }
+h2 {
+  font-size: 1.625rem;
 }
-
-h1 { font-size: 2.625rem; }
-h2 { font-size: 1.625rem; }
-h3 { font-size: 1.375rem; }
-h4 { font-size: 1.125rem; }
+h3 {
+  font-size: 1.375rem;
+}
+h4 {
+  font-size: 1.125rem;
+}
 
 ol {
   list-style-type: decimal;
@@ -110,8 +92,16 @@ li::marker {
 
 /* ── Scroll reveal (script adds .pre, then removes it on intersect) ─── */
 @media (prefers-reduced-motion: no-preference) {
-  .reveal { transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1); transition-delay: var(--d, 0ms); }
-  .reveal.pre { opacity: 0; transform: translateY(18px); }
+  .reveal {
+    transition:
+      opacity 0.7s ease,
+      transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
+    transition-delay: var(--d, 0ms);
+  }
+  .reveal.pre {
+    opacity: 0;
+    transform: translateY(18px);
+  }
 }
 
 /* ── Theme switch (circle reveal) ───────────────────────────────────── */
@@ -146,13 +136,25 @@ html:not([data-theme-transition])::view-transition-new(root) {
 }
 
 @keyframes page-out {
-  from { opacity: 1; transform: translateY(0); }
-  to   { opacity: 0; transform: translateY(-40px); }
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-40px);
+  }
 }
 
 @keyframes page-in {
-  from { opacity: 0; transform: translateY(60px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(60px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -163,7 +165,51 @@ html:not([data-theme-transition])::view-transition-new(root) {
 }
 
 /* ── Terminal sections (landing + blog index) ───────────────────────── */
-.mono { font-family: var(--font-mono); }
+.mono {
+  font-family: var(--font-mono);
+}
+.section {
+  padding: 5rem 0;
+  border-top: 1px solid var(--border);
+}
+.path {
+  color: var(--accent);
+}
+.key {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* lazygit panel (Experience, Contact): a bordered box with its title cut into the top border */
+.lg-panel {
+  position: relative;
+  min-width: 0;
+  padding: 1rem 0.9rem 1.1rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.lg-title {
+  position: absolute;
+  top: -0.6rem;
+  left: 0.7rem;
+  padding: 0 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--fg);
+  background: var(--body-bg);
+}
+
+/* key hints under the panels, like lazygit's bottom line */
+.lg-keys {
+  grid-column: 1 / -1;
+  margin-top: 0.6rem !important;
+  font-size: 0.72rem;
+  color: var(--fg-faint);
+}
+.lg-keys span {
+  color: var(--syn-type);
+}
 
 .cmd {
   margin: 0 0 1rem;
@@ -171,8 +217,12 @@ html:not([data-theme-transition])::view-transition-new(root) {
   color: var(--fg-faint);
 }
 
-.sec-head { margin-bottom: 2rem; }
-.sec-head .cmd { margin-bottom: 0.4rem; }
+.sec-head {
+  margin-bottom: 2rem;
+}
+.sec-head .cmd {
+  margin-bottom: 0.4rem;
+}
 
 .sec-title {
   margin: 0;
@@ -181,8 +231,17 @@ html:not([data-theme-transition])::view-transition-new(root) {
   color: var(--fg);
 }
 
-.more { display: inline-block; margin-top: 1.75rem; font-size: 0.8rem; color: var(--accent); text-decoration: none; }
-.more:hover { text-decoration: underline; text-underline-offset: 4px; }
+.more {
+  display: inline-block;
+  margin-top: 1.75rem;
+  font-size: 0.8rem;
+  color: var(--accent);
+  text-decoration: none;
+}
+.more:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
 
 /* ls -l (projects + posts): rows share one grid so columns line up like a terminal */
 .ls {
@@ -193,8 +252,14 @@ html:not([data-theme-transition])::view-transition-new(root) {
   line-height: 1.6;
 }
 
-.ls-dirs { grid-template-columns: repeat(5, auto) 1fr; }
-.ls-total { grid-column: 1 / -1; margin: 0 0 0.25rem; color: var(--fg-faint); }
+.ls-dirs {
+  grid-template-columns: repeat(5, auto) 1fr;
+}
+.ls-total {
+  grid-column: 1 / -1;
+  margin: 0 0 0.25rem;
+  color: var(--fg-faint);
+}
 
 .ls-row {
   display: grid;
@@ -208,23 +273,62 @@ html:not([data-theme-transition])::view-transition-new(root) {
   border-radius: 3px;
 }
 
-.ls-row:hover { background: var(--accent-soft); }
-.ls-perm, .ls-owner, .ls-group { color: var(--fg-faint); }
-.ls-size { text-align: right; }
-.ls-date { color: var(--syn-type); }
-.ls-name { color: var(--fg); font-weight: 600; }
-.ls-name.dir { color: var(--accent); }
-.ls-arrow { font-weight: 400; color: var(--fg-muted); }
-.ls-name, .ls-note { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
-.ls-note { color: var(--fg-faint); }
-.ls-row:hover .ls-name { text-decoration: underline; text-underline-offset: 3px; }
-
-@media (max-width: 720px) {
-  .ls-perm, .ls-owner, .ls-group { display: none; }
-  .ls { grid-template-columns: auto auto minmax(0, 1fr); }
-  /* name + note stack in one column so long names truncate instead of scrolling the page */
-  .ls-dirs { grid-template-columns: minmax(0, 1fr); }
-  .ls-dirs .ls-size { display: none; }
-  .ls:not(.ls-dirs) .ls-note { display: none; }
+.ls-row:hover {
+  background: var(--accent-soft);
+}
+.ls-perm,
+.ls-owner,
+.ls-group {
+  color: var(--fg-faint);
+}
+.ls-size {
+  text-align: right;
+}
+.ls-date {
+  color: var(--syn-type);
+}
+.ls-name {
+  color: var(--fg);
+  font-weight: 600;
+}
+.ls-name.dir {
+  color: var(--accent);
+}
+.ls-arrow {
+  font-weight: 400;
+  color: var(--fg-muted);
+}
+.ls-name,
+.ls-note {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ls-note {
+  color: var(--fg-faint);
+}
+.ls-row:hover .ls-name {
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
+@media (max-width: 720px) {
+  .ls-perm,
+  .ls-owner,
+  .ls-group {
+    display: none;
+  }
+  .ls {
+    grid-template-columns: auto auto minmax(0, 1fr);
+  }
+  /* name + note stack in one column so long names truncate instead of scrolling the page */
+  .ls-dirs {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .ls-dirs .ls-size {
+    display: none;
+  }
+  .ls:not(.ls-dirs) .ls-note {
+    display: none;
+  }
+}

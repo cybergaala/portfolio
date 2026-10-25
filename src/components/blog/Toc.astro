@@ -1,0 +1,89 @@
+---
+// Table of contents built from the post's h2s at build time; the script only tracks the active one.
+import type { MarkdownHeading } from 'astro';
+
+interface Props {
+  headings: MarkdownHeading[];
+  label: string;
+}
+
+const sections = Astro.props.headings.filter((h) => h.depth === 2);
+---
+
+{sections.length > 0 && (
+  <aside class="post-toc">
+    <p class="toc-label">{Astro.props.label}</p>
+    <nav id="toc">
+      {sections.map((h) => (
+        <a href={`#${h.slug}`}>{h.text}</a>
+      ))}
+    </nav>
+  </aside>
+)}
+
+<style>
+  /* same timeline look as the landing's command history */
+  .post-toc {
+    position: sticky;
+    top: 5rem;
+    font-family: var(--font-mono);
+  }
+  .toc-label {
+    margin: 0 0 0.75rem;
+    font-size: 0.75rem;
+    color: var(--fg-faint);
+  }
+  .toc-label::before {
+    content: '$ ';
+    color: var(--accent);
+  }
+
+  #toc {
+    border-left: 1px solid var(--border);
+  }
+
+  #toc a {
+    display: block;
+    padding: 0.3rem 0 0.3rem 1rem;
+    margin-left: -1px;
+    font-size: 0.75rem;
+    line-height: 1.4;
+    color: var(--fg-faint);
+    text-decoration: none;
+    border-left: 1px solid transparent;
+    transition: color 0.15s;
+  }
+
+  #toc a:hover {
+    color: var(--fg);
+  }
+  #toc a.active {
+    color: var(--fg);
+    border-left-color: var(--accent);
+  }
+
+  @media (max-width: 900px) {
+    .post-toc {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  import { onPageLoad } from '../../utils/page';
+
+  onPageLoad((signal) => {
+    const links = [...document.querySelectorAll<HTMLAnchorElement>('#toc a')];
+    const headings = links.map((a) => document.getElementById(a.hash.slice(1))).filter((h) => h !== null);
+    if (headings.length === 0) return;
+
+    // the active heading is the last one scrolled past the top of the viewport
+    const setActive = () => {
+      const current = headings.findLast((h) => h.getBoundingClientRect().top <= 120) ?? headings[0];
+      links.forEach((a) => a.classList.toggle('active', a.hash === `#${current.id}`));
+    };
+
+    window.addEventListener('scroll', setActive, { passive: true, signal });
+    setActive();
+  });
+</script>
