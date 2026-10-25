@@ -2,6 +2,7 @@
 // SEELE logo as one-ink ANSI half blocks, generated with scripts/ascii-art.py --line --ansi (footer-icon.ascii.json keeps the ASCII take)
 import icon from '../data/footer-icon.json';
 import Sky from './Sky.astro';
+import { site } from '../data/site';
 ---
 
 <footer class="site-footer">
@@ -17,14 +18,14 @@ import Sky from './Sky.astro';
         </div>
       </div>
       <ul class="footer-links">
-        <li><a href="https://github.com/cybergaala" target="_blank" rel="noopener">github ↗</a></li>
-        <li><a href="https://www.linkedin.com/in/mejia-edgar/" target="_blank" rel="noopener">linkedin ↗</a></li>
-        <li><a href="mailto:contact@edgarmejia.com">email</a></li>
+        <li><a href={site.github} target="_blank" rel="noopener">github ↗</a></li>
+        <li><a href={site.linkedin} target="_blank" rel="noopener">linkedin ↗</a></li>
+        <li><a href={`mailto:${site.email}`}>email</a></li>
         <li><a href="/blog">blog</a></li>
       </ul>
     </div>
     <div class="footer-bottom">
-      <span>© 2026 · San Salvador, SV</span>
+      <span>© {new Date().getFullYear()} · {site.location}</span>
       <span>swift · kotlin · flutter · python · .net</span>
     </div>
   </div>
