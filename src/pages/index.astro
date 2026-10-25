@@ -5,7 +5,7 @@ import { getCollection } from 'astro:content';
 import { experience, type Role } from '../data/experience';
 import { projects } from '../data/projects';
 // ANSI half-block art, generated with scripts/ascii-art.py --ansi; the earlier ASCII take covers it by default
-// and hovering reveals it (holding the lens swaps which one is the default, see initArtLens)
+// and pressing reveals it (holding the lens swaps which one is the default, see initArtLens)
 import art from '../data/hero-art.json';
 // fastfetch color blocks laid out like a terminal's 8 normal + 8 bright colors, drawn from the theme tokens
 // so they follow light/dark; the bright row is each color mixed with white
@@ -336,7 +336,7 @@ const selected = commits.findIndex((c) => c.job?.current);
        shows inside a circle that follows the pointer (--x/--y set from JS) */
     @property --lens { syntax: '<length>'; inherits: true; initial-value: 0px; }
 
-    /* the lens rests at its hover size and is shown/hidden instantly with visibility; only the
+    /* the lens opens at its resting size and is shown/hidden instantly with visibility; only the
        press-and-hold growth animates. 70px matches LENS_RADIUS in initArtLens */
     .ff-art-wrap { position: relative; --lens: 70px; transition: --lens 0.35s ease-out; -webkit-touch-callout: none; }
 
@@ -588,16 +588,28 @@ const selected = commits.findIndex((c) => c.job?.current);
   import artAscii from '../data/hero-art.ascii.json';
   import artAsciiLight from '../data/hero-art-light.ascii.json';
 
-  // paints the ASCII take on the same 128x43 grid as the ANSI art; each theme gets the take made for its paper
-  function drawAscii(canvas: HTMLCanvasElement, art: HTMLElement) {
+  // the art's own ramp, so a scrambled cell only looks like a slightly different shade of the picture
+  const SCRAMBLE_GLYPHS = '=+*#%@';
+  const SCRAMBLE_MS = 1000;
+  const SCRAMBLE_TICK = 80; // ms between glyph changes; every frame read as flicker
+  const SCRAMBLE_BAND = 0.06; // width of the scrambling edge, as a share of the sweep; cells past it are still blank
+  // stable per-cell jitter, so the front where glyphs settle is ragged instead of a straight line
+  const noise = (x: number, y: number) => (((Math.sin(x * 12.9898 + y * 78.233) * 43758.5453) % 1) + 1) % 1;
+
+  // paints the ASCII take on the same 128x43 grid as the ANSI art; each theme gets the take made for its paper.
+  // progress < 1 is the scramble intro: the art is typed in from the top-left corner, and only a narrow band at the
+  // leading edge shows random glyphs before they settle (scrambling the whole piece read as TV static)
+  function drawAscii(canvas: HTMLCanvasElement, art: HTMLElement, progress = 1) {
     const rows = canvas.dataset.take === 'dark' ? artAscii : artAsciiLight;
     const { width, height } = art.getBoundingClientRect();
     const dpr = devicePixelRatio || 1;
-    canvas.width = Math.round(width * dpr);
-    canvas.height = Math.round(height * dpr);
+    const w = Math.round(width * dpr), h = Math.round(height * dpr);
+    // resizing reallocates the bitmap, so only do it when the size really changed (not on every scramble frame)
+    if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; }
     const ctx = canvas.getContext('2d')!;
     const cw = width / 128, ch = height / rows.length;
-    ctx.scale(dpr, dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, width, height);
     ctx.font = `${ch}px ${getComputedStyle(art).fontFamily}`;
     ctx.textBaseline = 'middle';
     rows.forEach((row, y) => {
@@ -605,9 +617,76 @@ const selected = commits.findIndex((c) => c.job?.current);
       for (const [color, text] of row) {
         ctx.fillStyle = color || 'transparent';
         // one glyph per cell so the canvas grid can't drift from the DOM grid
-        for (const c of text) ctx.fillText(c, (x++) * cw, (y + 0.5) * ch);
+        for (const c of text) {
+          // diagonal sweep from the top-left corner: distance in on-screen units (a cell is 0.6 as wide as
+          // it is tall), scaled so the bottom-right cell settles exactly at progress 1, after crossing the band
+          const diag = (x * 0.6 + y) / (127 * 0.6 + rows.length - 1);
+          const at = (diag * 0.92 + noise(x, y) * 0.08) * (1 - SCRAMBLE_BAND) + SCRAMBLE_BAND;
+          const tick = Math.floor((progress * SCRAMBLE_MS) / SCRAMBLE_TICK);
+          const glyph = progress >= at ? c
+            : progress >= at - SCRAMBLE_BAND ? SCRAMBLE_GLYPHS[(noise(x + tick * 31, y) * SCRAMBLE_GLYPHS.length) | 0]
+            : '';
+          if (glyph && glyph !== ' ') ctx.fillText(glyph, x * cw, (y + 0.5) * ch);
+          x++;
+        }
       }
     });
+  }
+
+  // intro when the landing appears: only the take on screen animates (5k glyphs a frame is the budget)
+  function scrambleAscii(wrap: HTMLElement, takes: NodeListOf<HTMLCanvasElement>, art: HTMLElement) {
+    if (!wrap.classList.contains('swapped') || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const shown = [...takes].filter((c) => c.getClientRects().length);
+    const start = performance.now();
+    const frame = (now: number) => {
+      const p = Math.min(1, (now - start) / SCRAMBLE_MS);
+      shown.forEach((c) => drawAscii(c, art, p));
+      if (p < 1) requestAnimationFrame(frame);
+    };
+    // first frame right away, in the same task as the final draw, so the finished art never flashes first
+    frame(start);
+  }
+
+  // after the intro, every few seconds a few cells scramble for a moment and settle back into place
+  const GLITCH_EVERY = [500, 1400]; // ms between glitches, picked at random in this range
+  const GLITCH_CELLS = [5, 12]; // cells per glitch, picked at random in this range
+  const GLITCH_TICKS = 8; // glyph changes before the cell settles, SCRAMBLE_TICK apart
+
+  function glitchAscii(wrap: HTMLElement, takes: NodeListOf<HTMLCanvasElement>, art: HTMLElement) {
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return () => {};
+    let timer: ReturnType<typeof setTimeout>;
+    const schedule = () => {
+      timer = setTimeout(glitch, GLITCH_EVERY[0] + Math.random() * (GLITCH_EVERY[1] - GLITCH_EVERY[0]));
+    };
+    const glitch = () => {
+      schedule();
+      const canvas = [...takes].find((c) => c.getClientRects().length);
+      if (document.hidden || !wrap.classList.contains('swapped') || !canvas) return;
+      const rows = canvas.dataset.take === 'dark' ? artAscii : artAsciiLight;
+      const { width, height } = art.getBoundingClientRect();
+      const cw = width / 128, ch = height / rows.length;
+      const ctx = canvas.getContext('2d')!;
+      for (let n = GLITCH_CELLS[0] + ((Math.random() * (GLITCH_CELLS[1] - GLITCH_CELLS[0] + 1)) | 0); n > 0; n--) {
+        const y = (Math.random() * rows.length) | 0, x = (Math.random() * 128) | 0;
+        // find the cell's glyph and color in the row's runs
+        let col = 0, cell: [string, string] | undefined;
+        for (const [color, text] of rows[y]) {
+          if (x < col + text.length) { cell = [color, text[x - col]]; break; }
+          col += text.length;
+        }
+        if (!cell || !cell[0] || cell[1] === ' ') continue;
+        const [color, c] = cell;
+        for (let t = 0; t <= GLITCH_TICKS; t++) {
+          setTimeout(() => {
+            ctx.clearRect(x * cw, y * ch, cw, ch);
+            ctx.fillStyle = color;
+            ctx.fillText(t < GLITCH_TICKS ? SCRAMBLE_GLYPHS[(Math.random() * SCRAMBLE_GLYPHS.length) | 0] : c, x * cw, (y + 0.5) * ch);
+          }, t * SCRAMBLE_TICK);
+        }
+      }
+    };
+    schedule();
+    return () => clearTimeout(timer);
   }
 
   function initLazygit() {
@@ -682,11 +761,18 @@ const selected = commits.findIndex((c) => c.job?.current);
     // the visitor's last swap is remembered; storage can throw in private windows, then ASCII stays the default
     try { if (localStorage.getItem('hero-art') === 'ansi') wrap.classList.remove('swapped'); } catch {}
     // redraw when the font is ready or the art resizes (mobile scales it)
-    document.fonts.ready.then(redraw);
+    let stopGlitch = () => {};
+    document.fonts.ready.then(() => {
+      redraw();
+      scrambleAscii(wrap, takes, art);
+      // start once the intro is over, so the glitches never fight the sweep
+      const wait = setTimeout(() => (stopGlitch = glitchAscii(wrap, takes, art)), SCRAMBLE_MS);
+      stopGlitch = () => clearTimeout(wait);
+    });
     const resized = new ResizeObserver(redraw);
     resized.observe(art);
-    // hover is tracked by hand, not with :hover: a wheel or trackpad scroll moves the art under a still
-    // cursor without firing pointer events, so the last cursor position is rechecked on every scroll
+    // the press is tracked by hand: a wheel or trackpad scroll moves the art under a still pointer
+    // without firing pointer events, so the last position is rechecked on every scroll
     let last: { x: number; y: number } | undefined;
     const place = () => {
       if (!last) return;
@@ -700,16 +786,16 @@ const selected = commits.findIndex((c) => c.job?.current);
       wrap.style.setProperty('--x', `${last.x - r.left}px`);
       wrap.style.setProperty('--y', `${last.y - r.top}px`);
     };
-    // the whole page, so scrolling the art back under a resting cursor reopens the lens
     const track = (e: PointerEvent) => {
-      // touch has no hover: the lens only opens while a finger holds it down
-      if (e.pointerType !== 'mouse' && !wrap.classList.contains('pressing')) return;
+      // no hover lens: it only opens while a mouse button or finger holds it down
+      if (!wrap.classList.contains('pressing')) return;
       last = { x: e.clientX, y: e.clientY };
       place();
     };
     let hold: ReturnType<typeof setTimeout> | undefined;
     const unpress = () => { clearTimeout(hold); wrap.classList.remove('pressing'); };
-    const close = () => { unpress(); wrap.classList.remove('hovering'); };
+    // forgetting the position keeps a later scroll from reopening the lens
+    const close = () => { last = undefined; unpress(); wrap.classList.remove('hovering'); };
     // once the press has grown the lens over the whole art, 5 more seconds of holding swaps the default
     wrap.addEventListener('transitionend', (e) => {
       if (e.target !== wrap || e.propertyName !== '--lens' || !wrap.classList.contains('pressing')) return;
@@ -727,17 +813,19 @@ const selected = commits.findIndex((c) => c.job?.current);
       }, 5000);
     });
 
-    wrap.addEventListener('pointerdown', (e) => { wrap.classList.add('pressing'); track(e); });
-    wrap.addEventListener('pointerup', (e) => { unpress(); if (e.pointerType !== 'mouse') close(); });
+    // capture so the release still lands here when the pointer is let go outside the art
+    wrap.addEventListener('pointerdown', (e) => { wrap.setPointerCapture(e.pointerId); wrap.classList.add('pressing'); track(e); });
+    wrap.addEventListener('pointerup', close);
     wrap.addEventListener('pointercancel', close);
     // a long press on a phone would otherwise open the image/text menu
     wrap.addEventListener('contextmenu', (e) => e.preventDefault());
     document.addEventListener('pointermove', track);
     // leaving the browser window fires no pointermove, so close on the page's own leave
-    const leave = () => { last = undefined; close(); };
+    const leave = close;
     document.documentElement.addEventListener('pointerleave', leave);
     addEventListener('scroll', place, { passive: true });
     lensCleanup = () => {
+      stopGlitch();
       resized.disconnect();
       document.removeEventListener('pointermove', track);
       document.documentElement.removeEventListener('pointerleave', leave);
