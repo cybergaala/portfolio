@@ -35,7 +35,7 @@ const sections = [
       left: 2rem;
       z-index: 5;
       transform: translateY(-50%);
-      font-size: 0.75rem;
+      font-size: 0.8rem;
       transition: opacity 0.3s;
     }
   }
@@ -45,35 +45,27 @@ const sections = [
     opacity: 0.45;
   }
 
+  /* fzf: the running section is the selected line */
   .history ol {
     list-style: none;
     margin: 0;
     padding: 0;
-    border-left: 1px solid var(--border);
-  }
-  .history li {
-    position: relative;
-    padding: 0.55rem 0 0.55rem 1.1rem;
-  }
-
-  .history li::before {
-    content: '';
-    position: absolute;
-    left: -4.5px;
-    top: 50%;
-    width: 8px;
-    height: 8px;
-    margin-top: -4px;
-    border-radius: 50%;
-    background: var(--body-bg);
-    border: 1px solid var(--fg-faint);
   }
 
   .history a {
+    display: block;
+    padding: 0.3rem 0.75rem 0.3rem 0;
     color: var(--fg-faint);
     text-decoration: none;
     white-space: nowrap;
-    transition: color 0.2s;
+    transition:
+      color 0.2s,
+      background 0.2s;
+  }
+  .history a::before {
+    content: '  ';
+    white-space: pre;
+    color: var(--accent);
   }
   .history a:hover {
     color: var(--fg);
@@ -83,16 +75,13 @@ const sections = [
   .history li:has(~ li .active) a {
     color: var(--fg-muted);
   }
-  .history li:has(~ li .active)::before {
-    background: var(--fg-faint);
-  }
 
-  /* running now */
+  /* selected line */
   .history a.active {
     color: var(--fg);
+    background: var(--accent-soft);
   }
-  .history li:has(.active)::before {
-    background: var(--accent);
-    border-color: var(--accent);
+  .history a.active::before {
+    content: '~ ';
   }
 </style>
