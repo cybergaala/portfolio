@@ -1,0 +1,9 @@
+---
+import type { GetStaticPaths } from 'astro';
+import BlogPost from '../../../layouts/BlogPost.astro';
+import { postPaths } from '../../../utils/blog';
+
+export const getStaticPaths = (() => postPaths('es')) satisfies GetStaticPaths;
+---
+
+<BlogPost {...Astro.props} />

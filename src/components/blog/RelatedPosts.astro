@@ -1,0 +1,62 @@
+---
+// One lazygit-style panel listing posts that share a tag.
+import Tags from './Tags.astro';
+import { postUrl, type Post } from '../../utils/blog';
+
+interface Props {
+  posts: Post[];
+  label: string;
+}
+
+const { posts, label } = Astro.props;
+---
+
+{posts.length > 0 && (
+  <section class="related-posts">
+    <p class="related-label">{label}</p>
+    <div class="related-list">
+      {posts.map((p) => (
+        <a href={postUrl(p)} class="related-item">
+          <p class="related-title">{p.data.title}</p>
+          <p class="related-desc">{p.data.description}</p>
+          <Tags tags={p.data.tags} />
+        </a>
+      ))}
+    </div>
+  </section>
+)}
+
+<style>
+  .related-posts {
+    position: relative;
+    max-width: 42rem;
+    margin-top: 5rem;
+    padding: 0.6rem 0.5rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+
+  .related-posts:hover { border-color: var(--syn-type); }
+
+  .related-label {
+    position: absolute;
+    top: -0.6rem;
+    left: 0.7rem;
+    margin: 0;
+    padding: 0 0.35rem;
+    font: 600 0.75rem/1.4 var(--font-mono);
+    color: var(--fg);
+    background: var(--body-bg);
+  }
+
+  .related-posts:hover .related-label { color: var(--syn-type); }
+
+  .related-list { display: flex; flex-direction: column; }
+
+  .related-item { display: block; padding: 0.75rem 0.5rem; text-decoration: none; border-radius: 3px; }
+  .related-item:hover { background: var(--accent-soft); }
+
+  .related-title { margin: 0 0 0.2rem; font: 600 0.85rem var(--font-mono); color: var(--fg); }
+  .related-title::before { content: "> "; color: var(--accent); }
+  .related-desc { margin: 0 0 0.4rem; font-size: 0.85rem; line-height: 1.6; color: var(--fg-muted); }
+</style>

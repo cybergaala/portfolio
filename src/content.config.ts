@@ -1,7 +1,9 @@
 import { defineCollection, z } from 'astro:content';
+import { glob } from 'astro/loaders';
 
+// Posts live in en/ and es/; a translation shares its file name. `_`-prefixed files are unpublished drafts.
 const blog = defineCollection({
-  type: 'content',
+  loader: glob({ pattern: '{en,es}/**/[^_]*.mdx', base: './src/content/blog' }),
   schema: z.object({
     title: z.string(),
     description: z.string(),

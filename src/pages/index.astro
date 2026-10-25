@@ -1,7 +1,8 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import Sky from "../components/Sky.astro";
-import { getCollection } from 'astro:content';
+import PostRow from '../components/blog/PostRow.astro';
+import { getPosts } from '../utils/blog';
 import { experience, type Role } from '../data/experience';
 import { projects } from '../data/projects';
 // ANSI half-block art, generated with scripts/ascii-art.py --ansi; the earlier ASCII take covers it by default
@@ -12,9 +13,7 @@ import art from '../data/hero-art.json';
 const palette = ['var(--syn-com)', 'var(--syn-str)', '#3ecf6e', 'var(--syn-num)', 'var(--syn-type)', 'var(--syn-kw)', 'var(--accent)', 'var(--fg)'];
 const paletteRows = [palette, palette.map((c) => `color-mix(in oklab, ${c} 65%, white)`)];
 
-const posts = (await getCollection('blog', ({ id, data }) => id.startsWith('en/') && !data.draft))
-  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
-  .slice(0, 5);
+const posts = (await getPosts('en')).slice(0, 5);
 
 const email = 'contact@edgarmejia.com';
 
@@ -197,17 +196,7 @@ const selected = commits.findIndex((c) => c.job?.current);
           <h2 class="sec-title">Writing</h2>
         </header>
         <div class="ls mono reveal">
-          {posts.map((post) => (
-            <a href={`/blog/${post.slug.replace('en/', '')}`} class="ls-row">
-              <span class="ls-perm">-rw-r--r--</span>
-              <span class="ls-owner">dev</span>
-              <span class="ls-group">staff</span>
-              <span class="ls-size">{lsSize(post.body.length)}</span>
-              <span class="ls-date">{lsDate(post.data.pubDate)}</span>
-              <span class="ls-name">{post.slug.replace('en/', '')}.md</span>
-              <span class="ls-note"># {post.data.title}</span>
-            </a>
-          ))}
+          {posts.map((post) => <PostRow post={post} />)}
         </div>
         <a href="/blog" class="more mono">all posts →</a>
       </div>

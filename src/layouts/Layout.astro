@@ -3,11 +3,12 @@ import Head from '../components/Head.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import { ViewTransitions } from 'astro:transitions';
+import type { Lang } from '../i18n/ui';
 
 interface Props {
   title: string;
   description?: string;
-  lang?: 'en' | 'es';
+  lang?: Lang;
 }
 
 const { title, description, lang = 'en' } = Astro.props;

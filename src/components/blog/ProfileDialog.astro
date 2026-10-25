@@ -1,0 +1,113 @@
+---
+// The post author's avatar; clicking it opens a lazygit-style profile panel in a native <dialog>.
+import { site } from '../../data/site';
+---
+
+<p class="post-author">
+  <button type="button" class="post-avatar" id="profile-open" aria-haspopup="dialog" aria-label="Open profile"></button>
+  {site.name}
+</p>
+<dialog class="profile" id="profile" aria-labelledby="profile-title">
+  <span class="profile-title" id="profile-title">Profile</span>
+  <form method="dialog"><button class="profile-close" aria-label="Close">[x]</button></form>
+  <div class="profile-body">
+    <img src={site.photo} alt="" class="profile-photo" loading="lazy" />
+    <div class="profile-info">
+      <p class="profile-name">{site.name}</p>
+      <p>{site.role}</p>
+      <p>{site.location}</p>
+      <p>8+ years shipping</p>
+      <p>Swift, Kotlin, Flutter</p>
+      <p class="profile-links">
+        <a href={site.github} target="_blank" rel="noopener">github ↗</a>
+        <a href={site.linkedin} target="_blank" rel="noopener">linkedin ↗</a>
+        <a href={`mailto:${site.email}`}>email</a>
+      </p>
+    </div>
+  </div>
+</dialog>
+
+<style define:vars={{ photo: `url('${site.photo}')` }}>
+  .post-author { display: flex; align-items: center; gap: 0.6rem; margin: 0 0 1.25rem; font-size: 0.85rem; color: var(--fg); }
+
+  /* ponytail: crops the head out of the about photo with CSS; swap for a real square avatar file if one exists */
+  .post-avatar {
+    width: 2.5rem;
+    height: 2.5rem;
+    flex-shrink: 0;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    padding: 0;
+    cursor: pointer;
+    background: var(--photo) 0% 22% / 214% auto no-repeat;
+  }
+
+  .post-avatar:hover, .post-avatar:focus-visible { border-color: var(--accent); outline: none; }
+
+  .profile {
+    width: min(36rem, calc(100vw - 2rem));
+    margin: auto; /* Tailwind's reset zeroes it, which pins the dialog top-left */
+    padding: 1.4rem 1.1rem 1.1rem;
+    overflow: visible;
+    font: 0.8rem/1.65 var(--font-mono);
+    color: var(--fg-muted);
+    background: var(--body-bg);
+    border: 1px solid var(--syn-type);
+    border-radius: 8px;
+  }
+
+  .profile::backdrop { background: rgba(0, 0, 0, 0.55); }
+  .profile p { margin: 0; }
+
+  .profile-title {
+    position: absolute;
+    top: -0.6rem;
+    left: 0.7rem;
+    padding: 0 0.35rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--syn-type);
+    background: var(--body-bg);
+  }
+
+  .profile-close {
+    position: absolute;
+    top: 0.4rem;
+    right: 0.6rem;
+    font: inherit;
+    color: var(--fg-faint);
+    background: none;
+    border: none;
+    cursor: pointer;
+  }
+
+  .profile-close:hover, .profile-close:focus-visible { color: var(--accent); outline: none; }
+
+  .profile-body { display: flex; align-items: center; gap: 1.25rem; }
+  .profile-photo { width: 45%; aspect-ratio: 1; flex-shrink: 0; object-fit: cover; border: 1px solid var(--border); border-radius: 6px; }
+  .profile-info { min-width: 0; }
+  .profile .profile-name { font-weight: 600; color: var(--fg); margin-bottom: 0.4rem; }
+  .profile .profile-links { display: flex; flex-wrap: wrap; gap: 0 2ch; margin-top: 1rem; }
+  .profile-links a { color: var(--accent); text-decoration: none; }
+  .profile-links a:hover { text-decoration: underline; }
+
+  @media (max-width: 480px) {
+    .profile-body { flex-direction: column; align-items: stretch; }
+    .profile-photo { width: 100%; }
+  }
+</style>
+
+<script>
+  import { onPageLoad } from '../../utils/page';
+
+  onPageLoad(() => {
+    const dialog = document.getElementById('profile') as HTMLDialogElement | null;
+    if (!dialog) return;
+    document.getElementById('profile-open')?.addEventListener('click', () => dialog.showModal());
+    // close on backdrop click: the click lands on the dialog element itself, outside its panel box
+    dialog.addEventListener('click', (e) => {
+      const r = dialog.getBoundingClientRect();
+      if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) dialog.close();
+    });
+  });
+</script>

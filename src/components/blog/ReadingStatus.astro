@@ -1,0 +1,54 @@
+---
+// vim-style status line: file name on the left, scroll position (Top / NN% / Bot) on the right
+interface Props {
+  file: string;
+}
+
+const { file } = Astro.props;
+---
+
+<p id="reading-progress" aria-hidden="true"><span>{file} <span class="rp-ro">[RO]</span></span><span class="rp-pos">Top</span></p>
+
+<style>
+  #reading-progress {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 50;
+    display: flex;
+    justify-content: space-between;
+    margin: 0;
+    padding: 0.3rem 1rem;
+    /* keep the text above Android's gesture bar / iOS home indicator */
+    padding-bottom: calc(0.3rem + env(safe-area-inset-bottom, 0px));
+    font: 0.75rem var(--font-mono);
+    color: var(--fg-muted);
+    background-color: color-mix(in srgb, var(--body-bg) 85%, transparent);
+    backdrop-filter: blur(8px);
+    border-top: 1px solid var(--border);
+    pointer-events: none;
+  }
+
+  .rp-ro { color: var(--fg-faint); }
+  .rp-pos { color: var(--accent); }
+</style>
+
+<script>
+  import { onPageLoad } from '../../utils/page';
+
+  onPageLoad((signal) => {
+    const pos = document.querySelector('#reading-progress .rp-pos');
+    if (!pos) return;
+
+    const update = () => {
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const p = docHeight > 0 ? Math.min(100, Math.round((window.scrollY / docHeight) * 100)) : 0;
+      // same words vim uses in its ruler
+      pos.textContent = docHeight <= 0 ? 'All' : p === 0 ? 'Top' : p === 100 ? 'Bot' : `${p}%`;
+    };
+
+    window.addEventListener('scroll', update, { passive: true, signal });
+    update();
+  });
+</script>
