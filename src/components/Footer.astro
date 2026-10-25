@@ -1,55 +1,116 @@
 ---
-// SEELE logo as one-ink ANSI half blocks, generated with scripts/ascii-art.py --line --ansi (footer-icon.ascii.json keeps the ASCII take)
-import icon from '../data/footer-icon.json';
 import Sky from './Sky.astro';
 import { site } from '../data/site';
+
+// sits below the footer, revealed by scrolling past it; colored ASCII from scripts/ascii-art.py (120 cols, --light for the light take)
+import pullArt from '../data/footer-pull.json';
+import pullArtLight from '../data/footer-pull-light.json';
+import { artToHtml } from '../data/art-html';
 ---
 
-<footer class="site-footer">
-  <Sky count={45} seed={23} class="footer-sky" />
-  <div class="page-container">
-    <div class="footer-main">
-      <div class="session">
-        <pre class="icon" aria-hidden="true">{icon.join('\n')}</pre>
-        <div>
-          <p>
-            <span class="accent">~</span> $ exit
-          </p>
-          <p class="faint">logout</p>
-          <p class="faint">[Process completed]</p>
+<div class="footer-wrap" style={`--art-rows: ${pullArt.length}`}>
+  <footer class="site-footer">
+    <Sky count={45} seed={23} class="footer-sky" />
+    <div class="page-container">
+      <div class="footer-main">
+        <div class="session">
+          <div>
+            <p>
+              <span class="accent">~</span> $ exit
+            </p>
+            <p class="faint">logout</p>
+            <p class="faint">[Process completed]</p>
+          </div>
         </div>
+        <ul class="footer-links">
+          <li>
+            <a href={site.github} target="_blank" rel="noopener">
+              github ↗
+            </a>
+          </li>
+          <li>
+            <a href={site.linkedin} target="_blank" rel="noopener">
+              linkedin ↗
+            </a>
+          </li>
+          <li>
+            <a href={`mailto:${site.email}`}>email</a>
+          </li>
+          <li>
+            <a href="/blog">blog</a>
+          </li>
+        </ul>
       </div>
-      <ul class="footer-links">
-        <li>
-          <a href={site.github} target="_blank" rel="noopener">
-            github ↗
-          </a>
-        </li>
-        <li>
-          <a href={site.linkedin} target="_blank" rel="noopener">
-            linkedin ↗
-          </a>
-        </li>
-        <li>
-          <a href={`mailto:${site.email}`}>email</a>
-        </li>
-        <li>
-          <a href="/blog">blog</a>
-        </li>
-      </ul>
+      <div class="footer-bottom">
+        <span>
+          © {new Date().getFullYear()} · {site.location}
+        </span>
+        <span>swift · kotlin · flutter · python · .net</span>
+      </div>
     </div>
-    <div class="footer-bottom">
-      <span>
-        © {new Date().getFullYear()} · {site.location}
-      </span>
-      <span>swift · kotlin · flutter · python · .net</span>
+  </footer>
+  <div class="pull" aria-hidden="true">
+    <div class="pull-art">
+      <Sky count={14} seed={41} class="sparkles left" />
+      <Sky count={14} seed={59} class="sparkles right" />
+      <pre data-take="dark" set:html={artToHtml(pullArt)} />
+      <pre data-take="light" set:html={artToHtml(pullArtLight)} />
     </div>
   </div>
-</footer>
+</div>
 
 <style>
+  /* reveal: the art sticks to the bottom of the viewport under the opaque footer,
+     so scrolling past the footer slides it off and uncovers the art */
+  .pull {
+    position: sticky;
+    bottom: 0;
+    display: flex;
+    justify-content: center;
+    overflow: hidden;
+  }
+  /* one take per theme, like the hero */
+  :global(html.dark) .pull pre[data-take='light'],
+  :global(html:not(.dark)) .pull pre[data-take='dark'] {
+    display: none;
+  }
+  .pull-art {
+    position: relative;
+    margin-bottom: 3rem;
+    padding: 0 7rem;
+  }
+  /* sparkles: a strip of the star sky on each side of the art */
+  .pull :global(.sparkles) {
+    width: 6rem;
+  }
+  .pull :global(.sparkles.left) {
+    right: auto;
+  }
+  .pull :global(.sparkles.right) {
+    left: auto;
+  }
+  @media (max-width: 600px) {
+    .pull-art {
+      padding: 0 2.5rem;
+    }
+    .pull :global(.sparkles) {
+      width: 2rem;
+    }
+  }
+  .pull pre {
+    margin: 0;
+    font: 4px/1 var(--font-mono);
+    letter-spacing: 0;
+    color: var(--fg-faint);
+  }
+
   .site-footer {
     position: relative;
+    z-index: 1;
+    background: var(--body-bg);
+    /* the curtain reaches the floor: at least as tall as the art (4px rows + its 3rem margin), so none of it shows early */
+    box-sizing: border-box;
+    min-height: calc(var(--art-rows) * 4px + 3rem);
     padding: 4rem 0 2.5rem;
     font-family: var(--font-mono);
     font-size: 0.8rem;
@@ -83,12 +144,6 @@ import { site } from '../data/site';
     display: flex;
     align-items: center;
     gap: 1.75rem;
-  }
-  .icon {
-    margin: 0;
-    font: 3.8px/1 var(--font-mono);
-    letter-spacing: 0;
-    color: var(--accent);
   }
   .accent {
     color: var(--accent);
