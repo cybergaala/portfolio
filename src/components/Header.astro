@@ -4,9 +4,16 @@
 <header>
   <nav id="mainNav">
     <div class="bar page-container">
-      <a href="/" class="nav-logo" aria-label="Edgar Mejía, home"><span class="accent">~/home</span><span class="cursor" aria-hidden="true"></span></a>
+      <a href="/" class="nav-logo" aria-label="Edgar Mejía, home">
+        <span class="accent">~/home</span>
+        <span class="cursor" aria-hidden="true"></span>
+      </a>
       <ul class="nav-links">
-        <li><a href="/#contact" data-sec="contact" class="say-hi">[ contact ]</a></li>
+        <li>
+          <a href="/#contact" data-sec="contact" class="say-hi">
+            [ contact ]
+          </a>
+        </li>
       </ul>
       <button id="theme-toggle" aria-label="Toggle theme">
         <span class="icon-moon">[dark]</span>
@@ -25,7 +32,9 @@
     z-index: 10;
     font-family: var(--font-mono);
     border-bottom: 1px solid transparent;
-    transition: background-color 0.2s, border-color 0.2s;
+    transition:
+      background-color 0.2s,
+      border-color 0.2s;
   }
 
   nav.nav-scrolled {
@@ -34,7 +43,11 @@
     border-bottom-color: var(--border);
   }
 
-  .bar { display: flex; align-items: center; height: 56px; }
+  .bar {
+    display: flex;
+    align-items: center;
+    height: 56px;
+  }
 
   .nav-logo {
     display: flex;
@@ -46,13 +59,34 @@
     text-decoration: none;
   }
 
-  .accent { color: var(--accent); }
-  .faint { color: var(--fg-faint); font-weight: 400; }
+  .accent {
+    color: var(--accent);
+  }
+  .faint {
+    color: var(--fg-faint);
+    font-weight: 400;
+  }
 
-  .cursor { width: 0.5em; height: 1.05em; margin-left: 0.3em; background: var(--accent); opacity: 0; transition: opacity 0.15s; }
-  .nav-logo:hover .cursor { opacity: 1; }
+  .cursor {
+    width: 0.5em;
+    height: 1.05em;
+    margin-left: 0.3em;
+    background: var(--accent);
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+  .nav-logo:hover .cursor {
+    opacity: 1;
+  }
 
-  .nav-links { list-style: none; margin: 0; padding: 0; display: flex; align-items: center; gap: 1.5rem; }
+  .nav-links {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
 
   .nav-links a {
     font-size: 0.8rem;
@@ -61,11 +95,19 @@
     transition: color 0.2s;
   }
 
-  .nav-links a:hover { color: var(--fg); }
-  .nav-links a.active { color: var(--accent); }
+  .nav-links a:hover {
+    color: var(--fg);
+  }
+  .nav-links a.active {
+    color: var(--accent);
+  }
 
-  .nav-links a.say-hi { color: var(--accent); }
-  .nav-links a.say-hi:hover { color: var(--fg); }
+  .nav-links a.say-hi {
+    color: var(--accent);
+  }
+  .nav-links a.say-hi:hover {
+    color: var(--fg);
+  }
 
   #theme-toggle {
     display: flex;
@@ -83,13 +125,22 @@
     transition: color 0.2s;
   }
 
-  #theme-toggle:hover { color: var(--fg); }
+  #theme-toggle:hover {
+    color: var(--fg);
+  }
 
-  .icon-sun { display: none; }
-  .icon-moon { display: block; }
-  :global(html.dark) .icon-sun { display: block; }
-  :global(html.dark) .icon-moon { display: none; }
-
+  .icon-sun {
+    display: none;
+  }
+  .icon-moon {
+    display: block;
+  }
+  :global(html.dark) .icon-sun {
+    display: block;
+  }
+  :global(html.dark) .icon-moon {
+    display: none;
+  }
 </style>
 
 <script>
@@ -109,13 +160,18 @@
 
     secObserver?.disconnect();
 
-    if (location.pathname.startsWith('/blog')) return setActive('writing');
+    if (/^\/(es\/)?blog/.test(location.pathname)) return setActive('writing');
     setActive('');
     if (location.pathname !== '/') return;
-    secObserver = new IntersectionObserver((entries) => {
-      entries.forEach((en) => { if (en.isIntersecting) setActive(en.target.id); });
-    }, { rootMargin: '-40% 0px -55% 0px' });
-    ['hero', 'projects', 'writing', 'experience', 'contact'].forEach((id) => {
+    secObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((en) => {
+          if (en.isIntersecting) setActive(en.target.id);
+        });
+      },
+      { rootMargin: '-40% 0px -55% 0px' },
+    );
+    new Set([...links].map((a) => a.dataset.sec!)).forEach((id) => {
       const el = document.getElementById(id);
       if (el) secObserver!.observe(el);
     });
@@ -190,42 +246,45 @@
       html.dataset.themeTransition = 'true';
       const t = (trans = (document as any).startViewTransition(() => setTheme(toDark)));
       let anim: Animation | undefined;
-      t.ready.then(() => {
-        if (trans !== t) return;
-        anim = html.animate(
-          { clipPath: toDark ? circles : circles.reverse() },
-          {
-            duration: DURATION,
-            easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
-            fill: 'forwards',
-            pseudoElement: toDark ? '::view-transition-new(root)' : '::view-transition-old(root)',
-          },
-        );
-        // Driven frame by frame on the main thread: a playing clip-path animation runs off-thread,
-        // and reversing it there drew one more frame forward before snapping back (a visible jolt).
-        anim!.pause();
-        let elapsed = 0;
-        let last: number | undefined;
-        const step = (now: number) => {
+      t.ready.then(
+        () => {
           if (trans !== t) return;
-          elapsed += (now - (last ?? now)) * (dark === toDark ? 1 : -1);
-          last = now;
-          if (elapsed >= DURATION) {
-            // free the toggle right away, not when `finished` settles a few frames later
-            trans = undefined;
-            anim!.finish();
-          } else if (elapsed <= 0 && dark !== toDark) {
-            // reversed back to where it started: restore the old theme and end without a flash
-            trans = undefined;
-            setTheme(!toDark);
-            t.skipTransition();
-          } else {
-            anim!.currentTime = elapsed;
-            requestAnimationFrame(step);
-          }
-        };
-        requestAnimationFrame(step);
-      }, () => {});
+          anim = html.animate(
+            { clipPath: toDark ? circles : circles.reverse() },
+            {
+              duration: DURATION,
+              easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
+              fill: 'forwards',
+              pseudoElement: toDark ? '::view-transition-new(root)' : '::view-transition-old(root)',
+            },
+          );
+          // Driven frame by frame on the main thread: a playing clip-path animation runs off-thread,
+          // and reversing it there drew one more frame forward before snapping back (a visible jolt).
+          anim!.pause();
+          let elapsed = 0;
+          let last: number | undefined;
+          const step = (now: number) => {
+            if (trans !== t) return;
+            elapsed += (now - (last ?? now)) * (dark === toDark ? 1 : -1);
+            last = now;
+            if (elapsed >= DURATION) {
+              // free the toggle right away, not when `finished` settles a few frames later
+              trans = undefined;
+              anim!.finish();
+            } else if (elapsed <= 0 && dark !== toDark) {
+              // reversed back to where it started: restore the old theme and end without a flash
+              trans = undefined;
+              setTheme(!toDark);
+              t.skipTransition();
+            } else {
+              anim!.currentTime = elapsed;
+              requestAnimationFrame(step);
+            }
+          };
+          requestAnimationFrame(step);
+        },
+        () => {},
+      );
       t.finished.finally(() => {
         // the fill keeps the end state until the transition is gone; left on <html> it would clip
         // the next transition's fresh snapshot too (e.g. the light one, to an empty dark screen)

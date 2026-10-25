@@ -25,8 +25,8 @@ const { id, title = 'YouTube video' } = Astro.props;
     border-radius: 4px;
     overflow: hidden;
     margin: 2rem 0;
-    border: 1px solid rgba(0,0,0,0.07);
-    background: rgba(0,0,0,0.04);
+    border: 1px solid var(--border);
+    background: color-mix(in srgb, var(--body-bg), var(--fg) 4%);
   }
 
   iframe {
@@ -35,10 +35,5 @@ const { id, title = 'YouTube video' } = Astro.props;
     width: 100%;
     height: 100%;
     border: none;
-  }
-
-  :global(html.dark) .yt-embed {
-    border-color: rgba(255,255,255,0.08);
-    background: rgba(255,255,255,0.03);
   }
 </style>

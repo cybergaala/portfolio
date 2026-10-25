@@ -19,7 +19,10 @@ const html = artToHtml(rows);
 </figure>
 
 <style>
-  .ascii-art { margin: 1.5rem 0; container-type: inline-size; }
+  .ascii-art {
+    margin: 1.5rem 0;
+    container-type: inline-size;
+  }
 
   /* 128 columns of 0.6em glyphs = 76.8em: size the font from the figure's own width so the piece
      fills the column edge to edge; .ascii-art pre outranks the post's code block styles */
@@ -34,6 +37,10 @@ const html = artToHtml(rows);
     user-select: none;
   }
 
-  .dark { background: #141417; }
-  .light { background: #f6f6f4; }
+  .dark {
+    background: #141417;
+  }
+  .light {
+    background: #f6f6f4;
+  }
 </style>

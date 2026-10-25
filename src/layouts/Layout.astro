@@ -1,63 +1,57 @@
 ---
-import Head from '../components/Head.astro';
+import { ClientRouter } from 'astro:transitions';
+import Head, { type Props as HeadProps } from '../components/Head.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
-import { ViewTransitions } from 'astro:transitions';
+import type { Lang } from '../i18n/ui';
 
-interface Props {
-  title: string;
-  description?: string;
-  lang?: 'en' | 'es';
+interface Props extends HeadProps {
+  lang?: Lang;
 }
 
-const { title, description, lang = 'en' } = Astro.props;
+const { lang = 'en', ...head } = Astro.props;
 ---
 
 <!doctype html>
 <html lang={lang}>
   <head>
-    <Head title={title} description={description} />
-    <ViewTransitions />
+    <Head {...head} />
+    <ClientRouter />
     <script is:inline>
-      (function applyTheme() {
-        const saved = localStorage.getItem('theme');
-        if (saved !== 'light') {
-          document.documentElement.classList.add('dark');
-        } else {
-          document.documentElement.classList.remove('dark');
-        }
-      })();
-      document.addEventListener('astro:after-swap', function() {
-        const saved = localStorage.getItem('theme');
-        if (saved !== 'light') {
-          document.documentElement.classList.add('dark');
-        } else {
-          document.documentElement.classList.remove('dark');
-        }
-      });
+      // dark is the default; runs before paint, and again after each ClientRouter swap
+      function applyTheme() {
+        document.documentElement.classList.toggle('dark', localStorage.getItem('theme') !== 'light');
+      }
+      applyTheme();
+      document.addEventListener('astro:after-swap', applyTheme);
+
+      // a link to the current page scrolls (to its hash or the top) instead of reloading through the router
       if (!window._samePageGuard) {
         window._samePageGuard = true;
-        document.addEventListener('click', function(e) {
-          var a = e.target.closest('a[href]');
-          if (!a) return;
-          try {
-            var dest = new URL(a.href, location.href);
-            if (dest.origin === location.origin && dest.pathname === location.pathname) {
-              e.stopImmediatePropagation();
-              e.preventDefault();
-              if (dest.hash) {
-                var target = document.querySelector(dest.hash);
-                if (target) target.scrollIntoView({ behavior: 'smooth' });
-                else location.hash = dest.hash;
-              } else {
-                window.scrollTo({ top: 0, behavior: 'smooth' });
+        document.addEventListener(
+          'click',
+          function (e) {
+            var a = e.target.closest('a[href]');
+            if (!a) return;
+            try {
+              var dest = new URL(a.href, location.href);
+              if (dest.origin === location.origin && dest.pathname === location.pathname) {
+                e.stopImmediatePropagation();
+                e.preventDefault();
+                if (dest.hash) {
+                  var target = document.querySelector(dest.hash);
+                  if (target) target.scrollIntoView({ behavior: 'smooth' });
+                  else location.hash = dest.hash;
+                } else {
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
               }
-            }
-          } catch(_) {}
-        }, true);
+            } catch (_) {}
+          },
+          true,
+        );
       }
     </script>
-    <style></style>
   </head>
   <body>
     <Header />
@@ -65,3 +59,28 @@ const { title, description, lang = 'en' } = Astro.props;
     <Footer />
   </body>
 </html>
+
+<script>
+  import { onPageLoad } from '../utils/page';
+
+  // scroll reveal for `.reveal` blocks (styles in global.css)
+  onPageLoad(() => {
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((en) => {
+          if (en.isIntersecting) {
+            en.target.classList.remove('pre');
+            io.unobserve(en.target);
+          }
+        });
+      },
+      { threshold: 0.12 },
+    );
+    document.querySelectorAll<HTMLElement>('.reveal').forEach((el) => {
+      // only hide what is not already on screen, so above-the-fold content never flashes
+      if (el.getBoundingClientRect().top > innerHeight * 0.9) el.classList.add('pre');
+      io.observe(el);
+    });
+  });
+</script>
