@@ -1,4 +1,5 @@
 ---
+import { Image } from 'astro:assets';
 import { render } from 'astro:content';
 import Layout from './Layout.astro';
 import ProfileDialog from '../components/blog/ProfileDialog.astro';
@@ -47,7 +48,7 @@ const formatted = pubDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', 
   title={`${title} — ${site.name}`}
   description={description}
   lang={lang}
-  image={banner}
+  image={banner?.src}
   publishedTime={pubDate}
   alternate={translation && { lang: postLang(translation), href: postUrl(translation) }}
   jsonLd={article}
@@ -80,7 +81,7 @@ const formatted = pubDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', 
 
       {banner && (
         <div class="post-banner">
-          <img src={banner} alt="" />
+          <Image src={banner} alt="" widths={[720, 1080, 1440]} sizes="(max-width: 1024px) 100vw, 1024px" loading="eager" fetchpriority="high" />
         </div>
       )}
 
