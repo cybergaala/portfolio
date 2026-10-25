@@ -1,0 +1,64 @@
+---
+// Fixed timeline of the landing's sections; Header.astro marks the one on screen as active.
+const sections = [
+  ['hero', 'Home'],
+  ['projects', 'Projects'],
+  ['writing', 'Writing'],
+  ['experience', 'Experience'],
+  ['contact', 'Contact'],
+];
+---
+
+<nav class="history mono" aria-label="Sections">
+  <ol>
+    {sections.map(([id, label]) => <li><a href={`#${id}`} data-sec={id}>{label}</a></li>)}
+  </ol>
+</nav>
+
+<style>
+  /* wide screens only */
+  .history { display: none; }
+
+  @media (min-width: 1360px) {
+    .history {
+      display: block;
+      position: fixed;
+      top: 50%;
+      left: 2rem;
+      z-index: 5;
+      transform: translateY(-50%);
+      font-size: 0.75rem;
+      transition: opacity 0.3s;
+    }
+  }
+
+  /* faded when no command is running (e.g. between sections) */
+  .history:not(:has(.active)) { opacity: 0.45; }
+
+  .history ol { list-style: none; margin: 0; padding: 0; border-left: 1px solid var(--border); }
+  .history li { position: relative; padding: 0.55rem 0 0.55rem 1.1rem; }
+
+  .history li::before {
+    content: "";
+    position: absolute;
+    left: -4.5px;
+    top: 50%;
+    width: 8px;
+    height: 8px;
+    margin-top: -4px;
+    border-radius: 50%;
+    background: var(--body-bg);
+    border: 1px solid var(--fg-faint);
+  }
+
+  .history a { color: var(--fg-faint); text-decoration: none; white-space: nowrap; transition: color 0.2s; }
+  .history a:hover { color: var(--fg); }
+
+  /* already ran: every command before the running one */
+  .history li:has(~ li .active) a { color: var(--fg-muted); }
+  .history li:has(~ li .active)::before { background: var(--fg-faint); }
+
+  /* running now */
+  .history a.active { color: var(--fg); }
+  .history li:has(.active)::before { background: var(--accent); border-color: var(--accent); }
+</style>

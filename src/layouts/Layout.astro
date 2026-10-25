@@ -66,3 +66,25 @@ const { title, description, lang = 'en' } = Astro.props;
     <Footer />
   </body>
 </html>
+
+<script>
+  import { onPageLoad } from '../utils/page';
+
+  // scroll reveal for `.reveal` blocks (styles in global.css)
+  onPageLoad(() => {
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((en) => {
+        if (en.isIntersecting) {
+          en.target.classList.remove('pre');
+          io.unobserve(en.target);
+        }
+      });
+    }, { threshold: 0.12 });
+    document.querySelectorAll<HTMLElement>('.reveal').forEach((el) => {
+      // only hide what is not already on screen, so above-the-fold content never flashes
+      if (el.getBoundingClientRect().top > innerHeight * 0.9) el.classList.add('pre');
+      io.observe(el);
+    });
+  });
+</script>

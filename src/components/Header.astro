@@ -109,13 +109,13 @@
 
     secObserver?.disconnect();
 
-    if (location.pathname.startsWith('/blog')) return setActive('writing');
+    if (/^\/(es\/)?blog/.test(location.pathname)) return setActive('writing');
     setActive('');
     if (location.pathname !== '/') return;
     secObserver = new IntersectionObserver((entries) => {
       entries.forEach((en) => { if (en.isIntersecting) setActive(en.target.id); });
     }, { rootMargin: '-40% 0px -55% 0px' });
-    ['hero', 'projects', 'writing', 'experience', 'contact'].forEach((id) => {
+    new Set([...links].map((a) => a.dataset.sec!)).forEach((id) => {
       const el = document.getElementById(id);
       if (el) secObserver!.observe(el);
     });

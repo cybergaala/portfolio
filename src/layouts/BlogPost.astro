@@ -28,6 +28,7 @@ const formatted = pubDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', 
   year: 'numeric',
   month: 'long',
   day: 'numeric',
+  timeZone: 'UTC', // pubDate is a plain date, so read it in UTC or it shows the day before
 });
 ---
 
@@ -102,7 +103,6 @@ const formatted = pubDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', 
   }
 
   .post-header .cmd { margin-bottom: 0.4rem; }
-  .path { color: var(--accent); }
 
   .section-label {
     margin: 0 0 1rem;

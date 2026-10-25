@@ -1,0 +1,107 @@
+---
+// Contact as a mail(1) prompt, drawn with the same lazygit panels as Experience; the form is a Netlify form.
+import { site } from '../../data/site';
+---
+
+<section id="contact" class="section">
+  <div class="page-container">
+    <header class="sec-head reveal">
+      <p class="cmd">$ mail dev</p>
+      <h2 class="sec-title">Contact</h2>
+    </header>
+    <div class="mail mono reveal">
+      <p class="mail-note"># freelance, a full-time role, or just cats. I usually reply within a day.</p>
+      <p class="mail-to"><span class="key">To</span>: &lt;<button type="button" class="copy-email" data-email={site.email}><span class="copy-label">{site.email}</span></button>&gt; <span class="copy-hint">[copy]</span></p>
+      <form id="contact-form" name="contact" method="POST" data-netlify="true">
+        <input type="hidden" name="form-name" value="contact" />
+        <div class="mail-row">
+          <label class="lg-panel mail-field"><span class="lg-title">[1] From</span><input type="text" name="name" placeholder="your name" required /></label>
+          <label class="lg-panel mail-field"><span class="lg-title">[2] Reply-To</span><input type="email" name="email" placeholder="you@example.com" required /></label>
+        </div>
+        <label class="lg-panel mail-field"><span class="lg-title">[3] Body</span><textarea name="message" rows="6" placeholder="tell me about your project..." required></textarea></label>
+        <p class="lg-keys mail-keys"><button type="submit" class="mail-send">send <span>⏎</span></button> · next field: <span>tab</span></p>
+      </form>
+      <p id="contact-success" class="mail-ok" hidden><span class="ok">✓</span> message queued for delivery. I'll get back to you soon.</p>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* Contact: a mail(1) prompt drawn with the same lazygit panels as Experience */
+  .mail { font-size: 0.8rem; line-height: 1.65; }
+  .mail p { margin: 0; }
+  .mail-note { color: var(--fg-faint); }
+  .mail-to { margin: 0.4rem 0 1.6rem !important; color: var(--fg-muted); }
+
+  .copy-email { padding: 0; font: inherit; color: var(--accent); background: none; border: none; cursor: pointer; }
+  .copy-email:hover { text-decoration: underline; text-underline-offset: 3px; }
+  .copy-hint { color: var(--fg-faint); }
+  .mail-to:has(.copy-email:hover) .copy-hint { color: var(--accent); }
+
+  #contact-form { display: flex; flex-direction: column; gap: 1.4rem; }
+  .mail-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem 0.6rem; }
+  .lg-panel.mail-field { display: block; padding: 0.8rem 0.9rem 0.7rem; cursor: text; }
+  .mail-field:focus-within { border-color: var(--syn-type); }
+  .mail-field:focus-within .lg-title { color: var(--syn-type); }
+
+  .mail-field input,
+  .mail-field textarea {
+    display: block;
+    width: 100%;
+    padding: 0;
+    font: inherit;
+    color: var(--fg);
+    background: none;
+    border: none;
+    outline: none;
+    resize: vertical;
+    caret-color: var(--accent);
+  }
+
+  .mail-field input::placeholder,
+  .mail-field textarea::placeholder { color: var(--fg-faint); }
+
+  .lg-keys.mail-keys { margin-top: -0.4rem !important; }
+  .mail-send { padding: 0.1rem 0.4rem; margin-left: -0.4rem; font: inherit; color: var(--fg); background: none; border: none; border-radius: 3px; cursor: pointer; }
+  .mail-send:hover, .mail-send:focus-visible { background: var(--accent-soft); outline: none; }
+
+  .mail-ok { color: var(--fg); }
+  .ok { color: var(--ok); }
+
+  @media (max-width: 560px) {
+    .mail-row { grid-template-columns: 1fr; gap: 1.4rem; }
+  }
+</style>
+
+<script>
+  import { onPageLoad } from '../../utils/page';
+
+  onPageLoad(() => {
+    const btn = document.querySelector<HTMLButtonElement>('.copy-email');
+    btn?.addEventListener('click', async () => {
+      const label = btn.querySelector('.copy-label')!;
+      const email = btn.dataset.email!;
+      try { await navigator.clipboard.writeText(email); label.textContent = 'copied ✓'; }
+      catch { location.href = `mailto:${email}`; return; }
+      setTimeout(() => (label.textContent = email), 1600);
+    });
+
+    const form = document.getElementById('contact-form') as HTMLFormElement | null;
+    const success = document.getElementById('contact-success');
+    if (!form || !success) return;
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const body = new URLSearchParams(new FormData(form) as unknown as Record<string, string>).toString();
+      try {
+        const res = await fetch('/', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      } catch {
+        // let the browser post it the normal way so the message isn't lost
+        return form.submit();
+      }
+      form.hidden = true;
+      success.hidden = false;
+    });
+  });
+</script>

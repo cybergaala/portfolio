@@ -4,7 +4,7 @@ import { site } from '../../data/site';
 ---
 
 <p class="post-author">
-  <button type="button" class="post-avatar" id="profile-open" aria-haspopup="dialog" aria-label="Open profile"></button>
+  <button type="button" class="post-avatar" id="profile-open" aria-haspopup="dialog" aria-label="Open profile" style={`--photo: url('${site.photo}')`}></button>
   {site.name}
 </p>
 <dialog class="profile" id="profile" aria-labelledby="profile-title">
@@ -27,7 +27,7 @@ import { site } from '../../data/site';
   </div>
 </dialog>
 
-<style define:vars={{ photo: `url('${site.photo}')` }}>
+<style>
   .post-author { display: flex; align-items: center; gap: 0.6rem; margin: 0 0 1.25rem; font-size: 0.85rem; color: var(--fg); }
 
   /* ponytail: crops the head out of the about photo with CSS; swap for a real square avatar file if one exists */

@@ -1,0 +1,21 @@
+---
+import PostRow from '../blog/PostRow.astro';
+import { blogUrl, getPosts } from '../../utils/blog';
+
+const posts = (await getPosts('en')).slice(0, 5);
+---
+
+{posts.length > 0 && (
+  <section id="writing" class="section">
+    <div class="page-container">
+      <header class="sec-head reveal">
+        <p class="cmd">$ ls -lt ~/blog | head -5</p>
+        <h2 class="sec-title">Writing</h2>
+      </header>
+      <div class="ls mono reveal">
+        {posts.map((post) => <PostRow post={post} />)}
+      </div>
+      <a href={blogUrl('en')} class="more mono">all posts →</a>
+    </div>
+  </section>
+)}
