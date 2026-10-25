@@ -13,6 +13,10 @@ it crops to the drawing and thickens strokes so they survive the shrink.
 With --ansi too, each cell is two on/off pixels drawn with ▀ ▄ █.
 Output is then a JSON list of plain strings: > src/data/footer-icon.json
 
+--icon renders a flat icon on a transparent background (e.g. a macOS file icon) as one-ink
+ASCII: transparent is blank, the body is dots and its darker shapes are #, so it needs no color.
+Output is a JSON list of plain strings: > src/data/footer-pull.json
+
 --palette prints the image's 8 representative colors (dark to light) instead,
 for the color blocks under the fastfetch info: > src/data/hero-palette.json
 
@@ -98,14 +102,35 @@ def line(path, cols, ansi=False):
     return ["".join(ramp[min(n - 1, im.getpixel((x, y)) * n // 256)] for x in range(cols)).rstrip() for y in range(rows)]
 
 
+def icon(path, cols):
+    im = Image.open(path).convert("RGBA")
+    im = im.crop(im.getchannel("A").point(lambda a: 255 if a > 200 else 0).getbbox())
+    rows = round(cols * im.height / im.width * CELL)
+    alpha = im.getchannel("A").resize((cols, rows), Image.BOX)
+    # on white so the transparent edge doesn't read as ink; MinFilter thickens the thin shapes (text)
+    flat = Image.alpha_composite(Image.new("RGBA", im.size, "white"), im).convert("L")
+    gray = flat.filter(ImageFilter.MinFilter(7)).resize((cols, rows), Image.BOX)
+
+    def glyph(x, y):
+        v = gray.getpixel((x, y))
+        if alpha.getpixel((x, y)) < 235 or v >= 249:  # outside, or the white of the folded corner
+            return " "
+        return "#" if v < 200 else "+" if v < 222 else "."
+
+    return ["".join(glyph(x, y) for x in range(cols)).rstrip() for y in range(rows)]
+
+
 def main():
-    flags = {"--light", "--ansi", "--palette", "--line"}
+    flags = {"--light", "--ansi", "--palette", "--line", "--icon"}
     args = [a for a in sys.argv[1:] if a not in flags]
     light = "--light" in sys.argv
     path = args[0]
     cols = int(args[1]) if len(args) > 1 else 110
     ramp = LIGHT_RAMP if light else RAMP
 
+    if "--icon" in sys.argv:
+        json.dump(icon(path, cols), sys.stdout)
+        return
     if "--line" in sys.argv:
         json.dump(line(path, cols, "--ansi" in sys.argv), sys.stdout, separators=(",", ":"), ensure_ascii=False)
         return
