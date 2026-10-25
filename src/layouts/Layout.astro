@@ -28,24 +28,28 @@ const { lang = 'en', ...head } = Astro.props;
       // a link to the current page scrolls (to its hash or the top) instead of reloading through the router
       if (!window._samePageGuard) {
         window._samePageGuard = true;
-        document.addEventListener('click', function (e) {
-          var a = e.target.closest('a[href]');
-          if (!a) return;
-          try {
-            var dest = new URL(a.href, location.href);
-            if (dest.origin === location.origin && dest.pathname === location.pathname) {
-              e.stopImmediatePropagation();
-              e.preventDefault();
-              if (dest.hash) {
-                var target = document.querySelector(dest.hash);
-                if (target) target.scrollIntoView({ behavior: 'smooth' });
-                else location.hash = dest.hash;
-              } else {
-                window.scrollTo({ top: 0, behavior: 'smooth' });
+        document.addEventListener(
+          'click',
+          function (e) {
+            var a = e.target.closest('a[href]');
+            if (!a) return;
+            try {
+              var dest = new URL(a.href, location.href);
+              if (dest.origin === location.origin && dest.pathname === location.pathname) {
+                e.stopImmediatePropagation();
+                e.preventDefault();
+                if (dest.hash) {
+                  var target = document.querySelector(dest.hash);
+                  if (target) target.scrollIntoView({ behavior: 'smooth' });
+                  else location.hash = dest.hash;
+                } else {
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
               }
-            }
-          } catch (_) {}
-        }, true);
+            } catch (_) {}
+          },
+          true,
+        );
       }
     </script>
   </head>
@@ -62,14 +66,17 @@ const { lang = 'en', ...head } = Astro.props;
   // scroll reveal for `.reveal` blocks (styles in global.css)
   onPageLoad(() => {
     if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    const io = new IntersectionObserver((entries) => {
-      entries.forEach((en) => {
-        if (en.isIntersecting) {
-          en.target.classList.remove('pre');
-          io.unobserve(en.target);
-        }
-      });
-    }, { threshold: 0.12 });
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((en) => {
+          if (en.isIntersecting) {
+            en.target.classList.remove('pre');
+            io.unobserve(en.target);
+          }
+        });
+      },
+      { threshold: 0.12 },
+    );
     document.querySelectorAll<HTMLElement>('.reveal').forEach((el) => {
       // only hide what is not already on screen, so above-the-fold content never flashes
       if (el.getBoundingClientRect().top > innerHeight * 0.9) el.classList.add('pre');

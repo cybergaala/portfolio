@@ -8,7 +8,7 @@ export const projects: {
 }[] = [
   {
     title: 'parentkit',
-    desc: "baby sleep, feeding & diaper tracker, shared in real time with the care circle",
+    desc: 'baby sleep, feeding & diaper tracker, shared in real time with the care circle',
     tags: ['Mobile'],
     href: 'https://gaala.dev/parentkit/',
   },

@@ -13,9 +13,13 @@ const posts = (await getPosts('en')).slice(0, 5);
         <h2 class="sec-title">Writing</h2>
       </header>
       <div class="ls mono reveal">
-        {posts.map((post) => <PostRow post={post} />)}
+        {posts.map((post) => (
+          <PostRow post={post} />
+        ))}
       </div>
-      <a href={blogUrl('en')} class="more mono">all posts →</a>
+      <a href={blogUrl('en')} class="more mono">
+        all posts →
+      </a>
     </div>
   </section>
 )}

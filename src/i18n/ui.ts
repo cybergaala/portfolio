@@ -32,7 +32,7 @@ export const ui = {
 } as const;
 
 export type Lang = keyof typeof ui;
-export type TranslationKey = keyof typeof ui[typeof defaultLang];
+export type TranslationKey = keyof (typeof ui)[typeof defaultLang];
 
 export function useTranslations(lang: Lang) {
   return function t(key: TranslationKey): string {

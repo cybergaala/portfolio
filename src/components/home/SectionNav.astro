@@ -11,13 +11,21 @@ const sections = [
 
 <nav class="history mono" aria-label="Sections">
   <ol>
-    {sections.map(([id, label]) => <li><a href={`#${id}`} data-sec={id}>{label}</a></li>)}
+    {sections.map(([id, label]) => (
+      <li>
+        <a href={`#${id}`} data-sec={id}>
+          {label}
+        </a>
+      </li>
+    ))}
   </ol>
 </nav>
 
 <style>
   /* wide screens only */
-  .history { display: none; }
+  .history {
+    display: none;
+  }
 
   @media (min-width: 1360px) {
     .history {
@@ -33,13 +41,23 @@ const sections = [
   }
 
   /* faded when no command is running (e.g. between sections) */
-  .history:not(:has(.active)) { opacity: 0.45; }
+  .history:not(:has(.active)) {
+    opacity: 0.45;
+  }
 
-  .history ol { list-style: none; margin: 0; padding: 0; border-left: 1px solid var(--border); }
-  .history li { position: relative; padding: 0.55rem 0 0.55rem 1.1rem; }
+  .history ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-left: 1px solid var(--border);
+  }
+  .history li {
+    position: relative;
+    padding: 0.55rem 0 0.55rem 1.1rem;
+  }
 
   .history li::before {
-    content: "";
+    content: '';
     position: absolute;
     left: -4.5px;
     top: 50%;
@@ -51,14 +69,30 @@ const sections = [
     border: 1px solid var(--fg-faint);
   }
 
-  .history a { color: var(--fg-faint); text-decoration: none; white-space: nowrap; transition: color 0.2s; }
-  .history a:hover { color: var(--fg); }
+  .history a {
+    color: var(--fg-faint);
+    text-decoration: none;
+    white-space: nowrap;
+    transition: color 0.2s;
+  }
+  .history a:hover {
+    color: var(--fg);
+  }
 
   /* already ran: every command before the running one */
-  .history li:has(~ li .active) a { color: var(--fg-muted); }
-  .history li:has(~ li .active)::before { background: var(--fg-faint); }
+  .history li:has(~ li .active) a {
+    color: var(--fg-muted);
+  }
+  .history li:has(~ li .active)::before {
+    background: var(--fg-faint);
+  }
 
   /* running now */
-  .history a.active { color: var(--fg); }
-  .history li:has(.active)::before { background: var(--accent); border-color: var(--accent); }
+  .history a.active {
+    color: var(--fg);
+  }
+  .history li:has(.active)::before {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
 </style>

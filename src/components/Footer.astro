@@ -12,20 +12,36 @@ import { site } from '../data/site';
       <div class="session">
         <pre class="icon" aria-hidden="true">{icon.join('\n')}</pre>
         <div>
-          <p><span class="accent">~</span> $ exit</p>
+          <p>
+            <span class="accent">~</span> $ exit
+          </p>
           <p class="faint">logout</p>
           <p class="faint">[Process completed]</p>
         </div>
       </div>
       <ul class="footer-links">
-        <li><a href={site.github} target="_blank" rel="noopener">github ↗</a></li>
-        <li><a href={site.linkedin} target="_blank" rel="noopener">linkedin ↗</a></li>
-        <li><a href={`mailto:${site.email}`}>email</a></li>
-        <li><a href="/blog">blog</a></li>
+        <li>
+          <a href={site.github} target="_blank" rel="noopener">
+            github ↗
+          </a>
+        </li>
+        <li>
+          <a href={site.linkedin} target="_blank" rel="noopener">
+            linkedin ↗
+          </a>
+        </li>
+        <li>
+          <a href={`mailto:${site.email}`}>email</a>
+        </li>
+        <li>
+          <a href="/blog">blog</a>
+        </li>
       </ul>
     </div>
     <div class="footer-bottom">
-      <span>© {new Date().getFullYear()} · {site.location}</span>
+      <span>
+        © {new Date().getFullYear()} · {site.location}
+      </span>
       <span>swift · kotlin · flutter · python · .net</span>
     </div>
   </div>
@@ -41,7 +57,9 @@ import { site } from '../data/site';
     border-top: 1px solid var(--border);
   }
 
-  .site-footer > .page-container { position: relative; }
+  .site-footer > .page-container {
+    position: relative;
+  }
 
   /* the page ends in the same sky it starts with: stars fade in toward the bottom */
   .site-footer :global(.footer-sky) {
@@ -49,18 +67,53 @@ import { site } from '../data/site';
     mask: linear-gradient(to bottom, transparent, #000 75%);
   }
 
-  .site-footer p { margin: 0; line-height: 1.7; }
+  .site-footer p {
+    margin: 0;
+    line-height: 1.7;
+  }
 
-  .footer-main { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2.5rem; }
+  .footer-main {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 2.5rem;
+  }
 
-  .session { display: flex; align-items: center; gap: 1.75rem; }
-  .icon { margin: 0; font: 3.8px/1 var(--font-mono); letter-spacing: 0; color: var(--accent); }
-  .accent { color: var(--accent); }
-  .faint { color: var(--fg-faint); }
+  .session {
+    display: flex;
+    align-items: center;
+    gap: 1.75rem;
+  }
+  .icon {
+    margin: 0;
+    font: 3.8px/1 var(--font-mono);
+    letter-spacing: 0;
+    color: var(--accent);
+  }
+  .accent {
+    color: var(--accent);
+  }
+  .faint {
+    color: var(--fg-faint);
+  }
 
-  .footer-links { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: auto auto; gap: 0.5rem 2.5rem; align-content: center; }
-  .footer-links a { color: var(--fg-muted); text-decoration: none; transition: color 0.2s; }
-  .footer-links a:hover { color: var(--accent); }
+  .footer-links {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: auto auto;
+    gap: 0.5rem 2.5rem;
+    align-content: center;
+  }
+  .footer-links a {
+    color: var(--fg-muted);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .footer-links a:hover {
+    color: var(--accent);
+  }
 
   .footer-bottom {
     display: flex;

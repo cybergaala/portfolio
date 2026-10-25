@@ -7,7 +7,12 @@ interface Props {
 const { file } = Astro.props;
 ---
 
-<p id="reading-progress" aria-hidden="true"><span>{file} <span class="rp-ro">[RO]</span></span><span class="rp-pos">Top</span></p>
+<p id="reading-progress" aria-hidden="true">
+  <span>
+    {file} <span class="rp-ro">[RO]</span>
+  </span>
+  <span class="rp-pos">Top</span>
+</p>
 
 <style>
   #reading-progress {
@@ -30,8 +35,12 @@ const { file } = Astro.props;
     pointer-events: none;
   }
 
-  .rp-ro { color: var(--fg-faint); }
-  .rp-pos { color: var(--accent); }
+  .rp-ro {
+    color: var(--fg-faint);
+  }
+  .rp-pos {
+    color: var(--accent);
+  }
 </style>
 
 <script>

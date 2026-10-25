@@ -14,18 +14,33 @@ const sections = Astro.props.headings.filter((h) => h.depth === 2);
   <aside class="post-toc">
     <p class="toc-label">{Astro.props.label}</p>
     <nav id="toc">
-      {sections.map((h) => <a href={`#${h.slug}`}>{h.text}</a>)}
+      {sections.map((h) => (
+        <a href={`#${h.slug}`}>{h.text}</a>
+      ))}
     </nav>
   </aside>
 )}
 
 <style>
   /* same timeline look as the landing's command history */
-  .post-toc { position: sticky; top: 5rem; font-family: var(--font-mono); }
-  .toc-label { margin: 0 0 0.75rem; font-size: 0.75rem; color: var(--fg-faint); }
-  .toc-label::before { content: "$ "; color: var(--accent); }
+  .post-toc {
+    position: sticky;
+    top: 5rem;
+    font-family: var(--font-mono);
+  }
+  .toc-label {
+    margin: 0 0 0.75rem;
+    font-size: 0.75rem;
+    color: var(--fg-faint);
+  }
+  .toc-label::before {
+    content: '$ ';
+    color: var(--accent);
+  }
 
-  #toc { border-left: 1px solid var(--border); }
+  #toc {
+    border-left: 1px solid var(--border);
+  }
 
   #toc a {
     display: block;
@@ -39,11 +54,18 @@ const sections = Astro.props.headings.filter((h) => h.depth === 2);
     transition: color 0.15s;
   }
 
-  #toc a:hover { color: var(--fg); }
-  #toc a.active { color: var(--fg); border-left-color: var(--accent); }
+  #toc a:hover {
+    color: var(--fg);
+  }
+  #toc a.active {
+    color: var(--fg);
+    border-left-color: var(--accent);
+  }
 
   @media (max-width: 900px) {
-    .post-toc { display: none; }
+    .post-toc {
+      display: none;
+    }
   }
 </style>
 

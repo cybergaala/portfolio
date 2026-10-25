@@ -56,14 +56,20 @@ const formatted = pubDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', 
   <ReadingStatus file={`${slug}.md`} />
   <article class="post-article">
     <div class="page-container">
-      <a href={blogUrl(lang)} class="back-link">{t('blog.back')}</a>
+      <a href={blogUrl(lang)} class="back-link">
+        {t('blog.back')}
+      </a>
 
       <header class="post-header">
-        <p class="cmd"><span class="path">~/blog</span> $ cat {slug}.md</p>
+        <p class="cmd">
+          <span class="path">~/blog</span> $ cat {slug}.md
+        </p>
         <p class="section-label">
           <time datetime={pubDate.toISOString()}>{formatted}</time>
           <span class="reading-time-sep">·</span>
-          <span class="reading-time-label">{readingTime(post)} {t('blog.min-read')}</span>
+          <span class="reading-time-label">
+            {readingTime(post)} {t('blog.min-read')}
+          </span>
         </p>
         <h1 class="post-title">{title}</h1>
         <p class="post-desc">{description}</p>
@@ -71,17 +77,37 @@ const formatted = pubDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', 
         <Tags tags={tags} />
         {translation && (
           <p class="lang-switcher">
-            {lang === 'en'
-              ? <><strong>ENG</strong>{' | '}<a href={postUrl(translation)} hreflang="es">SPA</a></>
-              : <><a href={postUrl(translation)} hreflang="en">ENG</a>{' | '}<strong>SPA</strong></>
-            }
+            {lang === 'en' ? (
+              <>
+                <strong>ENG</strong>
+                {' | '}
+                <a href={postUrl(translation)} hreflang="es">
+                  SPA
+                </a>
+              </>
+            ) : (
+              <>
+                <a href={postUrl(translation)} hreflang="en">
+                  ENG
+                </a>
+                {' | '}
+                <strong>SPA</strong>
+              </>
+            )}
           </p>
         )}
       </header>
 
       {banner && (
         <div class="post-banner">
-          <Image src={banner} alt="" widths={[720, 1080, 1440]} sizes="(max-width: 1024px) 100vw, 1024px" loading="eager" fetchpriority="high" />
+          <Image
+            src={banner}
+            alt=""
+            widths={[720, 1080, 1440]}
+            sizes="(max-width: 1024px) 100vw, 1024px"
+            loading="eager"
+            fetchpriority="high"
+          />
         </div>
       )}
 
@@ -93,8 +119,12 @@ const formatted = pubDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', 
       </div>
 
       <div class="post-end">
-        <span class="post-end-marker" aria-hidden="true">· · ·</span>
-        <button id="back-to-top" class="back-to-top">↑ {t('blog.back-to-top')}</button>
+        <span class="post-end-marker" aria-hidden="true">
+          · · ·
+        </span>
+        <button id="back-to-top" class="back-to-top">
+          ↑ {t('blog.back-to-top')}
+        </button>
       </div>
 
       <RelatedPosts posts={related} label={t('blog.related')} />
@@ -104,7 +134,9 @@ const formatted = pubDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', 
 
 <style>
   /* colors come from the theme tokens in global.css, so dark mode needs no overrides */
-  .post-article { padding: 8rem 0; }
+  .post-article {
+    padding: 8rem 0;
+  }
 
   .back-link {
     display: inline-block;
@@ -114,7 +146,9 @@ const formatted = pubDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', 
     text-decoration: none;
   }
 
-  .back-link:hover { color: var(--accent); }
+  .back-link:hover {
+    color: var(--accent);
+  }
 
   .post-header {
     padding-bottom: 2.5rem;
@@ -122,7 +156,9 @@ const formatted = pubDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', 
     border-bottom: 1px solid var(--border);
   }
 
-  .post-header .cmd { margin-bottom: 0.4rem; }
+  .post-header .cmd {
+    margin-bottom: 0.4rem;
+  }
 
   .section-label {
     margin: 0 0 1rem;
@@ -130,8 +166,13 @@ const formatted = pubDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', 
     color: var(--syn-type);
   }
 
-  .reading-time-sep { margin: 0 0.5ch; color: var(--fg-faint); }
-  .reading-time-label { color: var(--fg-faint); }
+  .reading-time-sep {
+    margin: 0 0.5ch;
+    color: var(--fg-faint);
+  }
+  .reading-time-label {
+    color: var(--fg-faint);
+  }
 
   .post-title {
     margin: 0 0 1rem;
@@ -175,9 +216,16 @@ const formatted = pubDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', 
     color: var(--fg-faint);
   }
 
-  .lang-switcher strong { color: var(--accent); }
-  .lang-switcher a { color: var(--fg-faint); text-decoration: none; }
-  .lang-switcher a:hover { color: var(--fg); }
+  .lang-switcher strong {
+    color: var(--accent);
+  }
+  .lang-switcher a {
+    color: var(--fg-faint);
+    text-decoration: none;
+  }
+  .lang-switcher a:hover {
+    color: var(--fg);
+  }
 
   /* Banner */
   .post-banner {
@@ -189,15 +237,31 @@ const formatted = pubDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', 
     border-radius: 8px;
   }
 
-  .post-banner img { display: block; width: 100%; height: 100%; object-fit: cover; transition: filter 0.5s ease; }
+  .post-banner img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: filter 0.5s ease;
+  }
 
-  :global(.img-blur-load) { filter: blur(20px) !important; will-change: filter; }
+  :global(.img-blur-load) {
+    filter: blur(20px) !important;
+    will-change: filter;
+  }
 
   /* Layout: content + TOC */
-  .post-layout { display: grid; grid-template-columns: 42rem 1fr; gap: 0 4rem; align-items: start; }
+  .post-layout {
+    display: grid;
+    grid-template-columns: 42rem 1fr;
+    gap: 0 4rem;
+    align-items: start;
+  }
 
   @media (max-width: 900px) {
-    .post-layout { grid-template-columns: 1fr; }
+    .post-layout {
+      grid-template-columns: 1fr;
+    }
   }
 
   /* Body */
@@ -216,16 +280,33 @@ const formatted = pubDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', 
     text-align: left;
   }
 
-  .post-body :global(h2) { margin: 2.75rem 0 0.75rem; font-size: 1.4rem; font-weight: 600; }
-  .post-body :global(h3) { margin: 2rem 0 0.5rem; font-size: 1.1rem; font-weight: 600; }
+  .post-body :global(h2) {
+    margin: 2.75rem 0 0.75rem;
+    font-size: 1.4rem;
+    font-weight: 600;
+  }
+  .post-body :global(h3) {
+    margin: 2rem 0 0.5rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
 
   /* markdown heading marks, like the raw .md */
   .post-body :global(h2)::before,
-  .post-body :global(h3)::before { font: 400 0.8em var(--font-mono); color: var(--accent); }
-  .post-body :global(h2)::before { content: "## "; }
-  .post-body :global(h3)::before { content: "### "; }
+  .post-body :global(h3)::before {
+    font: 400 0.8em var(--font-mono);
+    color: var(--accent);
+  }
+  .post-body :global(h2)::before {
+    content: '## ';
+  }
+  .post-body :global(h3)::before {
+    content: '### ';
+  }
 
-  .post-body :global(p) { margin: 0 0 1.25rem; }
+  .post-body :global(p) {
+    margin: 0 0 1.25rem;
+  }
 
   /* drop cap as a terminal block cursor: inverted cell, exactly two body lines tall (2 × 1.8em) */
   .post-body :global(> p:first-of-type::first-letter) {
@@ -240,18 +321,48 @@ const formatted = pubDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', 
     border-radius: 3px;
   }
 
-  .post-body :global(ul) { list-style: none; padding-left: 0; margin: 0 0 1.25rem; }
-  .post-body :global(ul li) { position: relative; padding-left: 1.5rem; margin-bottom: 0.5rem; }
-  .post-body :global(ul li::before) { content: "-"; position: absolute; left: 0.2rem; font-family: var(--font-mono); color: var(--accent); }
+  .post-body :global(ul) {
+    list-style: none;
+    padding-left: 0;
+    margin: 0 0 1.25rem;
+  }
+  .post-body :global(ul li) {
+    position: relative;
+    padding-left: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+  .post-body :global(ul li::before) {
+    content: '-';
+    position: absolute;
+    left: 0.2rem;
+    font-family: var(--font-mono);
+    color: var(--accent);
+  }
 
-  .post-body :global(ol) { padding-left: 1.25rem; margin: 0 0 1.25rem; }
-  .post-body :global(ol li) { margin-bottom: 0.5rem; }
-  .post-body :global(ol li::marker) { font-family: var(--font-mono); color: var(--accent); }
+  .post-body :global(ol) {
+    padding-left: 1.25rem;
+    margin: 0 0 1.25rem;
+  }
+  .post-body :global(ol li) {
+    margin-bottom: 0.5rem;
+  }
+  .post-body :global(ol li::marker) {
+    font-family: var(--font-mono);
+    color: var(--accent);
+  }
 
-  .post-body :global(strong) { font-weight: 600; color: var(--fg); }
+  .post-body :global(strong) {
+    font-weight: 600;
+    color: var(--fg);
+  }
 
-  .post-body :global(a) { color: var(--accent); text-underline-offset: 3px; }
-  .post-body :global(a:hover) { background: var(--accent-soft); }
+  .post-body :global(a) {
+    color: var(--accent);
+    text-underline-offset: 3px;
+  }
+  .post-body :global(a:hover) {
+    background: var(--accent-soft);
+  }
 
   .post-body :global(code) {
     padding: 0.1em 0.35em;
@@ -271,8 +382,15 @@ const formatted = pubDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', 
     border-radius: 8px;
   }
 
-  .post-body :global(pre code) { padding: 0; font-size: 0.82rem; color: inherit; background: none; }
-  :global(html.dark) .post-body :global(pre .line) { background-color: transparent !important; }
+  .post-body :global(pre code) {
+    padding: 0;
+    font-size: 0.82rem;
+    color: inherit;
+    background: none;
+  }
+  :global(html.dark) .post-body :global(pre .line) {
+    background-color: transparent !important;
+  }
 
   .post-body :global(blockquote) {
     margin: 0 0 1.25rem;
@@ -282,7 +400,11 @@ const formatted = pubDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', 
     border-left: 2px solid var(--accent);
   }
 
-  .post-body :global(hr) { margin: 2.5rem 0; border: none; border-top: 1px dashed var(--border); }
+  .post-body :global(hr) {
+    margin: 2.5rem 0;
+    border: none;
+    border-top: 1px dashed var(--border);
+  }
 
   .post-body :global(img) {
     display: block;
@@ -295,8 +417,12 @@ const formatted = pubDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', 
   }
 
   /* Image followed by blockquote → render blockquote as caption, hanging off the photo like a tree branch */
-  .post-body :global(p:has(img):has(+ blockquote)) { margin-bottom: 0; }
-  .post-body :global(p:has(img):has(+ blockquote) img) { margin-bottom: 0.6rem; }
+  .post-body :global(p:has(img):has(+ blockquote)) {
+    margin-bottom: 0;
+  }
+  .post-body :global(p:has(img):has(+ blockquote) img) {
+    margin-bottom: 0.6rem;
+  }
 
   .post-body :global(p:has(img) + blockquote) {
     position: relative;
@@ -307,9 +433,18 @@ const formatted = pubDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', 
     border: none;
   }
 
-  .post-body :global(p:has(img) + blockquote)::before { content: "└─"; position: absolute; left: 0.25ch; color: var(--accent); }
-  .post-body :global(p:has(img) + blockquote p) { margin: 0; }
-  .post-body :global(p:has(img) + blockquote strong) { color: var(--fg); }
+  .post-body :global(p:has(img) + blockquote)::before {
+    content: '└─';
+    position: absolute;
+    left: 0.25ch;
+    color: var(--accent);
+  }
+  .post-body :global(p:has(img) + blockquote p) {
+    margin: 0;
+  }
+  .post-body :global(p:has(img) + blockquote strong) {
+    color: var(--fg);
+  }
 
   /* End of post */
   .post-end {
@@ -322,7 +457,11 @@ const formatted = pubDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', 
     font-family: var(--font-mono);
   }
 
-  .post-end-marker { letter-spacing: 0.4em; color: var(--fg-faint); user-select: none; }
+  .post-end-marker {
+    letter-spacing: 0.4em;
+    color: var(--fg-faint);
+    user-select: none;
+  }
 
   .back-to-top {
     padding: 0.1rem 0.5rem;
@@ -334,7 +473,12 @@ const formatted = pubDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', 
     cursor: pointer;
   }
 
-  .back-to-top:hover, .back-to-top:focus-visible { color: var(--fg); background: var(--accent-soft); outline: none; }
+  .back-to-top:hover,
+  .back-to-top:focus-visible {
+    color: var(--fg);
+    background: var(--accent-soft);
+    outline: none;
+  }
 </style>
 
 <script>
@@ -342,24 +486,29 @@ const formatted = pubDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', 
 
   function initBlurUp() {
     const images = document.querySelectorAll<HTMLImageElement>('.post-banner img, .post-body img');
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (!entry.isIntersecting) return;
-        const img = entry.target as HTMLImageElement;
-        observer.unobserve(img);
-        if (img.complete && img.naturalWidth > 0) return;
-        img.classList.add('img-blur-load');
-        const reveal = () => img.classList.remove('img-blur-load');
-        img.addEventListener('load', reveal, { once: true });
-        img.addEventListener('error', reveal, { once: true });
-      });
-    }, { rootMargin: '200px' });
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          const img = entry.target as HTMLImageElement;
+          observer.unobserve(img);
+          if (img.complete && img.naturalWidth > 0) return;
+          img.classList.add('img-blur-load');
+          const reveal = () => img.classList.remove('img-blur-load');
+          img.addEventListener('load', reveal, { once: true });
+          img.addEventListener('error', reveal, { once: true });
+        });
+      },
+      { rootMargin: '200px' },
+    );
 
     images.forEach((img) => observer.observe(img));
   }
 
   onPageLoad(() => {
-    document.getElementById('back-to-top')?.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+    document
+      .getElementById('back-to-top')
+      ?.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
     initBlurUp();
   });
 </script>

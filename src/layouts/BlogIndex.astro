@@ -23,7 +23,9 @@ const t = useTranslations(lang);
       </header>
       <div class="ls mono">
         <p class="ls-total">total {page.total}</p>
-        {page.data.map((post) => <PostRow post={post} />)}
+        {page.data.map((post) => (
+          <PostRow post={post} />
+        ))}
       </div>
 
       {page.lastPage > 1 && (
@@ -31,11 +33,15 @@ const t = useTranslations(lang);
           {page.url.prev ? <a href={page.url.prev}>{t('blog.prev')}</a> : <span class="off">{t('blog.prev')}</span>}
           <span class="pages">
             {Array.from({ length: page.lastPage }, (_, i) => i + 1).map((n) => (
-              <a href={blogUrl(lang, n)} aria-current={n === page.currentPage ? 'page' : undefined}>{n}</a>
+              <a href={blogUrl(lang, n)} aria-current={n === page.currentPage ? 'page' : undefined}>
+                {n}
+              </a>
             ))}
           </span>
           {page.url.next ? <a href={page.url.next}>{t('blog.next')}</a> : <span class="off">{t('blog.next')}</span>}
-          <span class="pos">({t('blog.page')} {page.currentPage}/{page.lastPage})</span>
+          <span class="pos">
+            ({t('blog.page')} {page.currentPage}/{page.lastPage})
+          </span>
         </nav>
       )}
     </div>
@@ -43,14 +49,44 @@ const t = useTranslations(lang);
 </Layout>
 
 <style>
-  .blog-index { padding: 9rem 0 6rem; }
+  .blog-index {
+    padding: 9rem 0 6rem;
+  }
 
   /* less(1)-style pager line */
-  .pager { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem 1.5ch; margin-top: 2rem; font-size: 0.8rem; color: var(--fg-faint); }
-  .pager a { padding: 0 0.4rem; color: var(--syn-type); text-decoration: none; border-radius: 3px; }
-  .pager a:hover { background: var(--accent-soft); color: var(--accent); }
-  .pager .off { padding: 0 0.4rem; opacity: 0.5; }
-  .pages { display: flex; gap: 0.25ch; }
-  .pages a[aria-current] { color: var(--body-bg); background: var(--accent); font-weight: 600; }
-  .pos { margin-left: auto; }
+  .pager {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem 1.5ch;
+    margin-top: 2rem;
+    font-size: 0.8rem;
+    color: var(--fg-faint);
+  }
+  .pager a {
+    padding: 0 0.4rem;
+    color: var(--syn-type);
+    text-decoration: none;
+    border-radius: 3px;
+  }
+  .pager a:hover {
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+  .pager .off {
+    padding: 0 0.4rem;
+    opacity: 0.5;
+  }
+  .pages {
+    display: flex;
+    gap: 0.25ch;
+  }
+  .pages a[aria-current] {
+    color: var(--body-bg);
+    background: var(--accent);
+    font-weight: 600;
+  }
+  .pos {
+    margin-left: auto;
+  }
 </style>

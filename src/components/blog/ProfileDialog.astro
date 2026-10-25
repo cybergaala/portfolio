@@ -4,12 +4,25 @@ import { site } from '../../data/site';
 ---
 
 <p class="post-author">
-  <button type="button" class="post-avatar" id="profile-open" aria-haspopup="dialog" aria-label="Open profile" style={`--photo: url('${site.photo}')`}></button>
+  <button
+    type="button"
+    class="post-avatar"
+    id="profile-open"
+    aria-haspopup="dialog"
+    aria-label="Open profile"
+    style={`--photo: url('${site.photo}')`}
+  ></button>
   {site.name}
 </p>
 <dialog class="profile" id="profile" aria-labelledby="profile-title">
-  <span class="profile-title" id="profile-title">Profile</span>
-  <form method="dialog"><button class="profile-close" aria-label="Close">[x]</button></form>
+  <span class="profile-title" id="profile-title">
+    Profile
+  </span>
+  <form method="dialog">
+    <button class="profile-close" aria-label="Close">
+      [x]
+    </button>
+  </form>
   <div class="profile-body">
     <img src={site.photo} alt="" class="profile-photo" loading="lazy" />
     <div class="profile-info">
@@ -19,8 +32,12 @@ import { site } from '../../data/site';
       <p>8+ years shipping</p>
       <p>Swift, Kotlin, Flutter</p>
       <p class="profile-links">
-        <a href={site.github} target="_blank" rel="noopener">github ↗</a>
-        <a href={site.linkedin} target="_blank" rel="noopener">linkedin ↗</a>
+        <a href={site.github} target="_blank" rel="noopener">
+          github ↗
+        </a>
+        <a href={site.linkedin} target="_blank" rel="noopener">
+          linkedin ↗
+        </a>
         <a href={`mailto:${site.email}`}>email</a>
       </p>
     </div>
@@ -28,7 +45,14 @@ import { site } from '../../data/site';
 </dialog>
 
 <style>
-  .post-author { display: flex; align-items: center; gap: 0.6rem; margin: 0 0 1.25rem; font-size: 0.85rem; color: var(--fg); }
+  .post-author {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin: 0 0 1.25rem;
+    font-size: 0.85rem;
+    color: var(--fg);
+  }
 
   /* ponytail: crops the head out of the about photo with CSS; swap for a real square avatar file if one exists */
   .post-avatar {
@@ -42,7 +66,11 @@ import { site } from '../../data/site';
     background: var(--photo) 0% 22% / 214% auto no-repeat;
   }
 
-  .post-avatar:hover, .post-avatar:focus-visible { border-color: var(--accent); outline: none; }
+  .post-avatar:hover,
+  .post-avatar:focus-visible {
+    border-color: var(--accent);
+    outline: none;
+  }
 
   .profile {
     width: min(36rem, calc(100vw - 2rem));
@@ -56,8 +84,12 @@ import { site } from '../../data/site';
     border-radius: 8px;
   }
 
-  .profile::backdrop { background: rgba(0, 0, 0, 0.55); }
-  .profile p { margin: 0; }
+  .profile::backdrop {
+    background: rgba(0, 0, 0, 0.55);
+  }
+  .profile p {
+    margin: 0;
+  }
 
   .profile-title {
     position: absolute;
@@ -81,19 +113,55 @@ import { site } from '../../data/site';
     cursor: pointer;
   }
 
-  .profile-close:hover, .profile-close:focus-visible { color: var(--accent); outline: none; }
+  .profile-close:hover,
+  .profile-close:focus-visible {
+    color: var(--accent);
+    outline: none;
+  }
 
-  .profile-body { display: flex; align-items: center; gap: 1.25rem; }
-  .profile-photo { width: 45%; aspect-ratio: 1; flex-shrink: 0; object-fit: cover; border: 1px solid var(--border); border-radius: 6px; }
-  .profile-info { min-width: 0; }
-  .profile .profile-name { font-weight: 600; color: var(--fg); margin-bottom: 0.4rem; }
-  .profile .profile-links { display: flex; flex-wrap: wrap; gap: 0 2ch; margin-top: 1rem; }
-  .profile-links a { color: var(--accent); text-decoration: none; }
-  .profile-links a:hover { text-decoration: underline; }
+  .profile-body {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+  }
+  .profile-photo {
+    width: 45%;
+    aspect-ratio: 1;
+    flex-shrink: 0;
+    object-fit: cover;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+  }
+  .profile-info {
+    min-width: 0;
+  }
+  .profile .profile-name {
+    font-weight: 600;
+    color: var(--fg);
+    margin-bottom: 0.4rem;
+  }
+  .profile .profile-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 2ch;
+    margin-top: 1rem;
+  }
+  .profile-links a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+  .profile-links a:hover {
+    text-decoration: underline;
+  }
 
   @media (max-width: 480px) {
-    .profile-body { flex-direction: column; align-items: stretch; }
-    .profile-photo { width: 100%; }
+    .profile-body {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .profile-photo {
+      width: 100%;
+    }
   }
 </style>
 

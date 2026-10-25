@@ -36,7 +36,9 @@ const { posts, label } = Astro.props;
     border-radius: 8px;
   }
 
-  .related-posts:hover { border-color: var(--syn-type); }
+  .related-posts:hover {
+    border-color: var(--syn-type);
+  }
 
   .related-label {
     position: absolute;
@@ -49,14 +51,38 @@ const { posts, label } = Astro.props;
     background: var(--body-bg);
   }
 
-  .related-posts:hover .related-label { color: var(--syn-type); }
+  .related-posts:hover .related-label {
+    color: var(--syn-type);
+  }
 
-  .related-list { display: flex; flex-direction: column; }
+  .related-list {
+    display: flex;
+    flex-direction: column;
+  }
 
-  .related-item { display: block; padding: 0.75rem 0.5rem; text-decoration: none; border-radius: 3px; }
-  .related-item:hover { background: var(--accent-soft); }
+  .related-item {
+    display: block;
+    padding: 0.75rem 0.5rem;
+    text-decoration: none;
+    border-radius: 3px;
+  }
+  .related-item:hover {
+    background: var(--accent-soft);
+  }
 
-  .related-title { margin: 0 0 0.2rem; font: 600 0.85rem var(--font-mono); color: var(--fg); }
-  .related-title::before { content: "> "; color: var(--accent); }
-  .related-desc { margin: 0 0 0.4rem; font-size: 0.85rem; line-height: 1.6; color: var(--fg-muted); }
+  .related-title {
+    margin: 0 0 0.2rem;
+    font: 600 0.85rem var(--font-mono);
+    color: var(--fg);
+  }
+  .related-title::before {
+    content: '> ';
+    color: var(--accent);
+  }
+  .related-desc {
+    margin: 0 0 0.4rem;
+    font-size: 0.85rem;
+    line-height: 1.6;
+    color: var(--fg-muted);
+  }
 </style>

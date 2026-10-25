@@ -16,7 +16,11 @@ const rail = (i: number, c: Commit) => (i === 0 ? 'r0' : i <= 2 ? (c.side ?? 'r1
 
 // Draw each row's graph as SVG instead of box-drawing glyphs: font glyphs leave gaps between
 // rows and around ◯, while SVG cells span the full row height so rails always connect.
-const CW = 6.9, CH = 14, CX = CW / 2, CY = CH / 2, R = 2.4;
+const CW = 6.9,
+  CH = 14,
+  CX = CW / 2,
+  CY = CH / 2,
+  R = 2.4;
 const line = (x1: number, y1: number, x2: number, y2: number) => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/>`;
 const graphSvg = (i: number) => {
   const c = commits[i];
@@ -32,9 +36,10 @@ const graphSvg = (i: number) => {
       if ('│◯⏣╮'.includes(at(i - 1, col))) d += line(CX, 0, CX, CY - R);
       if ('│◯⏣╯'.includes(at(i + 1, col))) d += line(CX, CY + R, CX, CH);
       if (chars[col + 1] === '─') d += line(CX + R, CY, CW, CY);
-      d += ch === '◯'
-        ? `<circle cx="${CX}" cy="${CY}" r="${R}"/>`
-        : `<polygon points="${[0, 60, 120, 180, 240, 300].map((a) => `${(CX + R * Math.cos((a * Math.PI) / 180)).toFixed(2)},${(CY + R * Math.sin((a * Math.PI) / 180)).toFixed(2)}`).join(' ')}"/>`;
+      d +=
+        ch === '◯'
+          ? `<circle cx="${CX}" cy="${CY}" r="${R}"/>`
+          : `<polygon points="${[0, 60, 120, 180, 240, 300].map((a) => `${(CX + R * Math.cos((a * Math.PI) / 180)).toFixed(2)},${(CY + R * Math.sin((a * Math.PI) / 180)).toFixed(2)}`).join(' ')}"/>`;
     }
     return d && `<g class="${rail(col, c)}" transform="translate(${col * CW} 0)">${d}</g>`;
   });
@@ -60,18 +65,28 @@ const selected = commits.findIndex((c) => c.job?.current);
               <span class="lg-hash">{hash(c.msg!)}</span>
               <span class="lg-graph" aria-hidden="true" set:html={graphSvg(i)} />
               <span class="lg-msg">
-                {c.labels?.map(([t, k]) => <span class={`lg-label ${k}`}>{t}</span>)}
-                {c.job
-                  ? <><span class="lg-co">{c.job.client ?? c.job.company}</span> <span class="lg-role">{c.job.role}</span></>
-                  : <span class="lg-note">{c.msg}</span>}
+                {c.labels?.map(([t, k]) => (
+                  <span class={`lg-label ${k}`}>{t}</span>
+                ))}
+                {c.job ? (
+                  <>
+                    <span class="lg-co">{c.job.client ?? c.job.company}</span> <span class="lg-role">{c.job.role}</span>
+                  </>
+                ) : (
+                  <span class="lg-note">{c.msg}</span>
+                )}
               </span>
               {c.job && <span class="lg-date">{shortPeriod(c.job.period)}</span>}
             </li>
           ))}
         </ul>
-        <span class="lg-count"><span data-pos>{selected + 1}</span> of {commits.length}</span>
+        <span class="lg-count">
+          <span data-pos>{selected + 1}</span> of {commits.length}
+        </span>
       </div>
 
+      <!-- the patch lines are white-space: pre-wrap, so reflowing them would add visible spaces -->
+      <!-- prettier-ignore -->
       <div class="lg-panel lg-patch">
         <span class="lg-title">Patch</span>
         {commits.map((c, i) => (
@@ -93,17 +108,30 @@ const selected = commits.findIndex((c) => c.job?.current);
         ))}
       </div>
 
-      <p class="lg-keys">navigate: <span>↑/↓</span> <span>j/k</span> · select: <span>click</span></p>
+      <p class="lg-keys">
+        navigate: <span>↑/↓</span> <span>j/k</span> · select: <span>click</span>
+      </p>
     </div>
   </div>
 </section>
 
 <style>
-    .lg { display: grid; grid-template-columns: 1.75fr 1fr; gap: 0.6rem; font-size: 0.8rem; line-height: 1.65; }
-  .lg p { margin: 0; }
+  .lg {
+    display: grid;
+    grid-template-columns: 1.75fr 1fr;
+    gap: 0.6rem;
+    font-size: 0.8rem;
+    line-height: 1.65;
+  }
+  .lg p {
+    margin: 0;
+  }
 
   /* the focused panel gets lazygit's highlighted border */
-  .lg-commits:focus-within, .lg-commits:hover { border-color: var(--syn-type); }
+  .lg-commits:focus-within,
+  .lg-commits:hover {
+    border-color: var(--syn-type);
+  }
 
   .lg-count {
     position: absolute;
@@ -114,9 +142,17 @@ const selected = commits.findIndex((c) => c.job?.current);
     color: var(--fg-faint);
     background: var(--body-bg);
   }
-  .lg-commits:focus-within .lg-title, .lg-commits:hover .lg-title { color: var(--syn-type); }
+  .lg-commits:focus-within .lg-title,
+  .lg-commits:hover .lg-title {
+    color: var(--syn-type);
+  }
 
-  .lg-list { list-style: none; margin: 0; padding: 0; outline: none; }
+  .lg-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    outline: none;
+  }
 
   /* tight rows so the box-drawing rails connect like terminal cells */
   .lg-list li {
@@ -131,48 +167,134 @@ const selected = commits.findIndex((c) => c.job?.current);
     border-radius: 3px;
   }
 
-  .lg-list li:hover { background: var(--accent-soft); }
-  .lg-list li[aria-selected="true"] { background: color-mix(in srgb, var(--syn-type) 22%, transparent); }
+  .lg-list li:hover {
+    background: var(--accent-soft);
+  }
+  .lg-list li[aria-selected='true'] {
+    background: color-mix(in srgb, var(--syn-type) 22%, transparent);
+  }
 
-  .lg-hash { color: var(--syn-num); }
-  .lg-graph { align-self: stretch; display: flex; }
-  .lg-graph :global(svg) { height: 100%; overflow: visible; fill: none; stroke-width: 1.1; stroke-linecap: square; }
-  .lg-graph :global(g) { stroke: currentColor; }
-  .lg-graph :global(.r0) { color: var(--accent); }
-  .lg-graph :global(.r1) { color: var(--syn-type); }
-  .lg-graph :global(.r2) { color: var(--ok); }
-  .lg-graph :global(.r3) { color: var(--syn-kw); }
+  .lg-hash {
+    color: var(--syn-num);
+  }
+  .lg-graph {
+    align-self: stretch;
+    display: flex;
+  }
+  .lg-graph :global(svg) {
+    height: 100%;
+    overflow: visible;
+    fill: none;
+    stroke-width: 1.1;
+    stroke-linecap: square;
+  }
+  .lg-graph :global(g) {
+    stroke: currentColor;
+  }
+  .lg-graph :global(.r0) {
+    color: var(--accent);
+  }
+  .lg-graph :global(.r1) {
+    color: var(--syn-type);
+  }
+  .lg-graph :global(.r2) {
+    color: var(--ok);
+  }
+  .lg-graph :global(.r3) {
+    color: var(--syn-kw);
+  }
 
-  .lg-label { margin-right: 0.5em; font-weight: 600; }
-  .lg-label.head { color: var(--syn-type); }
-  .lg-label.branch { color: var(--ok); }
-  .lg-label.tag { color: var(--syn-num); }
-  .lg-label.tag::before { content: "#"; }
-  .lg-msg { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; color: var(--fg); }
-  .lg-co { font-weight: 600; color: var(--fg); }
-  .lg-role { color: var(--fg-muted); }
-  .lg-note { color: var(--fg-faint); }
-  .lg-date { flex-shrink: 0; width: 17ch; text-align: right; color: var(--syn-type); }
-  .lg-list li:not(.job) .lg-hash { opacity: 0.55; }
+  .lg-label {
+    margin-right: 0.5em;
+    font-weight: 600;
+  }
+  .lg-label.head {
+    color: var(--syn-type);
+  }
+  .lg-label.branch {
+    color: var(--ok);
+  }
+  .lg-label.tag {
+    color: var(--syn-num);
+  }
+  .lg-label.tag::before {
+    content: '#';
+  }
+  .lg-msg {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--fg);
+  }
+  .lg-co {
+    font-weight: 600;
+    color: var(--fg);
+  }
+  .lg-role {
+    color: var(--fg-muted);
+  }
+  .lg-note {
+    color: var(--fg-faint);
+  }
+  .lg-date {
+    flex-shrink: 0;
+    width: 17ch;
+    text-align: right;
+    color: var(--syn-type);
+  }
+  .lg-list li:not(.job) .lg-hash {
+    opacity: 0.55;
+  }
 
-  .lg-detail { color: var(--fg-muted); }
-  .lg-detail p { white-space: pre-wrap; }
-  .lg-add { color: var(--ok); }
-  .lg-body { margin-top: 0.9rem !important; padding-left: 2rem; color: var(--fg); }
-  .lg-desc { margin-top: 0.5rem !important; color: var(--fg-muted); white-space: normal; }
-  .lg-file { margin-top: 1rem !important; color: var(--fg); font-weight: 600; }
+  .lg-detail {
+    color: var(--fg-muted);
+  }
+  .lg-detail p {
+    white-space: pre-wrap;
+  }
+  .lg-add {
+    color: var(--ok);
+  }
+  .lg-body {
+    margin-top: 0.9rem !important;
+    padding-left: 2rem;
+    color: var(--fg);
+  }
+  .lg-desc {
+    margin-top: 0.5rem !important;
+    color: var(--fg-muted);
+    white-space: normal;
+  }
+  .lg-file {
+    margin-top: 1rem !important;
+    color: var(--fg);
+    font-weight: 600;
+  }
 
   /* side by side, the commit list alone sets the height; a long patch scrolls instead of growing the box */
   @media (min-width: 861px) {
     /* 55% taller than the rows need (1.4em each + panel padding and border), leaving room for the patch */
-    .lg-commits { min-height: calc((var(--rows) * 1.4em + 2.1rem + 2px) * 1.55); }
-    .lg-patch { contain: size; }
-    .lg-detail { height: 100%; overflow-y: auto; }
+    .lg-commits {
+      min-height: calc((var(--rows) * 1.4em + 2.1rem + 2px) * 1.55);
+    }
+    .lg-patch {
+      contain: size;
+    }
+    .lg-detail {
+      height: 100%;
+      overflow-y: auto;
+    }
   }
 
   @media (max-width: 860px) {
-    .lg { grid-template-columns: 1fr; gap: 1.4rem; }
-    .lg .lg-keys { margin-top: 0 !important; }
+    .lg {
+      grid-template-columns: 1fr;
+      gap: 1.4rem;
+    }
+    .lg .lg-keys {
+      margin-top: 0 !important;
+    }
   }
 </style>
 
@@ -186,7 +308,10 @@ const selected = commits.findIndex((c) => c.job?.current);
     const rows = [...list.querySelectorAll<HTMLElement>('li')];
     const details = [...root.querySelectorAll<HTMLElement>('[data-detail]')];
     const pos = root.querySelector('[data-pos]')!;
-    let current = Math.max(0, rows.findIndex((r) => r.getAttribute('aria-selected') === 'true'));
+    let current = Math.max(
+      0,
+      rows.findIndex((r) => r.getAttribute('aria-selected') === 'true'),
+    );
 
     const select = (i: number) => {
       current = (i + rows.length) % rows.length;
@@ -195,7 +320,12 @@ const selected = commits.findIndex((c) => c.job?.current);
       pos.textContent = String(current + 1);
     };
 
-    rows.forEach((r, i) => r.addEventListener('click', () => { select(i); list.focus(); }));
+    rows.forEach((r, i) =>
+      r.addEventListener('click', () => {
+        select(i);
+        list.focus();
+      }),
+    );
     list.addEventListener('keydown', (e) => {
       if (e.key === 'ArrowDown' || e.key === 'j') select(current + 1);
       else if (e.key === 'ArrowUp' || e.key === 'k') select(current - 1);
