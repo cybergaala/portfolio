@@ -1,6 +1,22 @@
 ---
 // The post author's avatar; clicking it opens a lazygit-style profile panel in a native <dialog>.
 import { site } from '../../data/site';
+
+const epithets = [
+  'Invincible',
+  'Fearless',
+  'Sensual',
+  'Mysterious',
+  'Enchanting',
+  'Vigorous',
+  'Diligent',
+  'Overwhelming',
+  'Gorgeous',
+  'Passionate',
+  'Terrifying',
+  'Beautiful',
+  'Powerful',
+];
 ---
 
 <p class="post-author">
@@ -26,25 +42,33 @@ import { site } from '../../data/site';
   <div class="profile-body">
     <img src={site.photo} alt="" class="profile-photo" loading="lazy" />
     <div class="profile-info">
-      <p class="profile-name">{site.name}</p>
-      <p>{site.role}</p>
-      <p>{site.location}</p>
-      <p>8+ years shipping</p>
-      <p>Swift, Kotlin, Flutter</p>
-      <p class="profile-links">
-        <a href={site.github} target="_blank" rel="noopener">
-          github ↗
-        </a>
-        <a href={site.linkedin} target="_blank" rel="noopener">
-          linkedin ↗
-        </a>
-        <a href={`mailto:${site.email}`}>email</a>
-      </p>
+      <div class="profile-foot">
+        <!-- Grey Prince Zote's title card (Hollow Knight); spills out of the dialog on purpose -->
+        <ul class="profile-epithets">
+          {epithets.map((e) => (
+            <li>{e}</li>
+          ))}
+        </ul>
+        <p class="profile-links">
+          <a href={site.github} target="_blank" rel="noopener">
+            github ↗
+          </a>
+          <a href={site.linkedin} target="_blank" rel="noopener">
+            linkedin ↗
+          </a>
+          <a href={`mailto:${site.email}`}>email</a>
+        </p>
+        <p class="profile-name">{site.name}</p>
+      </div>
     </div>
   </div>
 </dialog>
 
 <style>
+  :global(html:has(.profile[open])) {
+    overflow: hidden;
+  }
+
   .post-author {
     display: flex;
     align-items: center;
@@ -84,8 +108,18 @@ import { site } from '../../data/site';
     border-radius: 8px;
   }
 
+  /* Windows 3.1-style "zoom rect": a bare outline grows in steps, then the real window appears */
+  :global(.profile-zoom) {
+    position: fixed;
+    z-index: 100;
+    pointer-events: none;
+    border: 1px solid var(--syn-type);
+  }
+
   .profile::backdrop {
     background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
   }
   .profile p {
     margin: 0;
@@ -132,19 +166,47 @@ import { site } from '../../data/site';
     border: 1px solid var(--border);
     border-radius: 6px;
   }
+  /* the column is exactly as tall as the photo; the epithets hang above it and out of the dialog */
   .profile-info {
+    flex: 1;
     min-width: 0;
+    align-self: stretch;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    text-align: center;
   }
-  .profile .profile-name {
-    font-weight: 600;
+  .profile-foot {
+    position: relative;
+  }
+  .profile-epithets {
+    pointer-events: none; /* it overlaps the [x] button */
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    right: 0;
+    margin: 0 0 0.6rem;
+    padding: 0;
+    list-style: none;
+    font-size: 0.75rem;
+    line-height: 1.9;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
     color: var(--fg);
-    margin-bottom: 0.4rem;
   }
   .profile .profile-links {
     display: flex;
     flex-wrap: wrap;
+    justify-content: center;
     gap: 0 2ch;
-    margin-top: 1rem;
+  }
+  .profile .profile-name {
+    font-size: 1.5rem;
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--fg);
   }
   .profile-links a {
     color: var(--accent);
@@ -152,16 +214,6 @@ import { site } from '../../data/site';
   }
   .profile-links a:hover {
     text-decoration: underline;
-  }
-
-  @media (max-width: 480px) {
-    .profile-body {
-      flex-direction: column;
-      align-items: stretch;
-    }
-    .profile-photo {
-      width: 100%;
-    }
   }
 </style>
 
@@ -171,7 +223,40 @@ import { site } from '../../data/site';
   onPageLoad(() => {
     const dialog = document.getElementById('profile') as HTMLDialogElement | null;
     if (!dialog) return;
-    document.getElementById('profile-open')?.addEventListener('click', () => dialog.showModal());
+    const trigger = document.getElementById('profile-open');
+    let zooming = false;
+    trigger?.addEventListener('click', () => {
+      if (zooming) return;
+      if (matchMedia('(prefers-reduced-motion: reduce)').matches) return dialog.showModal();
+      // measure the final box; nothing paints between show and close
+      dialog.showModal();
+      const to = dialog.getBoundingClientRect();
+      dialog.close();
+      const from = trigger.getBoundingClientRect();
+      const box = document.body.appendChild(document.createElement('div'));
+      box.className = 'profile-zoom';
+      zooming = true;
+      const steps = 8;
+      let i = 1;
+      // setInterval, not CSS transitions: the jumpy steps are the point
+      const tick = setInterval(() => {
+        if (i > steps) {
+          clearInterval(tick);
+          box.remove();
+          zooming = false;
+          dialog.showModal();
+          return;
+        }
+        const t = i++ / steps;
+        const at = (a: number, b: number) => `${a + (b - a) * t}px`;
+        Object.assign(box.style, {
+          left: at(from.left, to.left),
+          top: at(from.top, to.top),
+          width: at(from.width, to.width),
+          height: at(from.height, to.height),
+        });
+      }, 35);
+    });
     // close on backdrop click: the click lands on the dialog element itself, outside its panel box
     dialog.addEventListener('click', (e) => {
       const r = dialog.getBoundingClientRect();

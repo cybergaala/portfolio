@@ -126,13 +126,18 @@ html[data-theme-transition].dark::view-transition-new(root) {
   clip-path: circle(0px at var(--theme-x) var(--theme-y));
 }
 
-/* ── Page navigation transition ─────────────────────────────────────── */
-html:not([data-theme-transition])::view-transition-old(root) {
+/* ── Page navigation transition (a post's language switch scrambles its text instead, see BlogPost.astro) */
+html:not([data-theme-transition], .lang-swap)::view-transition-old(root) {
   animation: page-out 0.38s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
-html:not([data-theme-transition])::view-transition-new(root) {
+html:not([data-theme-transition], .lang-swap)::view-transition-new(root) {
   animation: page-in 0.42s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+html.lang-swap::view-transition-old(root),
+html.lang-swap::view-transition-new(root) {
+  animation: none;
 }
 
 @keyframes page-out {

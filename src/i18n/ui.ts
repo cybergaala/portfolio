@@ -14,6 +14,7 @@ export const ui = {
     'blog.back-to-top': 'Back to top',
     'blog.pagination': 'Pagination',
     'blog.page': 'page',
+    'blog.close': 'Close',
   },
   es: {
     'blog.title': 'Blog',
@@ -28,6 +29,7 @@ export const ui = {
     'blog.back-to-top': 'Volver arriba',
     'blog.pagination': 'Paginación',
     'blog.page': 'página',
+    'blog.close': 'Cerrar',
   },
 } as const;
 
