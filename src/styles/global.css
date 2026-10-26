@@ -18,7 +18,12 @@ html {
   --syn-type: #0b4f79;
   --syn-num: #1c00cf;
   --syn-com: #5d6c79;
+  --warn: #b58900;
+  --warn-soft: rgba(181, 137, 0, 0.1);
   --ok: #3ecf6e; /* the terminal's green, same in both themes */
+  /* text over photos (the post banner), same in both themes */
+  --on-photo: #fff;
+  --photo-shade: rgba(0, 0, 0, 0.7);
   --font-mono: 'Geist Mono Variable', ui-monospace, monospace;
   --gray: 96, 115, 159;
   --gray-dark: 34, 41, 57;
@@ -37,6 +42,8 @@ html.dark {
   --syn-type: #6bdfff;
   --syn-num: #d0bf69;
   --syn-com: #7f8c98;
+  --warn: #e5c07b;
+  --warn-soft: rgba(229, 192, 123, 0.1);
   --body-bg: #141417;
   --gray: 200, 210, 240;
   --gray-dark: 229, 233, 240;

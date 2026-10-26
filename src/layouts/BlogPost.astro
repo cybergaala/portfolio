@@ -19,7 +19,7 @@ interface Props {
 }
 
 const { post, related, translation } = Astro.props;
-const { title, description, pubDate, tags, banner } = post.data;
+const { title, description, pubDate, tags, banner, warning } = post.data;
 const { Content, headings } = await render(post);
 const lang = postLang(post);
 const slug = postSlug(post);
@@ -86,31 +86,38 @@ const formatted = pubDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', 
         <p class="cmd">
           <span class="path">~/blog</span> $ cat {slug}.md
         </p>
-        <p class="section-label">
-          <time datetime={pubDate.toISOString()}>{formatted}</time>
-          <span class="reading-time-sep">·</span>
-          <span class="reading-time-label">
-            {readingTime(post)} {t('blog.min-read')}
-          </span>
-        </p>
-        <h1 class="post-title">{title}</h1>
+        <div class:list={['post-cover', { 'post-banner': banner }]}>
+          {banner && (
+            <Image
+              src={banner}
+              alt=""
+              widths={[720, 1080, 1440]}
+              sizes="(max-width: 1024px) 100vw, 1024px"
+              loading="eager"
+              fetchpriority="high"
+            />
+          )}
+          <div class="post-cover-text">
+            <p class="section-label">
+              <time datetime={pubDate.toISOString()}>{formatted}</time>
+              <span class="reading-time-sep">·</span>
+              <span class="reading-time-label">
+                {readingTime(post)} {t('blog.min-read')}
+              </span>
+            </p>
+            <h1 class="post-title">{title}</h1>
+          </div>
+        </div>
         <p class="post-desc">{description}</p>
         <ProfileDialog />
         <Tags tags={tags} />
+        {warning && (
+          <p class="post-warning" role="note">
+            <span class="post-warning-icon" aria-hidden="true">i</span>
+            {warning}
+          </p>
+        )}
       </header>
-
-      {banner && (
-        <div class="post-banner">
-          <Image
-            src={banner}
-            alt=""
-            widths={[720, 1080, 1440]}
-            sizes="(max-width: 1024px) 100vw, 1024px"
-            loading="eager"
-            fetchpriority="high"
-          />
-        </div>
-      )}
 
       <div class="post-layout">
         <div class="post-body">
@@ -236,14 +243,69 @@ const formatted = pubDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', 
     color: var(--fg);
   }
 
-  /* Banner */
+  /* Warning box */
+  .post-warning {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 1.5rem 0 0;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--warn);
+    border-radius: 8px;
+    background: var(--warn-soft);
+    color: var(--fg-muted);
+    font-size: 0.875rem;
+  }
+  .post-warning-icon {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 1.25rem;
+    height: 1.25rem;
+    border: 1px solid var(--warn);
+    border-radius: 50%;
+    color: var(--warn);
+    font-weight: 700;
+    font-size: 0.75rem;
+  }
+
+  /* Banner: the cover, with the date and title over it, so it can't pass for one more post photo */
   .post-banner {
+    position: relative;
     width: 100%;
     aspect-ratio: 12 / 5.9;
     overflow: hidden;
-    margin-bottom: 3rem;
+    margin: 0.75rem 0 1.5rem;
     border: 1px solid var(--border);
     border-radius: 8px;
+  }
+
+  .post-banner .post-cover-text {
+    position: absolute;
+    inset: auto 0 0;
+    padding: 4rem 1.5rem 1.25rem;
+    /* the shade keeps the text readable on any photo, in either theme */
+    background: linear-gradient(transparent, var(--photo-shade));
+  }
+
+  .post-banner .section-label,
+  .post-banner .reading-time-sep,
+  .post-banner .reading-time-label,
+  .post-banner .post-title {
+    color: var(--on-photo);
+  }
+
+  .post-banner .post-title {
+    margin: 0;
+  }
+
+  @media (max-width: 640px) {
+    .post-banner {
+      aspect-ratio: 4 / 3; /* room for a title that wraps */
+    }
+    .post-banner .post-cover-text {
+      padding: 3rem 1rem 1rem;
+    }
   }
 
   .post-banner img {
@@ -332,19 +394,6 @@ const formatted = pubDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', 
 
   .post-body :global(p) {
     margin: 0 0 1.25rem;
-  }
-
-  /* drop cap as a terminal block cursor: inverted cell, exactly two body lines tall (2 × 1.8em) */
-  .post-body :global(> p:first-of-type::first-letter) {
-    float: left;
-    margin: 0.12em 0.3em 0 0; /* in the cap's own em: nudges it down onto the first line's x-height */
-    padding: 0 0.18em;
-    font-size: 2.5em;
-    font-weight: 700;
-    line-height: 1.3; /* 2.5 × 1.3 = 3.25em, plus the margin stays under the 3.6em of two lines */
-    color: var(--body-bg);
-    background: var(--accent);
-    border-radius: 3px;
   }
 
   .post-body :global(ul) {

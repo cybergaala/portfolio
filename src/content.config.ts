@@ -13,6 +13,8 @@ const blog = defineCollection({
       tags: z.array(z.string()).optional(),
       // path relative to the post, so Astro optimizes it
       banner: image().optional(),
+      // shown as a warning box above the post
+      warning: z.string().optional(),
     }),
 });
 
