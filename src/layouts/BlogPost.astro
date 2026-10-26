@@ -78,21 +78,17 @@ const formatted = pubDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', 
   </ReadingStatus>
   <article class="post-article">
     <div class="page-container">
-      <a href={blogUrl(lang)} class="back-link">
-        {t('blog.back')}
-      </a>
-
       <header class="post-header">
         <p class="cmd">
-          <span class="path">~/blog</span> $ cat {slug}.md
+          <a href={blogUrl(lang)} class="path">~/blog</a> $ cat {slug}.md
         </p>
         <div class:list={['post-cover', { 'post-banner': banner }]}>
           {banner && (
             <Image
               src={banner}
               alt=""
-              widths={[720, 1080, 1440]}
-              sizes="(max-width: 1024px) 100vw, 1024px"
+              widths={[720, 1080, 1440, 1920]}
+              sizes="100vw"
               loading="eager"
               fetchpriority="high"
             />
@@ -156,16 +152,13 @@ const formatted = pubDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', 
     padding: 8rem 0;
   }
 
-  .back-link {
-    display: inline-block;
-    margin-bottom: 2.5rem;
-    font: 0.8rem var(--font-mono);
-    color: var(--fg-faint);
+  /* ~/blog in the prompt is the way back to the list */
+  .post-header a.path {
     text-decoration: none;
   }
-
-  .back-link:hover {
-    color: var(--accent);
+  .post-header a.path:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
   }
 
   .post-header {
@@ -270,20 +263,22 @@ const formatted = pubDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', 
   }
 
   /* Banner: the cover, with the date and title over it, so it can't pass for one more post photo */
+  /* full bleed: the negative margins stretch it from the container to both edges of the window
+     (body clips the scrollbar's width that 100vw counts) */
   .post-banner {
     position: relative;
-    width: 100%;
-    aspect-ratio: 12 / 5.9;
+    /* not aspect-ratio + max-height: that pair shrinks the width too, leaving a gap on the right */
+    height: min(100vw * 5.9 / 12, 75vh);
     overflow: hidden;
-    margin: 0.75rem 0 1.5rem;
-    border: 1px solid var(--border);
-    border-radius: 8px;
+    margin: 0.75rem calc(50% - 50vw) 1.5rem;
+    border-block: 1px solid var(--border);
   }
 
   .post-banner .post-cover-text {
     position: absolute;
     inset: auto 0 0;
-    padding: 4rem 1.5rem 1.25rem;
+    /* the text lines up with the page column, not the window edge */
+    padding: 4rem max(1rem, 50vw - 31rem) 1.25rem;
     /* the shade keeps the text readable on any photo, in either theme */
     background: linear-gradient(transparent, var(--photo-shade));
   }
@@ -301,10 +296,11 @@ const formatted = pubDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', 
 
   @media (max-width: 640px) {
     .post-banner {
-      aspect-ratio: 4 / 3; /* room for a title that wraps */
+      height: 75vw; /* 4:3, room for a title that wraps */
     }
     .post-banner .post-cover-text {
-      padding: 3rem 1rem 1rem;
+      padding-top: 3rem;
+      padding-bottom: 1rem;
     }
   }
 

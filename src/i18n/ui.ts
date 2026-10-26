@@ -3,7 +3,6 @@ export const defaultLang = 'en' as const;
 export const ui = {
   en: {
     'blog.title': 'Writing',
-    'blog.back': '← Blog',
     'blog.on-this-page': 'On this page',
     'blog.related': 'Related posts',
     'blog.writing': 'Writing — Edgar Mejía',
@@ -18,7 +17,6 @@ export const ui = {
   },
   es: {
     'blog.title': 'Blog',
-    'blog.back': '← Blog',
     'blog.on-this-page': 'En esta página',
     'blog.related': 'Artículos relacionados',
     'blog.writing': 'Blog — Edgar Mejía',
