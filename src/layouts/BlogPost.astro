@@ -80,7 +80,10 @@ const formatted = pubDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', 
     <div class="page-container">
       <header class="post-header">
         <p class="cmd">
-          <a href={blogUrl(lang)} class="path">~/blog</a> $ cat {slug}.md
+          <a href={blogUrl(lang)} class="path">
+            ~/blog
+          </a>{' '}
+          $ cat {slug}.md
         </p>
         <div class:list={['post-cover', { 'post-banner': banner }]}>
           {banner && (
@@ -109,7 +112,9 @@ const formatted = pubDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', 
         <Tags tags={tags} />
         {warning && (
           <p class="post-warning" role="note">
-            <span class="post-warning-icon" aria-hidden="true">i</span>
+            <span class="post-warning-icon" aria-hidden="true">
+              i
+            </span>
             {warning}
           </p>
         )}

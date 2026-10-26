@@ -17,6 +17,10 @@ const ext = post.filePath?.split('.').pop() ?? 'mdx';
   <span class="ls-group">staff</span>
   <span class="ls-size">{lsSize(post.body?.length ?? 0)}</span>
   <span class="ls-date">{lsDate(post.data.pubDate)}</span>
-  <span class="ls-name">{postSlug(post)}.{ext}</span>
-  <span class="ls-note" title={post.data.description}># {post.data.description}</span>
+  <span class="ls-name">
+    {postSlug(post)}.{ext}
+  </span>
+  <span class="ls-note" title={post.data.description}>
+    # {post.data.description}
+  </span>
 </a>
