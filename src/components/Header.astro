@@ -151,30 +151,33 @@
     if (nav) nav.classList.toggle('nav-scrolled', window.scrollY > 40);
   });
 
-  let secObserver: IntersectionObserver | undefined;
+  let stopSpy: AbortController | undefined;
 
   function initNavState() {
     // every section link on the page: [ contact ] here and the home page's section timeline
     const links = document.querySelectorAll<HTMLAnchorElement>('a[data-sec]');
     const setActive = (id: string) => links.forEach((a) => a.classList.toggle('active', a.dataset.sec === id));
 
-    secObserver?.disconnect();
+    stopSpy?.abort();
 
     if (/^\/(es\/)?blog/.test(location.pathname)) return setActive('writing');
     setActive('');
     if (location.pathname !== '/') return;
-    secObserver = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((en) => {
-          if (en.isIntersecting) setActive(en.target.id);
-        });
-      },
-      { rootMargin: '-40% 0px -55% 0px' },
-    );
-    new Set([...links].map((a) => a.dataset.sec!)).forEach((id) => {
-      const el = document.getElementById(id);
-      if (el) secObserver!.observe(el);
-    });
+    // the active section is the last one whose top has passed 30% of the screen, so a link's jump (which puts
+    // its section at the top) always selects it, even when the section is shorter than the screen; at the very
+    // bottom the last section wins, since it may never reach that line
+    const ids = new Set([...links].map((a) => a.dataset.sec!));
+    const sections = [...document.querySelectorAll<HTMLElement>('section[id]')].filter((s) => ids.has(s.id));
+    const spy = () => {
+      const atBottom = innerHeight + scrollY >= document.documentElement.scrollHeight - 2;
+      let id = '';
+      for (const s of sections) if (s.getBoundingClientRect().top <= innerHeight * 0.3) id = s.id;
+      setActive(atBottom ? sections.at(-1)!.id : id);
+    };
+    stopSpy = new AbortController();
+    addEventListener('scroll', spy, { passive: true, signal: stopSpy.signal });
+    addEventListener('resize', spy, { signal: stopSpy.signal });
+    spy();
   }
 
   document.addEventListener('astro:page-load', initNavState);
