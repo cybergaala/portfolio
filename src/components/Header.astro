@@ -7,6 +7,7 @@
       <a href="/" class="nav-logo" aria-label="Edgar Mejía, home">
         <span class="accent">~/home</span>
         <span class="cursor" aria-hidden="true"></span>
+        <span class="spinner" aria-hidden="true"></span>
       </a>
       <ul class="nav-links">
         <li>
@@ -79,6 +80,57 @@
     opacity: 1;
   }
 
+  /* a command running while the next page loads (see the loading class below); it waits 150ms
+     so a prefetched page, which swaps right away, never flashes it */
+  .spinner {
+    display: none;
+    margin-left: 0.3em;
+    color: var(--accent);
+  }
+  :global(html.loading) .cursor {
+    display: none;
+  }
+  :global(html.loading) .spinner {
+    display: inline;
+    visibility: hidden;
+    animation: spinner-show 0s 0.15s forwards;
+  }
+  .spinner::before {
+    content: '⠋';
+    animation: spinner 0.8s steps(1) infinite;
+  }
+  @keyframes spinner-show {
+    to {
+      visibility: visible;
+    }
+  }
+  @keyframes spinner {
+    0% {
+      content: '⠋';
+    }
+    12.5% {
+      content: '⠙';
+    }
+    25% {
+      content: '⠹';
+    }
+    37.5% {
+      content: '⠸';
+    }
+    50% {
+      content: '⠼';
+    }
+    62.5% {
+      content: '⠴';
+    }
+    75% {
+      content: '⠦';
+    }
+    87.5% {
+      content: '⠧';
+    }
+  }
+
   .nav-links {
     list-style: none;
     margin: 0;
@@ -144,6 +196,10 @@
 </style>
 
 <script>
+  // the ClientRouter shows nothing while it fetches the next page, so flag it for the spinner in the logo
+  document.addEventListener('astro:before-preparation', () => document.documentElement.classList.add('loading'));
+  document.addEventListener('astro:after-preparation', () => document.documentElement.classList.remove('loading'));
+
   // Scroll handler always looks up a fresh DOM reference so it works
   // correctly after ViewTransitions swaps the page body.
   window.addEventListener('scroll', () => {
