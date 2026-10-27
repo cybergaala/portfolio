@@ -12,6 +12,12 @@ export default defineConfig({
   image: {
     layout: 'constrained',
   },
+  // the ClientRouter waits for the next page before it shows anything, so fetch each link's HTML as soon as
+  // it scrolls into view and a click swaps right away; the pages are ~20KB gzipped and images aren't included
+  prefetch: {
+    prefetchAll: true,
+    defaultStrategy: 'viewport',
+  },
   vite: {
     plugins: [tailwindcss()],
   },

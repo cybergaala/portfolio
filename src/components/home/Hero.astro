@@ -3,9 +3,8 @@
 import Sky from '../Sky.astro';
 import { fastfetch } from '../../data/fastfetch';
 import { site } from '../../data/site';
-// ANSI half-block art, generated with scripts/ascii-art.py --ansi; the earlier ASCII take covers it by default
-// and pressing reveals it (holding the lens swaps which one is the default, see initArtLens)
-import art from '../../data/hero-art.json';
+// ASCII take of the photo, generated with scripts/ascii-art.py; the canvases below paint it in color
+import art from '../../data/hero-art.ascii.json';
 
 // fastfetch color blocks laid out like a terminal's 8 normal + 8 bright colors, drawn from the theme tokens
 // so they follow light/dark; the bright row is each color mixed with white
@@ -32,14 +31,13 @@ const paletteRows = [palette, palette.map((c) => `color-mix(in oklab, ${c} 65%, 
           <span class="path">~</span> $ fastfetch
         </p>
         <div class="ff">
-          <div class="ff-art-wrap swapped" aria-hidden="true">
-            {/* the pre only sizes the 128x43 grid (one plain span per row); the ANSI pixels are painted
-                once into the canvas, since 4k colored spans made every theme switch restyle them all */}
+          <div class="ff-art-wrap" aria-hidden="true">
+            {/* the pre only sizes the 128x43 grid (one plain span per row); the glyphs are painted into
+                the canvases, since thousands of colored spans made every theme switch restyle them all */}
             <pre
               class="ff-art"
-              set:html={art.map((row) => `<span>${row.map((run) => run[2]).join('')}</span>`).join('\n')}
+              set:html={art.map((row) => `<span>${row.map((run) => run[1]).join('')}</span>`).join('\n')}
             />
-            <canvas class="ff-ansi" width="128" height={art.length * 2} data-art={JSON.stringify(art)}></canvas>
             <canvas class="ff-ascii" data-take="dark"></canvas>
             <canvas class="ff-ascii" data-take="light"></canvas>
           </div>
@@ -161,104 +159,30 @@ const paletteRows = [palette, palette.map((c) => `color-mix(in oklab, ${c} 65%, 
     color: transparent;
   }
 
-  /* each ▀ cell is two pixels: foreground on top, background below */
-  .ff-ansi {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    image-rendering: pixelated;
-  }
-
-  /* cells exactly one row tall so the half blocks stack into square pixels */
+  /* cells exactly one row tall so the canvas grid matches the DOM grid */
   .ff-art :global(span) {
     display: inline-block;
     height: 1em;
     vertical-align: top;
   }
 
-  /* Hover lens: the ASCII take sits on top of the ANSI art, same 128x43 grid, and only
-     shows inside a circle that follows the pointer (--x/--y set from JS) */
-  @property --lens {
-    syntax: '<length>';
-    inherits: true;
-    initial-value: 0px;
-  }
-
-  /* the lens opens at its resting size and is shown/hidden instantly with visibility; only the
-     press-and-hold growth animates. 70px matches LENS_RADIUS in initArtLens */
   .ff-art-wrap {
     position: relative;
-    --lens: 70px;
-    transition: --lens 0.35s ease-out;
-    -webkit-touch-callout: none;
   }
 
-  /* Press and hold (mouse or finger) grows the lens, starting slow and speeding up the bigger it gets
-     (ease-in that keeps accelerating until the end); letting go shrinks it back with the transition above */
-  .ff-art-wrap.pressing {
-    --lens: 800px;
-    transition: --lens 1.1s cubic-bezier(0.7, 0, 0.84, 0);
-  }
-
-  /* the ASCII take is drawn once into a canvas (see drawAscii): animating the mask over 3k text spans
-     repainted all of them every frame and stuttered, a canvas repaints as a single bitmap */
-  /* both takes are drawn up front and CSS picks one, so a theme switch doesn't redraw 5k glyphs;
-     the paper is a CSS background so each canvas follows the theme too */
+  /* the ASCII take is drawn into a canvas (see drawAscii): a canvas repaints as a single bitmap */
+  /* both takes are drawn up front and CSS picks one, so a theme switch doesn't redraw 5k glyphs */
   :global(html.dark) .ff-ascii[data-take='light'],
   :global(html:not(.dark)) .ff-ascii[data-take='dark'] {
     display: none;
   }
 
   .ff-ascii {
-    background: var(--body-bg);
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
-    -webkit-mask-image: radial-gradient(
-      circle var(--lens) at var(--x, 50%) var(--y, 50%),
-      #000 calc(100% - 6px),
-      transparent 100%
-    );
-    mask-image: radial-gradient(
-      circle var(--lens) at var(--x, 50%) var(--y, 50%),
-      #000 calc(100% - 6px),
-      transparent 100%
-    );
     pointer-events: none;
-    visibility: hidden;
-  }
-
-  /* set from JS, see initArtLens */
-  .ff-art-wrap:is(.hovering, .pressing) .ff-ascii {
-    visibility: visible;
-  }
-
-  /* swapped is the default (set in the markup): the ASCII take covers the art and the lens cuts a hole
-     showing the ANSI art underneath; holding the full lens for 5s toggles it */
-  /* the canvas is only painted once the font loads: until then hide the ANSI art too, so a refresh
-     doesn't flash it before the ASCII default covers it */
-  .ff-art-wrap:not(.ready) .ff-ansi {
-    visibility: hidden;
-  }
-
-  .ff-art-wrap.swapped .ff-ascii {
-    visibility: visible;
-    -webkit-mask-image: none;
-    mask-image: none;
-  }
-  .ff-art-wrap.swapped:is(.hovering, .pressing) .ff-ascii {
-    -webkit-mask-image: radial-gradient(
-      circle var(--lens) at var(--x, 50%) var(--y, 50%),
-      transparent calc(100% - 6px),
-      #000 100%
-    );
-    mask-image: radial-gradient(
-      circle var(--lens) at var(--x, 50%) var(--y, 50%),
-      transparent calc(100% - 6px),
-      #000 100%
-    );
   }
 
   .ff-links {
@@ -315,7 +239,7 @@ const paletteRows = [palette, palette.map((c) => `color-mix(in oklab, ${c} 65%, 
   // stable per-cell jitter, so the front where glyphs settle is ragged instead of a straight line
   const noise = (x: number, y: number) => (((Math.sin(x * 12.9898 + y * 78.233) * 43758.5453) % 1) + 1) % 1;
 
-  // paints the ASCII take on the same 128x43 grid as the ANSI art; each theme gets the take made for its paper.
+  // paints the ASCII take on the pre's 128x43 grid; each theme gets the take made for its paper.
   // progress < 1 is the scramble intro: the art is typed in from the top-left corner, and only a narrow band at the
   // leading edge shows random glyphs before they settle (scrambling the whole piece read as TV static)
   function drawAscii(canvas: HTMLCanvasElement, art: HTMLElement, progress = 1) {
@@ -380,7 +304,7 @@ const paletteRows = [palette, palette.map((c) => `color-mix(in oklab, ${c} 65%, 
   const GLITCH_CELLS = [5, 12]; // cells per glitch, picked at random in this range
   const GLITCH_TICKS = 8; // glyph changes before the cell settles, SCRAMBLE_TICK apart
 
-  function glitchAscii(wrap: HTMLElement, takes: NodeListOf<HTMLCanvasElement>, art: HTMLElement) {
+  function glitchAscii(takes: NodeListOf<HTMLCanvasElement>, art: HTMLElement) {
     if (matchMedia('(prefers-reduced-motion: reduce)').matches) return () => {};
     let timer: ReturnType<typeof setTimeout>;
     const schedule = () => {
@@ -389,7 +313,7 @@ const paletteRows = [palette, palette.map((c) => `color-mix(in oklab, ${c} 65%, 
     const glitch = () => {
       schedule();
       const canvas = [...takes].find((c) => c.getClientRects().length);
-      if (document.hidden || !wrap.classList.contains('swapped') || !canvas) return;
+      if (document.hidden || !canvas) return;
       const rows = canvas.dataset.take === 'dark' ? artAscii : artAsciiLight;
       const { width, height } = art.getBoundingClientRect();
       const cw = width / 128,
@@ -427,118 +351,32 @@ const paletteRows = [palette, palette.map((c) => `color-mix(in oklab, ${c} 65%, 
     return () => clearTimeout(timer);
   }
 
-  const LENS_RADIUS = 70;
-
-  function initArtLens(signal: AbortSignal) {
+  function initArt(signal: AbortSignal) {
     const wrap = document.querySelector<HTMLElement>('.ff-art-wrap');
     if (!wrap) return;
     const takes = wrap.querySelectorAll<HTMLCanvasElement>('.ff-ascii');
     const art = wrap.querySelector<HTMLElement>('.ff-art')!;
-    const ansi = wrap.querySelector<HTMLCanvasElement>('.ff-ansi')!;
-    const ctx = ansi.getContext('2d')!;
-    (JSON.parse(ansi.dataset.art!) as string[][][]).forEach((row, y) => {
-      let x = 0;
-      for (const [fg, bg, t] of row) {
-        ctx.fillStyle = fg;
-        ctx.fillRect(x, y * 2, t.length, 1);
-        ctx.fillStyle = bg;
-        ctx.fillRect(x, y * 2 + 1, t.length, 1);
-        x += t.length;
-      }
-    });
-    // the visitor's last swap is remembered; storage can throw in private windows, then ASCII stays the default
-    try {
-      if (localStorage.getItem('hero-art') === 'ansi') wrap.classList.remove('swapped');
-    } catch {}
     // the intro's progress: it starts blank, so the ResizeObserver's first call (which lands before
     // the font on a cold load) can't flash the finished art before the scramble starts
-    const intro = wrap.classList.contains('swapped') && !matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const intro = !matchMedia('(prefers-reduced-motion: reduce)').matches;
     let progress = intro ? 0 : 1;
-    const redraw = () => {
-      takes.forEach((c) => drawAscii(c, art, progress));
-      wrap.classList.add('ready');
-    };
+    const redraw = () => takes.forEach((c) => drawAscii(c, art, progress));
     // redraw when the font is ready or the art resizes (mobile scales it)
     let stopGlitch = () => {};
     document.fonts.ready.then(() => {
       if (intro) scrambleAscii(takes, art, (p) => (progress = p));
       redraw();
       // start once the intro is over, so the glitches never fight the sweep
-      const wait = setTimeout(() => (stopGlitch = glitchAscii(wrap, takes, art)), SCRAMBLE_MS);
+      const wait = setTimeout(() => (stopGlitch = glitchAscii(takes, art)), SCRAMBLE_MS);
       stopGlitch = () => clearTimeout(wait);
     });
     const resized = new ResizeObserver(redraw);
     resized.observe(art);
-    // the press is tracked by hand: a wheel or trackpad scroll moves the art under a still pointer
-    // without firing pointer events, so the last position is rechecked on every scroll
-    let last: { x: number; y: number } | undefined;
-    const place = () => {
-      if (!last) return;
-      const r = wrap.getBoundingClientRect();
-      // the lens opens as soon as its circle touches the art, before the cursor itself is over it
-      const dx = Math.max(r.left - last.x, 0, last.x - r.right);
-      const dy = Math.max(r.top - last.y, 0, last.y - r.bottom);
-      const inside = Math.hypot(dx, dy) <= LENS_RADIUS;
-      wrap.classList.toggle('hovering', inside);
-      if (!inside) return unpress();
-      wrap.style.setProperty('--x', `${last.x - r.left}px`);
-      wrap.style.setProperty('--y', `${last.y - r.top}px`);
-    };
-    const track = (e: PointerEvent) => {
-      // no hover lens: it only opens while a mouse button or finger holds it down
-      if (!wrap.classList.contains('pressing')) return;
-      last = { x: e.clientX, y: e.clientY };
-      place();
-    };
-    let hold: ReturnType<typeof setTimeout> | undefined;
-    const unpress = () => {
-      clearTimeout(hold);
-      wrap.classList.remove('pressing');
-    };
-    // forgetting the position keeps a later scroll from reopening the lens
-    const close = () => {
-      last = undefined;
-      unpress();
-      wrap.classList.remove('hovering');
-    };
-    // once the press has grown the lens over the whole art, 5 more seconds of holding swaps the default
-    wrap.addEventListener('transitionend', (e) => {
-      if (e.target !== wrap || e.propertyName !== '--lens' || !wrap.classList.contains('pressing')) return;
-      hold = setTimeout(() => {
-        const swapped = wrap.classList.toggle('swapped');
-        try {
-          localStorage.setItem('hero-art', swapped ? 'ascii' : 'ansi');
-        } catch {}
-        // snap the lens shut without the shrink, so the swap doesn't flash the other art, then let it
-        // inflate back to hover size with the base transition
-        wrap.style.transition = 'none';
-        wrap.style.setProperty('--lens', '0px');
-        unpress();
-        wrap.offsetWidth;
-        wrap.style.transition = '';
-        wrap.style.removeProperty('--lens');
-      }, 5000);
-    });
-
-    // capture so the release still lands here when the pointer is let go outside the art
-    wrap.addEventListener('pointerdown', (e) => {
-      wrap.setPointerCapture(e.pointerId);
-      wrap.classList.add('pressing');
-      track(e);
-    });
-    wrap.addEventListener('pointerup', close);
-    wrap.addEventListener('pointercancel', close);
-    // a long press on a phone would otherwise open the image/text menu
-    wrap.addEventListener('contextmenu', (e) => e.preventDefault());
-    document.addEventListener('pointermove', track, { signal });
-    // leaving the browser window fires no pointermove, so close on the page's own leave
-    document.documentElement.addEventListener('pointerleave', close, { signal });
-    addEventListener('scroll', place, { passive: true, signal });
     signal.addEventListener('abort', () => {
       stopGlitch();
       resized.disconnect();
     });
   }
 
-  onPageLoad(initArtLens);
+  onPageLoad(initArt);
 </script>

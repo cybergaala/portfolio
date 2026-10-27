@@ -48,4 +48,4 @@ CI (`.github/workflows/ci.yml`) runs the format check, the type check and the bu
 
 ## Writing a post
 
-Add `src/content/blog/en/<slug>.mdx`. Prefix the file name with `_` to keep it as an unpublished draft. For a Spanish version, add `src/content/blog/es/<slug>.mdx` with the same slug: the two posts link to each other and get `hreflang` tags automatically. Reference images with paths relative to the post (`../../../assets/blog/...`) so Astro optimizes them.
+Add `src/content/blog/en/<slug>.md` (`.mdx` only when the post needs components or imports). Prefix the file name with `_` to keep it as an unpublished draft. For a Spanish version, add `src/content/blog/es/<slug>.md` with the same slug: the two posts link to each other and get `hreflang` tags automatically. Reference images with paths relative to the post (`../../../assets/blog/...`) so Astro optimizes them.
