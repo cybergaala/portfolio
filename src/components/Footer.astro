@@ -4,8 +4,6 @@ import { site } from '../data/site';
 
 // sits below the footer, revealed by scrolling past it; colored ASCII from scripts/ascii-art.py (120 cols, --light for the light take)
 import pullArt from '../data/footer-pull.json';
-import pullArtLight from '../data/footer-pull-light.json';
-import { artToHtml } from '../data/art-html';
 ---
 
 <div class="footer-wrap" style={`--art-rows: ${pullArt.length}`}>
@@ -53,8 +51,9 @@ import { artToHtml } from '../data/art-html';
     <div class="pull-art">
       <Sky count={14} seed={41} class="sparkles left" />
       <Sky count={14} seed={59} class="sparkles right" />
-      <pre data-take="dark" set:html={artToHtml(pullArt)} />
-      <pre data-take="light" set:html={artToHtml(pullArtLight)} />
+      {/* painted in the script below: as colored spans the two takes were ~250KB of every page's HTML */}
+      <canvas data-take="dark"></canvas>
+      <canvas data-take="light"></canvas>
     </div>
   </div>
 </div>
@@ -70,8 +69,8 @@ import { artToHtml } from '../data/art-html';
     overflow: hidden;
   }
   /* one take per theme, like the hero */
-  :global(html.dark) .pull pre[data-take='light'],
-  :global(html:not(.dark)) .pull pre[data-take='dark'] {
+  :global(html.dark) .pull canvas[data-take='light'],
+  :global(html:not(.dark)) .pull canvas[data-take='dark'] {
     display: none;
   }
   .pull-art {
@@ -97,11 +96,12 @@ import { artToHtml } from '../data/art-html';
       width: 2rem;
     }
   }
-  .pull pre {
-    margin: 0;
-    font: 4px/1 var(--font-mono);
-    letter-spacing: 0;
-    color: var(--fg-faint);
+  /* 120 cols of 0.6em glyphs by --art-rows rows, at 4px */
+  .pull canvas {
+    display: block;
+    width: calc(120 * 0.6 * 4px);
+    height: calc(var(--art-rows) * 4px);
+    font-family: var(--font-mono);
   }
 
   .site-footer {
@@ -182,3 +182,38 @@ import { artToHtml } from '../data/art-html';
     border-top: 1px dashed var(--border);
   }
 </style>
+
+<script>
+  import { onPageLoad } from '../utils/page';
+  import dark from '../data/footer-pull.json';
+  import light from '../data/footer-pull-light.json';
+
+  // both takes are drawn up front and CSS picks one, so a theme switch doesn't redraw them
+  function drawPull() {
+    document.querySelectorAll<HTMLCanvasElement>('.pull canvas').forEach((canvas) => {
+      const rows = canvas.dataset.take === 'dark' ? dark : light;
+      const size = 4,
+        cw = size * 0.6,
+        dpr = devicePixelRatio || 1;
+      canvas.width = Math.round(120 * cw * dpr);
+      canvas.height = Math.round(rows.length * size * dpr);
+      const ctx = canvas.getContext('2d')!;
+      ctx.scale(dpr, dpr);
+      ctx.font = `${size}px ${getComputedStyle(canvas).fontFamily}`;
+      ctx.textBaseline = 'middle';
+      rows.forEach((row, y) => {
+        let x = 0;
+        for (const [color, text] of row) {
+          ctx.fillStyle = color;
+          // one glyph per cell so the grid can't drift
+          for (const c of text) {
+            if (c !== ' ') ctx.fillText(c, x * cw, (y + 0.5) * size);
+            x++;
+          }
+        }
+      });
+    });
+  }
+
+  onPageLoad(() => document.fonts.ready.then(drawPull));
+</script>
