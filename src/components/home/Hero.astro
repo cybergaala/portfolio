@@ -360,17 +360,18 @@ const paletteRows = [palette, palette.map((c) => `color-mix(in oklab, ${c} 65%, 
     });
   }
 
-  // intro when the landing appears: only the take on screen animates (5k glyphs a frame is the budget)
-  function scrambleAscii(wrap: HTMLElement, takes: NodeListOf<HTMLCanvasElement>, art: HTMLElement) {
-    if (!wrap.classList.contains('swapped') || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  // intro when the landing appears: only the take on screen animates (5k glyphs a frame is the budget);
+  // onFrame gets each progress so other redraws (resize, font load) paint the same frame instead of the finished art
+  function scrambleAscii(takes: NodeListOf<HTMLCanvasElement>, art: HTMLElement, onFrame: (p: number) => void) {
     const shown = [...takes].filter((c) => c.getClientRects().length);
     const start = performance.now();
     const frame = (now: number) => {
       const p = Math.min(1, (now - start) / SCRAMBLE_MS);
-      shown.forEach((c) => drawAscii(c, art, p));
+      onFrame(p);
+      if (p < 1) shown.forEach((c) => drawAscii(c, art, p));
+      else takes.forEach((c) => drawAscii(c, art)); // the hidden take too, it stayed blank during the intro
       if (p < 1) requestAnimationFrame(frame);
     };
-    // first frame right away, in the same task as the final draw, so the finished art never flashes first
     frame(start);
   }
 
@@ -445,19 +446,23 @@ const paletteRows = [palette, palette.map((c) => `color-mix(in oklab, ${c} 65%, 
         x += t.length;
       }
     });
-    const redraw = () => {
-      takes.forEach((c) => drawAscii(c, art));
-      wrap.classList.add('ready');
-    };
     // the visitor's last swap is remembered; storage can throw in private windows, then ASCII stays the default
     try {
       if (localStorage.getItem('hero-art') === 'ansi') wrap.classList.remove('swapped');
     } catch {}
+    // the intro's progress: it starts blank, so the ResizeObserver's first call (which lands before
+    // the font on a cold load) can't flash the finished art before the scramble starts
+    const intro = wrap.classList.contains('swapped') && !matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let progress = intro ? 0 : 1;
+    const redraw = () => {
+      takes.forEach((c) => drawAscii(c, art, progress));
+      wrap.classList.add('ready');
+    };
     // redraw when the font is ready or the art resizes (mobile scales it)
     let stopGlitch = () => {};
     document.fonts.ready.then(() => {
+      if (intro) scrambleAscii(takes, art, (p) => (progress = p));
       redraw();
-      scrambleAscii(wrap, takes, art);
       // start once the intro is over, so the glitches never fight the sweep
       const wait = setTimeout(() => (stopGlitch = glitchAscii(wrap, takes, art)), SCRAMBLE_MS);
       stopGlitch = () => clearTimeout(wait);
