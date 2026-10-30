@@ -669,6 +669,7 @@ const formatted = pubDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', 
 <script>
   import { onPageLoad } from '../utils/page';
   import { zoomOpen } from '../utils/zoom';
+  import { scramble } from '../utils/scramble';
 
   function initScanIn() {
     const images = document.querySelectorAll<HTMLImageElement>('.post-banner img, .post-body img');
@@ -704,11 +705,6 @@ const formatted = pubDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', 
 
   // Language switch: no fade, same scroll, and the visible text scrambles into the other language,
   // so it feels like the same page changing instead of a new one loading.
-  const LOWER = 'abcdefghijklmnopqrstuvwxyz';
-  const UPPER = LOWER.toUpperCase();
-  const SCRAMBLE_MS = 400;
-  const SCRAMBLE_TICK = 40; // ms between glyph changes; changing every frame reads as flicker
-  const LETTER = /[\p{L}\p{N}]/u;
   // same in both languages (command line, author, tags, ENG | SPA) or code, so they stay still
   const NO_SCRAMBLE = 'pre, code, .cmd, .post-author, .post-tags, .lang-switcher';
   let langSwapY: number | null = null;
@@ -731,11 +727,11 @@ const formatted = pubDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', 
   document.addEventListener('astro:after-swap', () => {
     if (langSwapY === null) return;
     scrollTo({ top: langSwapY, behavior: 'instant' });
-    if (!matchMedia('(prefers-reduced-motion: reduce)').matches) scrambleVisibleText();
+    scrambleVisibleText();
   });
 
   function scrambleVisibleText() {
-    const nodes: { node: Text; text: string; at: number[] }[] = [];
+    const nodes: Text[] = [];
     document.querySelectorAll('.post-header, .post-body, .post-toc').forEach((root) => {
       const walk = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
       for (let n = walk.nextNode() as Text | null; n; n = walk.nextNode() as Text | null) {
@@ -743,32 +739,10 @@ const formatted = pubDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', 
         // ponytail: on-screen text only; whatever is off-screen just swaps, nobody sees it
         if (!r || r.bottom < 0 || r.top > innerHeight || !n.data.trim() || n.parentElement!.closest(NO_SCRAMBLE))
           continue;
-        // each letter settles at its own time: mostly left to right, with some jitter so it doesn't read as a wipe
-        const at = [...n.data].map((_, i, a) => (i / a.length) * 0.6 + Math.random() * 0.4);
-        nodes.push({ node: n, text: n.data, at });
+        nodes.push(n);
       }
     });
-    const start = performance.now();
-    let lastTick = -1;
-    const frame = (now: number) => {
-      const p = Math.min((now - start) / SCRAMBLE_MS, 1);
-      const tick = Math.floor((now - start) / SCRAMBLE_TICK);
-      if (tick === lastTick && p < 1) return void requestAnimationFrame(frame);
-      lastTick = tick;
-      for (const n of nodes) {
-        // only letters and digits scramble, so spaces and punctuation keep the shape of the text
-        const out = [...n.text]
-          .map((c, i) => {
-            if (p >= n.at[i] || !LETTER.test(c)) return c;
-            const set = c === c.toLowerCase() ? LOWER : UPPER;
-            return set[(Math.random() * set.length) | 0];
-          })
-          .join('');
-        if (n.node.data !== out) n.node.data = out;
-      }
-      if (p < 1) requestAnimationFrame(frame);
-    };
-    frame(start); // first frame right away, so the new text never shows unscrambled
+    scramble(nodes);
   }
 
   // Click a post image to open it full size; arrows, swipe and the buttons move through the others.
