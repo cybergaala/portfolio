@@ -1,8 +1,8 @@
 ---
-title: "Building this portfolio"
+title: 'Building this portfolio'
 description: "Why I chose Astro, how I approached the design, and what I'd change next time."
 pubDate: 2026-04-20
-tags: ["astro", "web", "design", "development", "ai"]
+tags: ['astro', 'web', 'design', 'development', 'ai']
 ---
 
 I've rebuilt my portfolio more times than I care to admit. This version is the one I'm actually keeping.

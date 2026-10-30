@@ -1,9 +1,9 @@
 ---
-title: "Compré una Fujifilm X-M5"
-description: "Compré mi primera cámara de verdad para documentar el crecimiento de mi hija y llevarla en mis viajes fuera del país. Soy completamente amateur, y está bien."
+title: 'Compré una Fujifilm X-M5'
+description: 'Compré mi primera cámara de verdad para documentar el crecimiento de mi hija y llevarla en mis viajes fuera del país. Soy completamente amateur, y está bien.'
 pubDate: 2025-04-01
-tags: ["photography", "fujifilm", "family", "travel"]
-banner: "../../../assets/blog/fujifilm-xm5/05.webp"
+tags: ['photography', 'fujifilm', 'family', 'travel']
+banner: '../../../assets/blog/fujifilm-xm5/05.webp'
 ---
 
 ## Por qué una cámara

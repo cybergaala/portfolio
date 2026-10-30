@@ -1,9 +1,9 @@
 ---
-title: "I bought a GameBoy Advance"
-description: "After thinking about it a lot, I decided to settle a debt with my inner child, who always dreamed of having a GameBoy."
+title: 'I bought a GameBoy Advance'
+description: 'After thinking about it a lot, I decided to settle a debt with my inner child, who always dreamed of having a GameBoy.'
 pubDate: 2023-05-19
-tags: ["nintendo", "games", "tech", "hardware"]
-banner: "../../../assets/blog/red-gameboy/PXL_20240325_052831326.webp"
+tags: ['nintendo', 'games', 'tech', 'hardware']
+banner: '../../../assets/blog/red-gameboy/PXL_20240325_052831326.webp'
 ---
 
 ## Introduction
@@ -27,6 +27,7 @@ Holding it in my hands today feels like a victory. It's a reminder of how far I'
 If you're thinking about healing your inner child by getting that one thing you never could have, this is your sign. It's worth every penny.
 
 ## Games collection
+
 Of course, the real joy of owning a GameBoy Advance is playing the games. I have a collection of classics like "The Legend of Zelda: The Minish Cap," "Metroid Fusion," and "Advance Wars." Each game brings back memories and offers a new experience with the enhanced screen.
 
 ![Games collection](../../../assets/blog/red-gameboy/PXL_20250122_160218386.webp)

@@ -1,9 +1,9 @@
 ---
-title: "I bought a Fujifilm X-M5"
+title: 'I bought a Fujifilm X-M5'
 description: "I bought my first real camera to document my daughter growing up and to take on trips abroad. I'm a complete beginner, and that's fine."
 pubDate: 2025-04-01
-tags: ["photography", "fujifilm", "family", "travel"]
-banner: "../../../assets/blog/fujifilm-xm5/05.webp"
+tags: ['photography', 'fujifilm', 'family', 'travel']
+banner: '../../../assets/blog/fujifilm-xm5/05.webp'
 ---
 
 ## Why a camera
