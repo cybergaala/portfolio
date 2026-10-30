@@ -64,6 +64,7 @@ const help: [string, [string, string][]][] = [
     </p>
     <ul class="goto-list"></ul>
     <script is:inline type="application/json" class="goto-seed" set:html={seed} />
+    <p class="goto-egg" hidden></p>
     <p class="goto-empty" hidden>
       {t('goto.empty')}
     </p>
@@ -212,8 +213,14 @@ const help: [string, [string, string][]][] = [
   .goto-keys {
     color: var(--fg-faint);
   }
-  .goto-empty {
+  .goto-empty,
+  .goto-egg {
     padding: 0 0.5ch 0.5rem;
+  }
+  .goto-egg {
+    padding-top: 0.5rem; /* .goto p zeroes margins */
+    white-space: pre-line; /* a message can span lines */
+    color: var(--accent);
   }
 
   @media (max-width: 640px) {
@@ -226,6 +233,8 @@ const help: [string, [string, string][]][] = [
 <script>
   // listeners live on document, so they survive the ClientRouter swapping in each page's own #goto
   import type { GoToItem } from '../utils/goto';
+  import eggs from '../data/easter-eggs.json';
+  import { scramble } from '../utils/scramble';
 
   const dialog = () => document.getElementById('goto') as HTMLDialogElement | null;
   const links = (d: HTMLDialogElement) => [...d.querySelectorAll<HTMLAnchorElement>('.goto-list a')];
@@ -296,6 +305,8 @@ const help: [string, [string, string][]][] = [
     const url = d.dataset.index!;
     items = index.get(url) ?? JSON.parse(d.querySelector('.goto-seed')!.textContent!);
     d.querySelector('input')!.value = '';
+    chain = ''; // an unanswered question doesn't outlive the menu
+    (d.querySelector('.goto-egg') as HTMLElement).hidden = true;
     filter(d);
     d.showModal();
     if (index.has(url)) return;
@@ -350,15 +361,82 @@ const help: [string, [string, string][]][] = [
     if (move) {
       e.preventDefault();
       select(d, sel + move);
+    } else if (e.key === 'Enter' && chain) {
+      // Enter answers the question: the wrong answer ends the chain, back to the plain menu
+      e.preventDefault();
+      clearTimeout(eggTimer);
+      const input = d.querySelector('input')!;
+      easterEgg(d, input).then((opened) => {
+        if (opened || !chain) return;
+        chain = '';
+        input.value = '';
+        (d.querySelector('.goto-egg') as HTMLElement).hidden = true;
+        filter(d);
+      });
     } else if (e.key === 'Enter') {
       e.preventDefault();
       links(d)[sel]?.click();
     }
   });
 
+  // keep in sync with scripts/easter-eggs.mjs: case, accents and extra spaces don't matter
+  const normalize = (s: string) => s.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase().trim().replace(/\s+/g, ' ');
+  const bytes = (b64: string) => Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+
+  // the phrases typed so far when an egg asked a question: its answer is keyed by them plus itself
+  let chain = '';
+
+  // the typed text is tried as the key to each easter egg (scripts/easter-eggs.mjs); AES-GCM rejects every wrong one,
+  // so the page holds no phrase and no message, only ciphertext. Returns whether one opened.
+  async function easterEgg(d: HTMLDialogElement, input: HTMLInputElement) {
+    const phrase = normalize(input.value);
+    if (phrase.length < (chain ? 1 : 3)) return false;
+    const keyText = chain ? `${chain}\n${phrase}` : phrase;
+    const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(keyText), 'PBKDF2', false, [
+      'deriveKey',
+    ]);
+    const key = await crypto.subtle.deriveKey(
+      { name: 'PBKDF2', hash: 'SHA-256', salt: bytes(eggs.salt), iterations: eggs.iterations },
+      base,
+      { name: 'AES-GCM', length: 256 },
+      false,
+      ['decrypt'],
+    );
+    for (const egg of eggs.eggs) {
+      const plain = await crypto.subtle
+        .decrypt({ name: 'AES-GCM', iv: bytes(egg.iv) }, key, bytes(egg.data))
+        .catch(() => null);
+      if (!plain) continue;
+      if (!d.open || normalize(input.value) !== phrase) return false; // typed on while it was deriving
+      const found = JSON.parse(new TextDecoder().decode(plain)) as { message: string; ask: boolean };
+      d.querySelector('.goto-list')!.replaceChildren(); // so Enter opens nothing
+      d.querySelector('.goto-count')!.textContent = '';
+      (d.querySelector('.goto-empty') as HTMLElement).hidden = true;
+      const message = d.querySelector('.goto-egg') as HTMLElement;
+      message.textContent = found.message;
+      scramble([message.firstChild as Text]);
+      message.hidden = false;
+      // a question clears the box for its answer; anything else ends the chain
+      chain = found.ask ? keyText : '';
+      if (found.ask) input.value = '';
+      return true;
+    }
+    return false;
+  }
+
+  // the key takes a moment to derive (that's what makes guessing slow), so it waits for a pause in the typing
+  let eggTimer = 0;
   document.addEventListener('input', (e) => {
     const d = dialog();
-    if (d && e.target === d.querySelector('input')) filter(d);
+    const input = d?.querySelector('input');
+    if (!d || !input || e.target !== input) return;
+    clearTimeout(eggTimer);
+    // waiting on an answer: the question stays up and the menu stays empty
+    if (!chain) {
+      (d.querySelector('.goto-egg') as HTMLElement).hidden = true;
+      filter(d);
+    }
+    eggTimer = window.setTimeout(() => easterEgg(d, input), 400);
   });
 
   document.addEventListener('mousemove', (e) => {
