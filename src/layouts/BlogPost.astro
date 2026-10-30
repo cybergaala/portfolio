@@ -627,6 +627,7 @@ const formatted = pubDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', 
 
 <script>
   import { onPageLoad } from '../utils/page';
+  import { zoomOpen } from '../utils/zoom';
 
   function initBlurUp() {
     const images = document.querySelectorAll<HTMLImageElement>('.post-banner img, .post-body img');
@@ -746,7 +747,7 @@ const formatted = pubDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', 
     imgs.forEach((img, n) =>
       img.addEventListener('click', () => {
         show(n);
-        dialog.showModal();
+        zoomOpen(dialog, img);
       }),
     );
     dialog.addEventListener('click', (e) => {
