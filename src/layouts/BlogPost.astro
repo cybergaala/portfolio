@@ -141,11 +141,13 @@ const formatted = pubDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', 
   </article>
 
   <dialog id="viewer" class="viewer">
-    <img alt="" />
+    <!-- takes the opening focus, which would otherwise land on Prev and ring it at the first arrow key -->
+    <img alt="" tabindex="-1" autofocus />
+    <p class="viewer-alt"></p>
     <p class="viewer-bar">
-      <button data-step="-1">{t('blog.prev')}</button>
+      <button data-step="-1">[←] {t('blog.prev-image')}</button>
       <span class="viewer-count"></span>
-      <button data-step="1">{t('blog.next')}</button>
+      <button data-step="1">{t('blog.next-image')} [→]</button>
       <button data-close>[esc] {t('blog.close')}</button>
     </p>
   </dialog>
@@ -542,7 +544,7 @@ const formatted = pubDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', 
 
   .viewer[open] {
     display: grid;
-    grid-template-rows: minmax(0, 1fr) auto;
+    grid-template-rows: minmax(0, 1fr) auto auto;
     width: 100vw;
     height: 100dvh;
     max-width: none;
@@ -560,9 +562,18 @@ const formatted = pubDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', 
   }
 
   .viewer img {
+    outline: none; /* focused only to hold the opening focus; Tab still rings the buttons */
     width: 100%;
     height: 100%;
     object-fit: contain;
+  }
+
+  /* the image's alt text, under it like the caption on an old photo viewer */
+  .viewer-alt {
+    max-width: 65ch;
+    margin: 0.75rem auto 0;
+    text-align: center;
+    color: var(--fg-muted);
   }
 
   .viewer-bar {
@@ -672,13 +683,17 @@ const formatted = pubDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', 
           box.dataset.alt = img.alt;
           box.classList.add('img-wait');
           img.classList.add('reveal', 'pre');
-          const reveal = () => img.classList.remove('pre');
+          void img.offsetWidth; // commits the hidden state, or a fast load skips the bands and pops in
+          // a fully clipped image never counts as visible, so lazy loading would wait on it forever; it's near the screen already
+          img.loading = 'eager';
+          const reveal = () => {
+            img.classList.remove('pre');
+            // the frame stays under the bands until the last one (0.6s, the reveal's) has painted; a timer, since no
+            // transitionend fires under reduced motion
+            setTimeout(() => box.classList.remove('img-wait'), 600);
+          };
           img.addEventListener('load', reveal, { once: true });
           img.addEventListener('error', reveal, { once: true });
-          // the frame stays under the bands until the last one has painted
-          img.addEventListener('transitionend', (e) => {
-            if (e.propertyName === 'clip-path') box.classList.remove('img-wait');
-          });
         });
       },
       { rootMargin: '200px' },
@@ -763,18 +778,21 @@ const formatted = pubDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', 
     if (!dialog || !imgs.length) return;
     const view = dialog.querySelector('img')!;
     const count = dialog.querySelector('.viewer-count')!;
+    const caption = dialog.querySelector<HTMLElement>('.viewer-alt')!;
     dialog.querySelectorAll<HTMLElement>('[data-step]').forEach((b) => (b.hidden = imgs.length < 2));
     let i = 0;
-    // a new src keeps painting the old picture until it loads, so hide it until then
-    view.onload = view.onerror = () => (view.style.visibility = '');
+    // a new src keeps painting the old picture until it loads, so hide it until then; with opacity, since a
+    // visibility-hidden image would drop the focus that carries the arrow keys
+    view.onload = view.onerror = () => (view.style.opacity = '');
 
     const show = (n: number) => {
       i = (n + imgs.length) % imgs.length;
       const img = imgs[i];
-      if (view.src !== (img.currentSrc || img.src)) view.style.visibility = 'hidden';
+      if (view.src !== (img.currentSrc || img.src)) view.style.opacity = '0';
       // the size already on screen shows right away; src is the original, swapped in once it loads
       view.src = img.currentSrc || img.src;
-      view.alt = img.alt;
+      view.alt = caption.textContent = img.alt;
+      caption.hidden = !img.alt;
       count.textContent = `${i + 1}/${imgs.length}`;
       const full = new Image();
       full.onload = () => imgs[i] === img && (view.src = full.src);
@@ -792,9 +810,11 @@ const formatted = pubDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', 
       if (el.dataset.step) show(i + Number(el.dataset.step));
       else if (el !== view) dialog.close();
     });
+    // arrows, a/d like a game, h/l like vim
+    const steps: Record<string, number> = { ArrowLeft: -1, a: -1, h: -1, ArrowRight: 1, d: 1, l: 1 };
     dialog.addEventListener('keydown', (e) => {
-      if (e.key === 'ArrowLeft') show(i - 1);
-      if (e.key === 'ArrowRight') show(i + 1);
+      const step = steps[e.key.length === 1 ? e.key.toLowerCase() : e.key];
+      if (step && !e.metaKey && !e.ctrlKey && !e.altKey) show(i + step);
     });
     let touchX = 0;
     dialog.addEventListener('touchstart', (e) => (touchX = e.touches[0].clientX), { passive: true });

@@ -1,0 +1,399 @@
+---
+// the keyboard layer on every page: an fzf-style switcher to any page or post, opened with double Shift (IntelliJ's) or
+// Ctrl+P (vim's ctrlp/fzf.vim), and a help panel listing every shortcut, opened with ? or the header's [?]
+import { useTranslations, type Lang } from '../i18n/ui';
+import { goToItems } from '../utils/goto';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+// the menu lists at most this many rows; the page carries only the first ones, so it doesn't grow with the blog
+const LIMIT = 10;
+const items = await goToItems(lang);
+// < escaped, so a title can't close the script tag it's inlined in
+const seed = JSON.stringify(items.slice(0, LIMIT)).replaceAll('<', '\\u003c');
+const help: [string, [string, string][]][] = [
+  [
+    t('help.everywhere'),
+    [
+      ['[shift shift] [ctrl+p]', t('help.goto')],
+      ['[h] [g] [d|l]', t('help.header')],
+      ['[?]', t('help.help')],
+    ],
+  ],
+  [
+    t('goto.title'),
+    [
+      ['[↑↓] [ctrl+n/p] [ctrl+j/k]', t('help.move')],
+      ['[enter]', t('help.open')],
+    ],
+  ],
+  [t('help.viewer'), [['[←→] [a d] [h l]', t('help.image')]]],
+  [
+    t('help.home'),
+    [
+      ['[1]…[5]', t('help.sections')],
+      ['[↑↓] [j k]', t('help.jobs')],
+    ],
+  ],
+];
+---
+
+<dialog
+  id="goto"
+  class="goto"
+  aria-label={t('goto.title')}
+  data-index={`/goto-${lang}.json`}
+  data-total={items.length}
+  data-limit={LIMIT}
+  data-of={t('goto.of')}
+>
+  <div class="goto-panel">
+    <span class="goto-title" aria-hidden="true">
+      {t('goto.title')}
+    </span>
+    <p class="goto-prompt">
+      <span class="accent" aria-hidden="true">
+        &gt;
+      </span>
+      <input id="goto-q" type="text" autocomplete="off" spellcheck="false" aria-label={t('goto.title')} autofocus />
+      <span class="goto-count"></span>
+    </p>
+    <ul class="goto-list"></ul>
+    <script is:inline type="application/json" class="goto-seed" set:html={seed} />
+    <p class="goto-empty" hidden>
+      {t('goto.empty')}
+    </p>
+    <p class="goto-keys">{t('goto.keys')}</p>
+  </div>
+</dialog>
+
+<dialog id="help" class="goto" aria-label={t('help.title')}>
+  <div class="goto-panel">
+    <span class="goto-title" aria-hidden="true">
+      {t('help.title')}
+    </span>
+    {help.map(([section, rows]) => (
+      <section class="help-section">
+        <p class="help-head">{section}</p>
+        <dl>
+          {rows.map(([keys, what]) => (
+            <>
+              <dt>{keys}</dt>
+              <dd>{what}</dd>
+            </>
+          ))}
+        </dl>
+      </section>
+    ))}
+    <p class="goto-keys">[esc] {t('blog.close')}</p>
+  </div>
+</dialog>
+
+<style>
+  .goto {
+    width: min(40rem, calc(100vw - 2rem));
+    margin: 15vh auto auto; /* Tailwind's reset zeroes it */
+    padding: 0;
+    overflow: visible;
+    font: 0.8rem/1.65 var(--font-mono);
+    color: var(--fg-muted);
+    background: var(--body-bg);
+    border: 1px solid var(--syn-type);
+    border-radius: 8px;
+    outline: none; /* the help has nothing to focus, so it focuses itself; its border already frames it */
+  }
+  /* a flat dim, no blur: old screens didn't frost */
+  .goto::backdrop {
+    background: rgba(0, 0, 0, 0.55);
+  }
+  .goto-panel {
+    position: relative;
+    padding: 1rem 1.1rem 0.75rem;
+  }
+  .goto p {
+    margin: 0;
+  }
+
+  .goto-title {
+    position: absolute;
+    top: -0.6rem;
+    left: 0.7rem;
+    padding: 0 0.35rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--syn-type);
+    background: var(--body-bg);
+  }
+
+  .goto-prompt {
+    display: flex;
+    align-items: center;
+    gap: 1ch;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .goto-prompt input {
+    flex: 1;
+    min-width: 0;
+    padding: 0;
+    font: inherit;
+    color: var(--fg);
+    caret-color: var(--accent);
+    background: none;
+    border: none;
+    outline: none;
+  }
+  .accent {
+    color: var(--accent);
+  }
+  .goto-count {
+    color: var(--fg-faint);
+  }
+
+  .goto-list {
+    max-height: 50vh;
+    overflow-y: auto;
+    margin: 0.5rem 0;
+    padding: 0;
+    list-style: none;
+  }
+  /* rows are built in the script, which scoped styles can't reach */
+  .goto-list :global(a) {
+    display: flex;
+    gap: 2ch;
+    padding: 0 0.5ch;
+    color: var(--fg-muted);
+    text-decoration: none;
+  }
+  .goto-list :global(.goto-path) {
+    flex-shrink: 0;
+    color: var(--fg);
+  }
+  .goto-list :global(.goto-name) {
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  /* the selected row in inverse video, like fzf's cursor line */
+  .goto-list :global(a.sel),
+  .goto-list :global(a.sel .goto-path) {
+    color: var(--body-bg);
+  }
+  .goto-list :global(a.sel) {
+    background: var(--accent);
+  }
+
+  .help-section {
+    margin-bottom: 0.75rem;
+  }
+  .help-head {
+    color: var(--syn-type);
+  }
+  .help-section dl {
+    display: grid;
+    grid-template-columns: 27ch 1fr; /* the longest keys, so every section lines up */
+    gap: 0 2ch;
+    margin: 0;
+    padding-left: 2ch;
+  }
+  .help-section dt {
+    color: var(--fg);
+  }
+  .help-section dd {
+    margin: 0;
+  }
+
+  .goto-empty,
+  .goto-keys {
+    color: var(--fg-faint);
+  }
+  .goto-empty {
+    padding: 0 0.5ch 0.5rem;
+  }
+
+  @media (max-width: 640px) {
+    .goto-list :global(.goto-name) {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  // listeners live on document, so they survive the ClientRouter swapping in each page's own #goto
+  import type { GoToItem } from '../utils/goto';
+
+  const dialog = () => document.getElementById('goto') as HTMLDialogElement | null;
+  const links = (d: HTMLDialogElement) => [...d.querySelectorAll<HTMLAnchorElement>('.goto-list a')];
+  let sel = 0;
+  let items: GoToItem[] = [];
+  // each language's whole index, fetched on its first open; until then the menu searches the page's seed
+  const index = new Map<string, GoToItem[]>();
+
+  // fzf's fuzzy match: the query's letters appear in order, gaps allowed. Returns how far apart the first and last
+  // matched letters are (lower ranks higher, so "post777" puts post-777 above post-977), or -1 for no match.
+  // ponytail: greedy leftmost match, so a later, tighter run can lose; fzf's full scoring if results ever feel off
+  function fuzzy(query: string, text: string) {
+    if (!query) return 0;
+    let i = 0;
+    let first = -1;
+    for (let at = 0; at < text.length; at++) {
+      if (text[at] !== query[i]) continue;
+      if (i === 0) first = at;
+      if (++i === query.length) return at - first;
+    }
+    return -1;
+  }
+
+  function select(d: HTMLDialogElement, n: number) {
+    const rows = links(d);
+    sel = Math.max(0, Math.min(n, rows.length - 1));
+    links(d).forEach((a) => a.classList.toggle('sel', a === rows[sel]));
+    rows[sel]?.scrollIntoView({ block: 'nearest' });
+  }
+
+  function row({ href, path, title }: GoToItem) {
+    const a = document.createElement('a');
+    a.href = href;
+    a.dataset.astroPrefetch = 'tap';
+    for (const [cls, text] of [
+      ['goto-path', path],
+      ['goto-name', title],
+    ]) {
+      const span = a.appendChild(document.createElement('span'));
+      span.className = cls;
+      span.textContent = text;
+    }
+    const li = document.createElement('li');
+    li.append(a);
+    return li;
+  }
+
+  // shows the first `limit` matches and how many there are in all: "10 of 1000"
+  function filter(d: HTMLDialogElement) {
+    const query = d.querySelector('input')!.value.toLowerCase().replace(/\s+/g, '');
+    // sort is stable: equally tight matches keep the index's order, newest first
+    const matches = items
+      .map((item) => ({ item, span: fuzzy(query, `${item.path} ${item.title}`.toLowerCase()) }))
+      .filter((m) => m.span >= 0)
+      .sort((a, b) => a.span - b.span)
+      .map((m) => m.item);
+    const shown = matches.slice(0, Number(d.dataset.limit));
+    d.querySelector('.goto-list')!.replaceChildren(...shown.map(row));
+    // before the index arrives, an empty query still knows the real total
+    const total = query || index.has(d.dataset.index!) ? matches.length : Number(d.dataset.total);
+    d.querySelector('.goto-count')!.textContent = `${shown.length} ${d.dataset.of} ${total}`;
+    (d.querySelector('.goto-empty') as HTMLElement).hidden = matches.length > 0;
+    select(d, 0);
+  }
+
+  function open(d: HTMLDialogElement) {
+    (document.getElementById('help') as HTMLDialogElement).close(); // the switcher replaces the help, never stacks on it
+    const url = d.dataset.index!;
+    items = index.get(url) ?? JSON.parse(d.querySelector('.goto-seed')!.textContent!);
+    d.querySelector('input')!.value = '';
+    filter(d);
+    d.showModal();
+    if (index.has(url)) return;
+    fetch(url)
+      .then((r) => r.json())
+      .then((all: GoToItem[]) => {
+        index.set(url, all);
+        if (dialog() !== d || !d.open) return;
+        items = all;
+        const keep = sel;
+        filter(d);
+        select(d, keep); // the index landing mid-browse keeps the cursor where it was
+      })
+      .catch(() => {}); // offline: the seed's rows still work
+  }
+
+  let lastShift = 0;
+  document.addEventListener('keydown', (e) => {
+    const d = dialog();
+    if (!d) return;
+    // ? opens the help, unless it's being typed somewhere
+    if (e.key === '?' && !(e.target as Element).closest('input, textarea, [contenteditable]')) {
+      const help = document.getElementById('help') as HTMLDialogElement;
+      if (!help.open && !d.open) help.showModal();
+      lastShift = 0; // its Shift isn't half of a double tap
+      return;
+    }
+    if (e.key === 'Shift') {
+      if (e.repeat) return;
+      if (e.timeStamp - lastShift < 400 && !d.open) {
+        lastShift = 0;
+        open(d);
+      } else lastShift = e.timeStamp;
+      return;
+    }
+    lastShift = 0; // Shift+letter is typing, not a double tap
+    const ctrl = e.ctrlKey && !e.metaKey && !e.altKey;
+    if (!d.open) {
+      if (ctrl && e.key === 'p') {
+        e.preventDefault(); // the browser's print
+        open(d);
+      }
+      return;
+    }
+    // arrows, or fzf's Ctrl+N/P and Ctrl+J/K
+    const move =
+      e.key === 'ArrowDown' || (ctrl && (e.key === 'n' || e.key === 'j'))
+        ? 1
+        : e.key === 'ArrowUp' || (ctrl && (e.key === 'p' || e.key === 'k'))
+          ? -1
+          : 0;
+    if (move) {
+      e.preventDefault();
+      select(d, sel + move);
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      links(d)[sel]?.click();
+    }
+  });
+
+  document.addEventListener('input', (e) => {
+    const d = dialog();
+    if (d && e.target === d.querySelector('input')) filter(d);
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    const d = dialog();
+    const a = (e.target as Element).closest?.('.goto-list a');
+    if (d?.open && a) select(d, links(d).indexOf(a as HTMLAnchorElement));
+  });
+
+  document.addEventListener('click', (e) => {
+    const help = document.getElementById('help') as HTMLDialogElement | null;
+    if ((e.target as Element).closest('#help-open')) help?.showModal();
+    if ((e.target as Element).closest('#goto-open')) open(dialog()!);
+    else if (help?.open && e.target === help) help.close();
+    const d = dialog();
+    if (!d?.open) return;
+    // the backdrop is the dialog itself; the panel fills its inside
+    if (e.target === d) d.close();
+    // a picked row blinks first (Layout.astro), then the menu closes; a new page replaces it anyway
+    else if ((e.target as Element).closest('.goto-list a')) setTimeout(() => d.close(), 320);
+  });
+
+  // the header's accelerators: its underlined letters. The theme's is the first letter of what it shows,
+  // [dark] in light mode and [light] in dark
+  document.addEventListener('keydown', (e) => {
+    if (e.metaKey || e.ctrlKey || e.altKey || document.querySelector('dialog[open]')) return;
+    if ((e.target as Element).closest('input, textarea, [contenteditable]')) return;
+    const dark = document.documentElement.classList.contains('dark');
+    const target = {
+      h: '.nav-logo',
+      g: '#goto-open',
+      d: dark ? null : '#theme-toggle',
+      l: dark ? '#theme-toggle' : null,
+    }[e.key];
+    if (!target) return;
+    e.preventDefault(); // or g's letter lands in the switcher's search box, focused by the click
+    document.querySelector<HTMLElement>(target)?.click();
+  });
+</script>
