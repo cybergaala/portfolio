@@ -314,7 +314,9 @@ const formatted = pubDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', 
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: filter 0.5s ease;
+    transition:
+      filter 0.5s ease,
+      clip-path 0.6s steps(8, end); /* the scroll reveal's, which this rule would otherwise override */
   }
 
   /* dimmed in dark mode, so the theme circle visibly sweeps over the images too */
@@ -329,9 +331,35 @@ const formatted = pubDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', 
     transition: none;
   }
 
-  :global(.img-blur-load) {
-    filter: blur(20px) !important;
-    will-change: filter;
+  /* an image still downloading stays blank, then paints in with the scroll reveal (.reveal.pre in global.css),
+     like a baseline JPEG coming down a modem; until then its box shows an old browser's placeholder: an empty frame with [img] and the alt text */
+  .post-banner img,
+  .post-body :global(img) {
+    position: relative; /* paints over the placeholder, which is positioned too */
+  }
+  .post-body :global(p.img-wait) {
+    position: relative;
+  }
+  :global(.img-wait)::before {
+    content: '[img] ' attr(data-alt);
+    position: absolute;
+    inset: 0;
+    padding: 0.5rem 0.75rem;
+    font: 0.8rem/1.6 var(--font-mono);
+    color: var(--fg-faint);
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+  /* matches the image's margins, so the frame sits exactly where it will paint */
+  .post-body :global(p.img-wait)::before {
+    inset: 2rem 0;
+    border-radius: 8px;
+  }
+  .post-body :global(p.img-wait:has(+ blockquote))::before {
+    bottom: 0.6rem;
+  }
+  .post-banner:global(.img-wait)::before {
+    border: none;
   }
 
   /* Layout: content + TOC */
@@ -501,7 +529,9 @@ const formatted = pubDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', 
     margin: 2rem 0;
     border: 1px solid var(--border);
     border-radius: 8px;
-    transition: filter 0.5s ease;
+    transition:
+      filter 0.5s ease,
+      clip-path 0.6s steps(8, end); /* the scroll reveal's, which this rule would otherwise override */
     cursor: zoom-in;
   }
 
@@ -629,7 +659,7 @@ const formatted = pubDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', 
   import { onPageLoad } from '../utils/page';
   import { zoomOpen } from '../utils/zoom';
 
-  function initBlurUp() {
+  function initScanIn() {
     const images = document.querySelectorAll<HTMLImageElement>('.post-banner img, .post-body img');
     const observer = new IntersectionObserver(
       (entries) => {
@@ -638,10 +668,17 @@ const formatted = pubDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', 
           const img = entry.target as HTMLImageElement;
           observer.unobserve(img);
           if (img.complete && img.naturalWidth > 0) return;
-          img.classList.add('img-blur-load');
-          const reveal = () => img.classList.remove('img-blur-load');
+          const box = img.parentElement!;
+          box.dataset.alt = img.alt;
+          box.classList.add('img-wait');
+          img.classList.add('reveal', 'pre');
+          const reveal = () => img.classList.remove('pre');
           img.addEventListener('load', reveal, { once: true });
           img.addEventListener('error', reveal, { once: true });
+          // the frame stays under the bands until the last one has painted
+          img.addEventListener('transitionend', (e) => {
+            if (e.propertyName === 'clip-path') box.classList.remove('img-wait');
+          });
         });
       },
       { rootMargin: '200px' },
@@ -770,7 +807,7 @@ const formatted = pubDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', 
   onPageLoad(() => {
     initViewer();
     document.getElementById('back-to-top')?.addEventListener('click', () => window.scrollTo(0, 0));
-    initBlurUp();
+    initScanIn();
     langSwapY = null;
   });
 </script>
