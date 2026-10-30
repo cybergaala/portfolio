@@ -78,7 +78,7 @@ const formatted = pubDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', 
   </ReadingStatus>
   <article class="post-article">
     <div class="page-container">
-      <header class="post-header">
+      <header class="post-header reveal">
         <p class="cmd">
           <a href={blogUrl(lang)} class="path">
             ~/blog
@@ -127,7 +127,7 @@ const formatted = pubDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', 
         <Toc headings={headings} label={t('blog.on-this-page')} />
       </div>
 
-      <div class="post-end">
+      <div class="post-end reveal">
         <span class="post-end-marker" aria-hidden="true">
           · · ·
         </span>
@@ -141,11 +141,13 @@ const formatted = pubDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', 
   </article>
 
   <dialog id="viewer" class="viewer">
-    <img alt="" />
+    <!-- takes the opening focus, which would otherwise land on Prev and ring it at the first arrow key -->
+    <img alt="" tabindex="-1" autofocus />
+    <p class="viewer-alt"></p>
     <p class="viewer-bar">
-      <button data-step="-1">{t('blog.prev')}</button>
+      <button data-step="-1">[←] {t('blog.prev-image')}</button>
       <span class="viewer-count"></span>
-      <button data-step="1">{t('blog.next')}</button>
+      <button data-step="1">{t('blog.next-image')} [→]</button>
       <button data-close>[esc] {t('blog.close')}</button>
     </p>
   </dialog>
@@ -314,7 +316,9 @@ const formatted = pubDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', 
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: filter 0.5s ease;
+    transition:
+      filter 0.5s ease,
+      clip-path 0.6s steps(8, end); /* the scroll reveal's, which this rule would otherwise override */
   }
 
   /* dimmed in dark mode, so the theme circle visibly sweeps over the images too */
@@ -329,9 +333,35 @@ const formatted = pubDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', 
     transition: none;
   }
 
-  :global(.img-blur-load) {
-    filter: blur(20px) !important;
-    will-change: filter;
+  /* an image still downloading stays blank, then paints in with the scroll reveal (.reveal.pre in global.css),
+     like a baseline JPEG coming down a modem; until then its box shows an old browser's placeholder: an empty frame with [img] and the alt text */
+  .post-banner img,
+  .post-body :global(img) {
+    position: relative; /* paints over the placeholder, which is positioned too */
+  }
+  .post-body :global(p.img-wait) {
+    position: relative;
+  }
+  :global(.img-wait)::before {
+    content: '[img] ' attr(data-alt);
+    position: absolute;
+    inset: 0;
+    padding: 0.5rem 0.75rem;
+    font: 0.8rem/1.6 var(--font-mono);
+    color: var(--fg-faint);
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+  /* matches the image's margins, so the frame sits exactly where it will paint */
+  .post-body :global(p.img-wait)::before {
+    inset: 2rem 0;
+    border-radius: 8px;
+  }
+  .post-body :global(p.img-wait:has(+ blockquote))::before {
+    bottom: 0.6rem;
+  }
+  .post-banner:global(.img-wait)::before {
+    border: none;
   }
 
   /* Layout: content + TOC */
@@ -501,7 +531,9 @@ const formatted = pubDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', 
     margin: 2rem 0;
     border: 1px solid var(--border);
     border-radius: 8px;
-    transition: filter 0.5s ease;
+    transition:
+      filter 0.5s ease,
+      clip-path 0.6s steps(8, end); /* the scroll reveal's, which this rule would otherwise override */
     cursor: zoom-in;
   }
 
@@ -512,7 +544,7 @@ const formatted = pubDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', 
 
   .viewer[open] {
     display: grid;
-    grid-template-rows: minmax(0, 1fr) auto;
+    grid-template-rows: minmax(0, 1fr) auto auto;
     width: 100vw;
     height: 100dvh;
     max-width: none;
@@ -530,9 +562,18 @@ const formatted = pubDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', 
   }
 
   .viewer img {
+    outline: none; /* focused only to hold the opening focus; Tab still rings the buttons */
     width: 100%;
     height: 100%;
     object-fit: contain;
+  }
+
+  /* the image's alt text, under it like the caption on an old photo viewer */
+  .viewer-alt {
+    max-width: 65ch;
+    margin: 0.75rem auto 0;
+    text-align: center;
+    color: var(--fg-muted);
   }
 
   .viewer-bar {
@@ -628,8 +669,9 @@ const formatted = pubDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', 
 <script>
   import { onPageLoad } from '../utils/page';
   import { zoomOpen } from '../utils/zoom';
+  import { scramble } from '../utils/scramble';
 
-  function initBlurUp() {
+  function initScanIn() {
     const images = document.querySelectorAll<HTMLImageElement>('.post-banner img, .post-body img');
     const observer = new IntersectionObserver(
       (entries) => {
@@ -638,8 +680,19 @@ const formatted = pubDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', 
           const img = entry.target as HTMLImageElement;
           observer.unobserve(img);
           if (img.complete && img.naturalWidth > 0) return;
-          img.classList.add('img-blur-load');
-          const reveal = () => img.classList.remove('img-blur-load');
+          const box = img.parentElement!;
+          box.dataset.alt = img.alt;
+          box.classList.add('img-wait');
+          img.classList.add('reveal', 'pre');
+          void img.offsetWidth; // commits the hidden state, or a fast load skips the bands and pops in
+          // a fully clipped image never counts as visible, so lazy loading would wait on it forever; it's near the screen already
+          img.loading = 'eager';
+          const reveal = () => {
+            img.classList.remove('pre');
+            // the frame stays under the bands until the last one (0.6s, the reveal's) has painted; a timer, since no
+            // transitionend fires under reduced motion
+            setTimeout(() => box.classList.remove('img-wait'), 600);
+          };
           img.addEventListener('load', reveal, { once: true });
           img.addEventListener('error', reveal, { once: true });
         });
@@ -652,11 +705,6 @@ const formatted = pubDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', 
 
   // Language switch: no fade, same scroll, and the visible text scrambles into the other language,
   // so it feels like the same page changing instead of a new one loading.
-  const LOWER = 'abcdefghijklmnopqrstuvwxyz';
-  const UPPER = LOWER.toUpperCase();
-  const SCRAMBLE_MS = 400;
-  const SCRAMBLE_TICK = 40; // ms between glyph changes; changing every frame reads as flicker
-  const LETTER = /[\p{L}\p{N}]/u;
   // same in both languages (command line, author, tags, ENG | SPA) or code, so they stay still
   const NO_SCRAMBLE = 'pre, code, .cmd, .post-author, .post-tags, .lang-switcher';
   let langSwapY: number | null = null;
@@ -679,11 +727,11 @@ const formatted = pubDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', 
   document.addEventListener('astro:after-swap', () => {
     if (langSwapY === null) return;
     scrollTo({ top: langSwapY, behavior: 'instant' });
-    if (!matchMedia('(prefers-reduced-motion: reduce)').matches) scrambleVisibleText();
+    scrambleVisibleText();
   });
 
   function scrambleVisibleText() {
-    const nodes: { node: Text; text: string; at: number[] }[] = [];
+    const nodes: Text[] = [];
     document.querySelectorAll('.post-header, .post-body, .post-toc').forEach((root) => {
       const walk = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
       for (let n = walk.nextNode() as Text | null; n; n = walk.nextNode() as Text | null) {
@@ -691,32 +739,10 @@ const formatted = pubDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', 
         // ponytail: on-screen text only; whatever is off-screen just swaps, nobody sees it
         if (!r || r.bottom < 0 || r.top > innerHeight || !n.data.trim() || n.parentElement!.closest(NO_SCRAMBLE))
           continue;
-        // each letter settles at its own time: mostly left to right, with some jitter so it doesn't read as a wipe
-        const at = [...n.data].map((_, i, a) => (i / a.length) * 0.6 + Math.random() * 0.4);
-        nodes.push({ node: n, text: n.data, at });
+        nodes.push(n);
       }
     });
-    const start = performance.now();
-    let lastTick = -1;
-    const frame = (now: number) => {
-      const p = Math.min((now - start) / SCRAMBLE_MS, 1);
-      const tick = Math.floor((now - start) / SCRAMBLE_TICK);
-      if (tick === lastTick && p < 1) return void requestAnimationFrame(frame);
-      lastTick = tick;
-      for (const n of nodes) {
-        // only letters and digits scramble, so spaces and punctuation keep the shape of the text
-        const out = [...n.text]
-          .map((c, i) => {
-            if (p >= n.at[i] || !LETTER.test(c)) return c;
-            const set = c === c.toLowerCase() ? LOWER : UPPER;
-            return set[(Math.random() * set.length) | 0];
-          })
-          .join('');
-        if (n.node.data !== out) n.node.data = out;
-      }
-      if (p < 1) requestAnimationFrame(frame);
-    };
-    frame(start); // first frame right away, so the new text never shows unscrambled
+    scramble(nodes);
   }
 
   // Click a post image to open it full size; arrows, swipe and the buttons move through the others.
@@ -726,18 +752,21 @@ const formatted = pubDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', 
     if (!dialog || !imgs.length) return;
     const view = dialog.querySelector('img')!;
     const count = dialog.querySelector('.viewer-count')!;
+    const caption = dialog.querySelector<HTMLElement>('.viewer-alt')!;
     dialog.querySelectorAll<HTMLElement>('[data-step]').forEach((b) => (b.hidden = imgs.length < 2));
     let i = 0;
-    // a new src keeps painting the old picture until it loads, so hide it until then
-    view.onload = view.onerror = () => (view.style.visibility = '');
+    // a new src keeps painting the old picture until it loads, so hide it until then; with opacity, since a
+    // visibility-hidden image would drop the focus that carries the arrow keys
+    view.onload = view.onerror = () => (view.style.opacity = '');
 
     const show = (n: number) => {
       i = (n + imgs.length) % imgs.length;
       const img = imgs[i];
-      if (view.src !== (img.currentSrc || img.src)) view.style.visibility = 'hidden';
+      if (view.src !== (img.currentSrc || img.src)) view.style.opacity = '0';
       // the size already on screen shows right away; src is the original, swapped in once it loads
       view.src = img.currentSrc || img.src;
-      view.alt = img.alt;
+      view.alt = caption.textContent = img.alt;
+      caption.hidden = !img.alt;
       count.textContent = `${i + 1}/${imgs.length}`;
       const full = new Image();
       full.onload = () => imgs[i] === img && (view.src = full.src);
@@ -755,9 +784,11 @@ const formatted = pubDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', 
       if (el.dataset.step) show(i + Number(el.dataset.step));
       else if (el !== view) dialog.close();
     });
+    // arrows, a/d like a game, h/l like vim
+    const steps: Record<string, number> = { ArrowLeft: -1, a: -1, h: -1, ArrowRight: 1, d: 1, l: 1 };
     dialog.addEventListener('keydown', (e) => {
-      if (e.key === 'ArrowLeft') show(i - 1);
-      if (e.key === 'ArrowRight') show(i + 1);
+      const step = steps[e.key.length === 1 ? e.key.toLowerCase() : e.key];
+      if (step && !e.metaKey && !e.ctrlKey && !e.altKey) show(i + step);
     });
     let touchX = 0;
     dialog.addEventListener('touchstart', (e) => (touchX = e.touches[0].clientX), { passive: true });
@@ -770,7 +801,7 @@ const formatted = pubDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', 
   onPageLoad(() => {
     initViewer();
     document.getElementById('back-to-top')?.addEventListener('click', () => window.scrollTo(0, 0));
-    initBlurUp();
+    initScanIn();
     langSwapY = null;
   });
 </script>

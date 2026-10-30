@@ -33,9 +33,9 @@ Every photo was taken with the [Fujifilm X-M5](/blog/fujifilm-x-m5).
 
 ![A drooping sunflower](../../../assets/blog/massachusetts-2026/DSCF3587.webp)
 
-![A farm stand's wooden door with a welcome chalkboard](../../../assets/blog/massachusetts-2026/DSCF3710.webp)
+![A farm stand’s wooden door with a welcome chalkboard](../../../assets/blog/massachusetts-2026/DSCF3710.webp)
 
-![The farm stand's porch with flowers and string lights](../../../assets/blog/massachusetts-2026/DSCF3711.webp)
+![The farm stand’s porch with flowers and string lights](../../../assets/blog/massachusetts-2026/DSCF3711.webp)
 
 ![A curving road between cornfields](../../../assets/blog/massachusetts-2026/DSCF3780.webp)
 
@@ -77,6 +77,6 @@ Every photo was taken with the [Fujifilm X-M5](/blog/fujifilm-x-m5).
 
 ![A white house with a white fence](../../../assets/blog/massachusetts-2026/DSCF4363.webp)
 
-![My dad's backyard at night, with string lights](../../../assets/blog/massachusetts-2026/DSCF4374.webp)
+![My dad’s backyard at night, with string lights](../../../assets/blog/massachusetts-2026/DSCF4374.webp)
 
 ![Everyone in the backyard at night](../../../assets/blog/massachusetts-2026/DSCF4378.webp)

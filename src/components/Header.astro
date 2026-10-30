@@ -5,21 +5,29 @@
   <nav id="mainNav">
     <div class="bar page-container">
       <a href="/" class="nav-logo" aria-label="Edgar Mejía, home">
-        <span class="accent">~/home</span>
+        <span class="accent">
+          ~/<u class="acc">h</u>ome
+        </span>
         <span class="cursor" aria-hidden="true"></span>
         <span class="spinner" aria-hidden="true"></span>
       </a>
-      <ul class="nav-links">
-        <li>
-          <a href="/#contact" data-sec="contact" class="say-hi">
-            [ contact ]
-          </a>
-        </li>
-      </ul>
-      <button id="theme-toggle" aria-label="Toggle theme">
-        <span class="icon-moon">[dark]</span>
-        <span class="icon-sun">[light]</span>
+      <button id="goto-open" aria-label="Go to a page or post">
+        [<u class="acc">g</u>o to]
       </button>
+      <button id="help-open" aria-label="Keyboard shortcuts">
+        [?]
+      </button>
+      <button id="theme-toggle" aria-label="Toggle theme">
+        <span class="icon-moon">
+          [<u class="acc">d</u>ark]
+        </span>
+        <span class="icon-sun">
+          [<u class="acc">l</u>ight]
+        </span>
+      </button>
+    </div>
+    <div class="rule" aria-hidden="true">
+      {'─'.repeat(400)}
     </div>
   </nav>
 </header>
@@ -32,16 +40,27 @@
     right: 0;
     z-index: 10;
     font-family: var(--font-mono);
-    border-bottom: 1px solid transparent;
-    transition:
-      background-color 0.2s,
-      border-color 0.2s;
   }
 
+  /* scrolled: a solid bar ruled off with box-drawing characters, like a tmux status line; it switches on, no fade */
   nav.nav-scrolled {
-    background-color: color-mix(in srgb, var(--body-bg) 85%, transparent);
-    backdrop-filter: blur(8px);
-    border-bottom-color: var(--border);
+    background-color: var(--body-bg);
+  }
+  .rule {
+    display: none;
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    font-size: 0.8rem;
+    line-height: 1;
+    color: var(--fg-faint);
+    transform: translateY(50%); /* ─ sits mid-glyph, so this puts the line on the bar's edge */
+  }
+  nav.nav-scrolled .rule {
+    display: block;
   }
 
   .bar {
@@ -131,36 +150,8 @@
     }
   }
 
-  .nav-links {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    align-items: center;
-    gap: 1.5rem;
-  }
-
-  .nav-links a {
-    font-size: 0.8rem;
-    color: var(--fg-muted);
-    text-decoration: none;
-    transition: color 0.2s;
-  }
-
-  .nav-links a:hover {
-    color: var(--fg);
-  }
-  .nav-links a.active {
-    color: var(--accent);
-  }
-
-  .nav-links a.say-hi {
-    color: var(--accent);
-  }
-  .nav-links a.say-hi:hover {
-    color: var(--fg);
-  }
-
+  #goto-open,
+  #help-open,
   #theme-toggle {
     display: flex;
     align-items: center;
@@ -177,8 +168,29 @@
     transition: color 0.2s;
   }
 
+  #goto-open:hover,
+  #help-open:hover,
   #theme-toggle:hover {
     color: var(--fg);
+  }
+
+  /* shortcuts only exist with a keyboard: hidden on touch screens, phones and tablets alike */
+  #help-open {
+    display: none;
+  }
+  /* each item's key is its underlined letter, like a Windows 3.1 menu accelerator (handled in Shortcuts.astro);
+     plain text on touch screens, where there's no keyboard */
+  .acc {
+    text-decoration: none;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    #help-open {
+      display: flex;
+    }
+    .acc {
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
   }
 
   .icon-sun {
@@ -210,7 +222,7 @@
   let stopSpy: AbortController | undefined;
 
   function initNavState() {
-    // every section link on the page: [ contact ] here and the home page's section timeline
+    // every section link on the page: the home page's section timeline
     const links = document.querySelectorAll<HTMLAnchorElement>('a[data-sec]');
     const setActive = (id: string) => links.forEach((a) => a.classList.toggle('active', a.dataset.sec === id));
 

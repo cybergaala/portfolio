@@ -11,7 +11,7 @@ const { post } = Astro.props;
 const ext = post.filePath?.split('.').pop() ?? 'mdx';
 ---
 
-<a href={postUrl(post)} class="ls-row">
+<a href={postUrl(post)} class="ls-row" data-astro-prefetch="tap">
   <span class="ls-perm">-rw-r--r--</span>
   <span class="ls-owner">dev</span>
   <span class="ls-group">staff</span>

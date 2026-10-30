@@ -12,11 +12,11 @@ const { posts, label } = Astro.props;
 ---
 
 {posts.length > 0 && (
-  <section class="related-posts">
+  <section class="related-posts reveal">
     <p class="related-label">{label}</p>
     <div class="related-list">
       {posts.map((p) => (
-        <a href={postUrl(p)} class="related-item">
+        <a href={postUrl(p)} class="related-item" data-astro-prefetch="tap">
           <p class="related-title">{p.data.title}</p>
           <p class="related-desc">{p.data.description}</p>
           <Tags tags={p.data.tags} />

@@ -25,3 +25,6 @@ pnpm-debug.log*
 
 # Claude Code
 .claude/
+
+# easter eggs in plain text: only their encrypted form (src/data/easter-eggs.json) is committed
+scripts/easter-eggs.local.json

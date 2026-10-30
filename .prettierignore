@@ -7,3 +7,5 @@ public/
 src/data/*.json
 # post prose stays as written
 *.mdx
+# easter eggs in plain text
+scripts/easter-eggs.local.json

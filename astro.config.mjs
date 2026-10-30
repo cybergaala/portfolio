@@ -13,7 +13,8 @@ export default defineConfig({
     layout: 'constrained',
   },
   // the ClientRouter waits for the next page before it shows anything, so fetch each link's HTML as soon as
-  // it scrolls into view and a click swaps right away; the pages are ~20KB gzipped and images aren't included
+  // it scrolls into view and a click swaps right away; the pages are ~20KB gzipped and images aren't included.
+  // post links opt out with data-astro-prefetch="tap": they are many and heavy, so they load on press behind the header spinner
   prefetch: {
     prefetchAll: true,
     defaultStrategy: 'viewport',

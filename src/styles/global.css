@@ -106,6 +106,22 @@ li::marker {
   }
 }
 
+/* ── Clicked link: blinks twice in inverse video (script in Layout.astro adds .blink) */
+a.blink {
+  background: var(--accent);
+  color: var(--body-bg);
+  animation: link-blink 0.32s steps(1, end);
+}
+@keyframes link-blink {
+  25%,
+  75% {
+    visibility: hidden;
+  }
+  50% {
+    visibility: visible;
+  }
+}
+
 /* ── Theme switch (circle reveal) ───────────────────────────────────── */
 html[data-theme-transition]::view-transition {
   pointer-events: none;
