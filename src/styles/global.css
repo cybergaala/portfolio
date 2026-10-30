@@ -133,6 +133,14 @@ html[data-theme-transition].dark::view-transition-new(root) {
   clip-path: circle(0px at var(--theme-x) var(--theme-y));
 }
 
+/* Windows 3.1-style "zoom rect" that opens dialogs, see utils/zoom.ts */
+.zoom-rect {
+  position: fixed;
+  z-index: 100;
+  pointer-events: none;
+  border: 1px solid var(--syn-type);
+}
+
 /* ── Page navigation transition (a post's language switch scrambles its text instead, see BlogPost.astro) */
 html:not([data-theme-transition], .lang-swap)::view-transition-old(root) {
   animation: page-out 0.38s cubic-bezier(0.4, 0, 0.2, 1) forwards;
