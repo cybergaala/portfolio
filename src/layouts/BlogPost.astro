@@ -317,6 +317,18 @@ const formatted = pubDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', 
     transition: filter 0.5s ease;
   }
 
+  /* dimmed in dark mode, so the theme circle visibly sweeps over the images too */
+  :global(.dark) .post-banner img,
+  :global(.dark) .post-body :global(img) {
+    filter: brightness(0.8);
+  }
+
+  /* the new theme is a live view: a filter transition would fade the dimming in behind the circle */
+  :global(html[data-theme-transition]) .post-banner img,
+  :global(html[data-theme-transition]) .post-body :global(img) {
+    transition: none;
+  }
+
   :global(.img-blur-load) {
     filter: blur(20px) !important;
     will-change: filter;
@@ -543,6 +555,12 @@ const formatted = pubDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', 
     color: var(--accent);
   }
 
+  .viewer-bar [data-close] {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+  }
+
   /* Image followed by blockquote → render blockquote as caption, hanging off the photo like a tree branch */
   .post-body :global(p:has(img):has(+ blockquote)) {
     margin-bottom: 0;
@@ -709,10 +727,13 @@ const formatted = pubDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', 
     const count = dialog.querySelector('.viewer-count')!;
     dialog.querySelectorAll<HTMLElement>('[data-step]').forEach((b) => (b.hidden = imgs.length < 2));
     let i = 0;
+    // a new src keeps painting the old picture until it loads, so hide it until then
+    view.onload = view.onerror = () => (view.style.visibility = '');
 
     const show = (n: number) => {
       i = (n + imgs.length) % imgs.length;
       const img = imgs[i];
+      if (view.src !== (img.currentSrc || img.src)) view.style.visibility = 'hidden';
       // the size already on screen shows right away; src is the original, swapped in once it loads
       view.src = img.currentSrc || img.src;
       view.alt = img.alt;
