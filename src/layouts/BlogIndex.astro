@@ -17,11 +17,11 @@ const t = useTranslations(lang);
 <Layout title={t('blog.writing')} description={t('blog.writing-description')} lang={lang}>
   <section class="blog-index">
     <div class="page-container">
-      <header class="sec-head">
+      <header class="sec-head reveal">
         <p class="cmd">$ ls -lt ~/blog{page.lastPage > 1 && ` | sed -n '${page.start + 1},${page.end + 1}p'`}</p>
         <h1 class="sec-title">{t('blog.title')}</h1>
       </header>
-      <div class="ls mono">
+      <div class="ls mono reveal">
         <p class="ls-total">total {page.total}</p>
         {page.data.map((post) => (
           <PostRow post={post} />
@@ -29,7 +29,7 @@ const t = useTranslations(lang);
       </div>
 
       {page.lastPage > 1 && (
-        <nav class="pager mono" aria-label={t('blog.pagination')}>
+        <nav class="pager mono reveal" aria-label={t('blog.pagination')}>
           {page.url.prev ? <a href={page.url.prev}>{t('blog.prev')}</a> : <span class="off">{t('blog.prev')}</span>}
           <span class="pages">
             {Array.from({ length: page.lastPage }, (_, i) => i + 1).map((n) => (

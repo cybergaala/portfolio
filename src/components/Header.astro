@@ -21,6 +21,9 @@
         <span class="icon-sun">[light]</span>
       </button>
     </div>
+    <div class="rule" aria-hidden="true">
+      {'─'.repeat(400)}
+    </div>
   </nav>
 </header>
 
@@ -32,16 +35,27 @@
     right: 0;
     z-index: 10;
     font-family: var(--font-mono);
-    border-bottom: 1px solid transparent;
-    transition:
-      background-color 0.2s,
-      border-color 0.2s;
   }
 
+  /* scrolled: a solid bar ruled off with box-drawing characters, like a tmux status line; it switches on, no fade */
   nav.nav-scrolled {
-    background-color: color-mix(in srgb, var(--body-bg) 85%, transparent);
-    backdrop-filter: blur(8px);
-    border-bottom-color: var(--border);
+    background-color: var(--body-bg);
+  }
+  .rule {
+    display: none;
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    font-size: 0.8rem;
+    line-height: 1;
+    color: var(--fg-faint);
+    transform: translateY(50%); /* ─ sits mid-glyph, so this puts the line on the bar's edge */
+  }
+  nav.nav-scrolled .rule {
+    display: block;
   }
 
   .bar {

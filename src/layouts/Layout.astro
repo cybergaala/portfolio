@@ -38,13 +38,20 @@ const { lang = 'en', ...head } = Astro.props;
               if (dest.origin === location.origin && dest.pathname === location.pathname) {
                 e.stopImmediatePropagation();
                 e.preventDefault();
-                if (dest.hash) {
-                  var target = document.querySelector(dest.hash);
-                  if (target) target.scrollIntoView();
-                  else location.hash = dest.hash;
-                } else {
-                  window.scrollTo(0, 0);
-                }
+                // waits for the clicked link's blink (see Layout's script) before jumping
+                var still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+                setTimeout(
+                  function () {
+                    if (dest.hash) {
+                      var target = document.querySelector(dest.hash);
+                      if (target) target.scrollIntoView();
+                      else location.hash = dest.hash;
+                    } else {
+                      window.scrollTo(0, 0);
+                    }
+                  },
+                  still ? 0 : 320,
+                );
               }
             } catch (_) {}
           },
@@ -94,25 +101,52 @@ const { lang = 'en', ...head } = Astro.props;
     true,
   );
 
-  // scroll reveal for `.reveal` blocks (styles in global.css)
-  onPageLoad(() => {
+  // a clicked link blinks in inverse video before the browser moves on, like an old one did (styles in global.css);
+  // captured on window so it runs before the same-page guard, which waits the same 320ms before jumping
+  const still = matchMedia('(prefers-reduced-motion: reduce)');
+  addEventListener(
+    'click',
+    (e) => {
+      const link = (e.target as Element).closest('a[href]');
+      if (!link || still.matches) return;
+      link.classList.remove('blink');
+      void (link as HTMLElement).offsetWidth; // restarts the animation on a double click
+      link.classList.add('blink');
+      link.addEventListener('animationend', () => link.classList.remove('blink'), { once: true });
+    },
+    true,
+  );
+  document.addEventListener('astro:before-preparation', (e) => {
+    if (!document.querySelector('a.blink')) return;
+    const load = e.loader;
+    e.loader = async () => {
+      await new Promise((r) => setTimeout(r, 320));
+      await load();
+    };
+  });
+
+  // scroll reveal for `.reveal` blocks on every page (styles in global.css); a block paints once its top passes 90% of
+  // the viewport. Checked on scroll instead of with an IntersectionObserver: a hidden block is fully clipped, and Chrome
+  // never reports a clipped target as intersecting, while getBoundingClientRect ignores the clip
+  onPageLoad((signal) => {
     if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    // watches each block's parent: a hidden block is fully clipped, and Chrome never reports a clipped target as intersecting
-    const io = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((en) => {
-          if (en.isIntersecting) {
-            en.target.querySelectorAll(':scope > .reveal').forEach((el) => el.classList.remove('pre'));
-            io.unobserve(en.target);
-          }
-        });
-      },
-      { rootMargin: '0px 0px -10% 0px' },
-    );
-    document.querySelectorAll<HTMLElement>('.reveal').forEach((el) => {
-      // only hide what is not already on screen, so above-the-fold content never flashes
-      if (el.getBoundingClientRect().top > innerHeight * 0.9) el.classList.add('pre');
-      io.observe(el.parentElement!);
-    });
+    // a post's body is rendered Markdown, so its blocks get the class here
+    document.querySelectorAll('.post-body > *').forEach((el) => el.classList.add('reveal'));
+    const below = (el: Element) => el.getBoundingClientRect().top > innerHeight * 0.9;
+    // only hide what is not already on screen, so above-the-fold content never flashes
+    let hidden = [...document.querySelectorAll('.reveal')].filter(below);
+    hidden.forEach((el) => el.classList.add('pre'));
+    const check = () => {
+      hidden = hidden.filter((el) => {
+        if (below(el)) return true;
+        el.classList.remove('pre');
+        return false;
+      });
+      if (!hidden.length) ctrl.abort();
+    };
+    const ctrl = new AbortController();
+    const opts = { passive: true, signal: AbortSignal.any([signal, ctrl.signal]) };
+    addEventListener('scroll', check, opts);
+    addEventListener('resize', check, opts);
   });
 </script>
