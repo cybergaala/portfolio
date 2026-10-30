@@ -7,3 +7,8 @@ export function onPageLoad(setup: (signal: AbortSignal) => void) {
     setup(ctrl.signal);
   });
 }
+
+// the running navigation's view transition, so an intro can wait for the page flicker to end
+let transition: Promise<unknown> = Promise.resolve();
+document.addEventListener('astro:before-swap', (e) => (transition = e.viewTransition.finished));
+export const transitionDone = () => transition;

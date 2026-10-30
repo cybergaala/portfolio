@@ -25,7 +25,7 @@ const { lang = 'en', ...head } = Astro.props;
       applyTheme();
       document.addEventListener('astro:after-swap', applyTheme);
 
-      // a link to the current page scrolls (to its hash or the top) instead of reloading through the router
+      // a link to the current page jumps (to its hash or the top) instead of reloading through the router; no smooth scroll, old browsers just jumped
       if (!window._samePageGuard) {
         window._samePageGuard = true;
         document.addEventListener(
@@ -40,10 +40,10 @@ const { lang = 'en', ...head } = Astro.props;
                 e.preventDefault();
                 if (dest.hash) {
                   var target = document.querySelector(dest.hash);
-                  if (target) target.scrollIntoView({ behavior: 'smooth' });
+                  if (target) target.scrollIntoView();
                   else location.hash = dest.hash;
                 } else {
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                  window.scrollTo(0, 0);
                 }
               }
             } catch (_) {}
@@ -63,24 +63,56 @@ const { lang = 'en', ...head } = Astro.props;
 <script>
   import { onPageLoad } from '../utils/page';
 
+  // old Internet Explorer's navigation "click", synthesized: two short bursts of filtered noise
+  let audio: AudioContext | undefined;
+  function navClick() {
+    const ctx = (audio ??= new AudioContext());
+    const len = ctx.sampleRate * 0.012;
+    const buf = ctx.createBuffer(1, len, ctx.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / len) ** 3;
+    [0, 0.045].forEach((at) => {
+      const src = ctx.createBufferSource();
+      src.buffer = buf;
+      const band = new BiquadFilterNode(ctx, { type: 'bandpass', frequency: 2500, Q: 1.5 });
+      src
+        .connect(band)
+        .connect(new GainNode(ctx, { gain: 0.4 }))
+        .connect(ctx.destination);
+      src.start(ctx.currentTime + at);
+    });
+  }
+  document.addEventListener('astro:before-preparation', navClick);
+  // section links jump inside the home, so they never fire a navigation (from another page they do, and play there);
+  // captured on window because the same-page guard above stops the click on document
+  addEventListener(
+    'click',
+    (e) => {
+      const link = (e.target as Element).closest<HTMLAnchorElement>('a[data-sec]');
+      if (link?.pathname === location.pathname) navClick();
+    },
+    true,
+  );
+
   // scroll reveal for `.reveal` blocks (styles in global.css)
   onPageLoad(() => {
     if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    // watches each block's parent: a hidden block is fully clipped, and Chrome never reports a clipped target as intersecting
     const io = new IntersectionObserver(
       (entries) => {
         entries.forEach((en) => {
           if (en.isIntersecting) {
-            en.target.classList.remove('pre');
+            en.target.querySelectorAll(':scope > .reveal').forEach((el) => el.classList.remove('pre'));
             io.unobserve(en.target);
           }
         });
       },
-      { threshold: 0.12 },
+      { rootMargin: '0px 0px -10% 0px' },
     );
     document.querySelectorAll<HTMLElement>('.reveal').forEach((el) => {
       // only hide what is not already on screen, so above-the-fold content never flashes
       if (el.getBoundingClientRect().top > innerHeight * 0.9) el.classList.add('pre');
-      io.observe(el);
+      io.observe(el.parentElement!);
     });
   });
 </script>

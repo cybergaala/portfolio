@@ -1,10 +1,6 @@
 @import 'tailwindcss';
 @import '@fontsource-variable/geist-mono';
 
-html {
-  scroll-behavior: smooth;
-}
-
 :root {
   /* accent: red (Edgar's favorite); syntax colors follow Xcode's default themes */
   --accent: #e06c75;
@@ -99,15 +95,14 @@ li::marker {
 
 /* ── Scroll reveal (script adds .pre, then removes it on intersect) ─── */
 @media (prefers-reduced-motion: no-preference) {
+  /* paints top to bottom in hard bands, like a page coming down a slow modem; the 10px margin keeps rings and shadows unclipped */
   .reveal {
-    transition:
-      opacity 0.7s ease,
-      transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
+    clip-path: inset(-10px);
+    transition: clip-path 0.6s steps(8, end);
     transition-delay: var(--d, 0ms);
   }
   .reveal.pre {
-    opacity: 0;
-    transform: translateY(18px);
+    clip-path: inset(-10px -10px 100% -10px);
   }
 }
 
@@ -142,12 +137,13 @@ html[data-theme-transition].dark::view-transition-new(root) {
 }
 
 /* ── Page navigation transition (a post's language switch scrambles its text instead, see BlogPost.astro) */
+/* old browsers repainting: the page blanks out, then the new one flickers on in hard steps, no easing */
 html:not([data-theme-transition], .lang-swap)::view-transition-old(root) {
-  animation: page-out 0.38s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation: page-out 0.08s steps(1, end) forwards;
 }
 
 html:not([data-theme-transition], .lang-swap)::view-transition-new(root) {
-  animation: page-in 0.42s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation: page-in 0.4s steps(1, end) both;
 }
 
 html.lang-swap::view-transition-old(root),
@@ -156,24 +152,30 @@ html.lang-swap::view-transition-new(root) {
 }
 
 @keyframes page-out {
-  from {
-    opacity: 1;
-    transform: translateY(0);
-  }
   to {
     opacity: 0;
-    transform: translateY(-40px);
   }
 }
 
 @keyframes page-in {
-  from {
+  0% {
     opacity: 0;
-    transform: translateY(60px);
   }
-  to {
+  20% {
     opacity: 1;
-    transform: translateY(0);
+  }
+  35% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  62% {
+    opacity: 0.3;
+  }
+  75%,
+  100% {
+    opacity: 1;
   }
 }
 
