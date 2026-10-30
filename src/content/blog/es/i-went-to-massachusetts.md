@@ -1,10 +1,10 @@
 ---
-title: "Fui a Massachusetts"
-description: "Un viaje de seis días para visitar a mi papá y conocer a mis dos medios hermanos. Las fotos, todas con la X-M5."
+title: 'Fui a Massachusetts'
+description: 'Un viaje de seis días para visitar a mi papá y conocer a mis dos medios hermanos. Las fotos, todas con la X-M5.'
 pubDate: 2026-10-25
-tags: ["photography", "fujifilm", "family", "travel"]
-banner: "../../../assets/blog/massachusetts-2026/DSCF3780.webp"
-warning: "Las fotos están comprimidas; las originales pesan demasiado para subirlas."
+tags: ['photography', 'fujifilm', 'family', 'travel']
+banner: '../../../assets/blog/massachusetts-2026/DSCF3780.webp'
+warning: 'Las fotos están comprimidas; las originales pesan demasiado para subirlas.'
 ---
 
 Del 1 al 6 de agosto fuimos a Massachusetts a visitar a mi papá y a conocer a mis dos medios hermanos.

@@ -1,9 +1,9 @@
 ---
-title: "My current setup"
+title: 'My current setup'
 description: "After years of using consoles, I decided to build my own PC. In this post I'll tell you about my experience and the components I chose."
 pubDate: 2024-11-17
-tags: ["pc", "games"]
-banner: "../../../assets/blog/my-setup-2024/PXL_20241212_1839511962.webp"
+tags: ['pc', 'games']
+banner: '../../../assets/blog/my-setup-2024/PXL_20241212_1839511962.webp'
 ---
 
 This setup starts by reusing some components from a prebuilt PC I bought a little over a year ago, but most of the components were chosen and purchased by me. The goal was to build a PC that could handle most modern games without issues. In the end I only played Overwatch 2 and Silksong, but that's not the PC's fault.
@@ -79,6 +79,7 @@ Now the GPU:
 ![GPU](../../../assets/blog/my-setup-2024/PXL_20241205_031924627.webp)
 ![GPU](../../../assets/blog/my-setup-2024/PXL_20241205_032155466.webp)
 ![GPU](../../../assets/blog/my-setup-2024/PXL_20241212_183431983.webp)
+
 > My only complaint about the GPU is that I didn't buy it in white to match the case, but it doesn't bother me too much.
 
 ### Motherboard and CPU
@@ -88,6 +89,7 @@ I forgot to take separate photos of them.
 ![Motherboard](../../../assets/blog/my-setup-2024/PXL_20241211_225933877.webp)
 ![Motherboard](../../../assets/blog/my-setup-2024/PXL_20241212_183951196.webp)
 ![Motherboard](../../../assets/blog/my-setup-2024/PXL_20241212_050546930.webp)
+
 > 😮‍💨
 
 ## Liquid cooling
@@ -96,6 +98,7 @@ This was another component I reused from the prebuilt: the liquid cooler that ca
 
 ![Liquid cooler](../../../assets/blog/my-setup-2024/PXL_20241212_183234735.webp)
 ![Liquid cooler](../../../assets/blog/my-setup-2024/PXL_20241213_070531395.webp)
+
 > I was really happy with the final result, but already at this point I started thinking about getting a white 3-fan cooler to match the case and improve cooling performance.
 
 ## Cable management
@@ -109,9 +112,11 @@ It took quite a bit of time since I had to make several trips to buy supplies ov
 ![Cable management](../../../assets/blog/my-setup-2024/PXL_20241214_170827675.webp)
 
 ![Cable management](../../../assets/blog/my-setup-2024/PXL_20241214_204809624.webp)
+
 > Cables connected but not yet managed.
 
 ![Cable management](../../../assets/blog/my-setup-2024/PXL_20241214_210420078.webp)
+
 > Final result :). Turned out much better than I expected.
 
 At this point I realized the PSU was another component I wanted to upgrade: the one from the prebuilt wasn't modular, which made cable management a lot harder. So I decided to get a modular PSU to make routing easier and improve overall performance.
@@ -125,9 +130,11 @@ These aren't formal benchmarks, more like a showcase of the games I regularly pl
 I ran these tests before closing up the case, so if there were any performance issues I could check whether cable routing or component temperatures were to blame.
 
 ![Ghost of Tsushima](../../../assets/blog/my-setup-2024/PXL_20250105_213701981.webp)
+
 > **Ghost of Tsushima**: With graphics settings maxed out, the game runs at an average of 120 FPS, with peaks of up to 140 FPS in less demanding areas.
 
 ![Ghost of Tsushima](../../../assets/blog/my-setup-2024/PXL_20250106_054450396.webp)
+
 > **Ghost of Tsushima**: The game must look incredible in 4K, but on my 1440p monitor the performance is excellent and the visual quality is still impressive.
 
 And that was basically it for my exhaustive performance testing. Overall I'm very happy with the build; most modern games run without any issues.

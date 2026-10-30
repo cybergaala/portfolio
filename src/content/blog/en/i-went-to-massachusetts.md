@@ -1,10 +1,10 @@
 ---
-title: "I went to Massachusetts"
-description: "A six-day trip to visit my dad and meet my two half-brothers. Every photo taken with the X-M5."
+title: 'I went to Massachusetts'
+description: 'A six-day trip to visit my dad and meet my two half-brothers. Every photo taken with the X-M5.'
 pubDate: 2026-10-25
-tags: ["photography", "fujifilm", "family", "travel"]
-banner: "../../../assets/blog/massachusetts-2026/DSCF3780.webp"
-warning: "The photos are compressed; the originals are too heavy to upload."
+tags: ['photography', 'fujifilm', 'family', 'travel']
+banner: '../../../assets/blog/massachusetts-2026/DSCF3780.webp'
+warning: 'The photos are compressed; the originals are too heavy to upload.'
 ---
 
 From August 1 to 6 we went to Massachusetts to visit my dad and meet my two half-brothers.

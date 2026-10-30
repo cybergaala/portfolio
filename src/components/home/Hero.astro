@@ -227,7 +227,7 @@ const paletteRows = [palette, palette.map((c) => `color-mix(in oklab, ${c} 65%, 
 </style>
 
 <script>
-  import { onPageLoad } from '../../utils/page';
+  import { onPageLoad, transitionDone } from '../../utils/page';
   import artAscii from '../../data/hero-art.ascii.json';
   import artAsciiLight from '../../data/hero-art-light.ascii.json';
 
@@ -363,7 +363,9 @@ const paletteRows = [palette, palette.map((c) => `color-mix(in oklab, ${c} 65%, 
     const redraw = () => takes.forEach((c) => drawAscii(c, art, progress));
     // redraw when the font is ready or the art resizes (mobile scales it)
     let stopGlitch = () => {};
-    document.fonts.ready.then(() => {
+    // the intro waits for the navigation flicker too, or half of it plays behind it
+    Promise.allSettled([document.fonts.ready, transitionDone()]).then(() => {
+      if (signal.aborted) return;
       if (intro) scrambleAscii(takes, art, (p) => (progress = p));
       redraw();
       // start once the intro is over, so the glitches never fight the sweep

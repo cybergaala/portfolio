@@ -769,9 +769,7 @@ const formatted = pubDate.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', 
 
   onPageLoad(() => {
     initViewer();
-    document
-      .getElementById('back-to-top')
-      ?.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+    document.getElementById('back-to-top')?.addEventListener('click', () => window.scrollTo(0, 0));
     initBlurUp();
     langSwapY = null;
   });

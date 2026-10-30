@@ -1,19 +1,21 @@
 ---
-title: "Mi setup actual"
-description: "Despues de años usando consolas, decidí armar mi propia PC. En este post les cuento sobre mi experiencia y los componentes que elegí."
+title: 'Mi setup actual'
+description: 'Despues de años usando consolas, decidí armar mi propia PC. En este post les cuento sobre mi experiencia y los componentes que elegí.'
 pubDate: 2024-11-17
-tags: ["pc", "games"]
-banner: "../../../assets/blog/my-setup-2024/PXL_20241212_1839511962.webp"
+tags: ['pc', 'games']
+banner: '../../../assets/blog/my-setup-2024/PXL_20241212_1839511962.webp'
 ---
 
 Este setup parte reutilizando algunos componentes de una PC pre-armada que compré hace poco más de un año, pero la mayoría de los componentes los elegí y compré yo mismo. La idea era armar una PC que me permitiera jugar a la mayoría de los juegos modernos sin problemas, al final terminé jugando sólo Overwatch 2 y Silksong, pero bueno, eso no es culpa de la PC.
 
 ## Por qué compré una PC pre-armada?
+
 Hace un par de años, estaba pensando en armar mi propia PC, pero no tenía ni la más mínima idea de qué componentes elegir ni cómo armarlos. Así que decidí comprar una PC pre-armada, para quitarme todo el estrés y simplemente empezar a ahorrarme en juegos. Además, la PC pre-armada que compré tenía un buen rendimiento y diseño, así que pensé que sería una buena opción para empezar.
 
 El tema que más me abrumaba era el de las tarjetas gráficas, sinceramente no entendía nada de la nomenclatura de las tarjetas gráficas, ni sabía qué era el VRAM ni nada de eso, así que decidí dejar esa parte en manos de los expertos y comprar una PC pre-armada que tuviera una buena tarjeta gráfica.
 
 ## Por qué decidí armar mi propia PC?
+
 Después de poco menos de un año usando la PC pre-armada, me di cuenta que la recomencación de componentes que me dió el vendedor no era tan buena como pensaba, ya que la PC pre-armada tenía una fuente de energía de baja calidad, lo que causaba problemas de rendimiento y estabilidad. Además, no estaba feliz con el enfriamiento líquido que venia con la PC pre-armada.
 
 También al fin entendí la nomenclatura de las tarjetas gráficas, así que decidí armar mi propia PC para poder elegir los componentes que realmente quería y necesitaba, en lugar de depender de las recomendaciones de los vendedores.
@@ -24,6 +26,7 @@ Para no terminar con un Frankenstein de PC, decidí ponerme dos reglas para eleg
 2. Los componentes nuevos deben ser de la misma marca y color que el gabinete, para que todo combine y se vea bien. Como se ve mas adelante en el post, esta regla no la cumplí al 100%.
 
 ## Componentes de mi PC pre-armada
+
 - **Procesador**: AMD Ryzen 5 5600X
 - **Tarjeta gráfica**: NVIDIA GeForce RTX 4060
 - **Motherboard**: MSI Pro B650M-P AMS DDR5
@@ -34,6 +37,7 @@ Para no terminar con un Frankenstein de PC, decidí ponerme dos reglas para eleg
 - **Gabinete**: MINITOWER AEROCOOL Trinity Mini
 
 ## Componentes elegidos para reutilizar
+
 - **Procesador**: AMD Ryzen 5 5600X
 - **Memoria RAM**: Kingston Fury 32GB (2 x 16GB) DDR5 6000MHz
 - **Almacenamiento**: Kingston A2000 NVMe PCIe M.2 1TB
@@ -43,6 +47,7 @@ Para no terminar con un Frankenstein de PC, decidí ponerme dos reglas para eleg
 ![Foto grupal](../../../assets/blog/my-setup-2024/PXL_20241211_163832764.MP.webp)
 
 De la unica cosa que estaba seguro era que quería un procesador AMD, el resto de los componentes los elegí basándome en reviews en internet. Aquí les dejo la lista de componentes usados en la configuración inicial:
+
 - **Procesador**: AMD Ryzen 5 5600X
 - **Motherboard**: MSI Pro B650M-P AMS DDR5
 - **Memoria RAM**: Kingston Fury 32GB (2 x 16GB) DDR5 6000MHz
@@ -55,10 +60,12 @@ De la unica cosa que estaba seguro era que quería un procesador AMD, el resto d
 Al final, les mostrare la lista de componentes actualizados.
 
 ## Montaje de los componentes
+
 Hacia mucho tiempo que no armaba una PC, así que el proceso de montaje fue un poco complicado al principio, pero después de un par de horas, logré montar todos los componentes sin problemas. El proceso de montaje fue bastante sencillo, aunque tuve que buscar algunos tutoriales en YouTube para asegurarme de que estaba haciendo todo correctamente.
 La parte en la que más tiempo invertí fue en la organización de los cables, ya que quería que todo se viera lo más limpio posible. Al final, creo que logré un buen resultado.
 
 ### Empecemos por el gabinete:
+
 Esta fue una de las partes más dificiles de elegir, porque dependiendo de la marca y el color que eligiera iba a ser la base para los componentes internos.
 Al final fué un MSI de la línea Project Zero.
 ![Gabinete](../../../assets/blog/my-setup-2024/PXL_20241211_150303062.webp)
@@ -70,24 +77,30 @@ Ahora vamos con la grafica:
 ![Grafica](../../../assets/blog/my-setup-2024/PXL_20241205_031924627.webp)
 ![Grafica](../../../assets/blog/my-setup-2024/PXL_20241205_032155466.webp)
 ![Grafica](../../../assets/blog/my-setup-2024/PXL_20241212_183431983.webp)
+
 > Mi unico problema con la gráfica es que no la compré en blanco, para que combine con el gabinete, pero bueno, no es algo que me moleste mucho.
 
 ### Motherboard y procesador:
+
 Olvide tomarles fotos por separado.
 
 ![Motherboard](../../../assets/blog/my-setup-2024/PXL_20241211_225933877.webp)
 ![Motherboard](../../../assets/blog/my-setup-2024/PXL_20241212_183951196.webp)
 ![Motherboard](../../../assets/blog/my-setup-2024/PXL_20241212_050546930.webp)
+
 > 😮‍💨
 
 ## Enfriamiento líquido
+
 Este fue otro componente que reutilice de la PC pre-armada, ya que el enfriamiento líquido que venia con la PC pre-armada era bastante bueno, así que decidí reutilizarlo en mi nueva PC. Lastimosamente no era blanco y solo tiene 2 ventiladores.
 
 ![Enfriamiento líquido](../../../assets/blog/my-setup-2024/PXL_20241212_183234735.webp)
 ![Enfriamiento líquido](../../../assets/blog/my-setup-2024/PXL_20241213_070531395.webp)
+
 > Me gustó mucho el resultado final, pero ya desde aquí me empece a plantear comprar una liquida blanca con 3 ventiladores, para que combine con el gabinete y para mejorar el rendimiento de enfriamiento.
 
 ## Organización de cables
+
 Sinceramente esta era la parte que más me preocupaba, ya que no soy muy bueno organizando cables, pero al final creo que logré un buen resultado. Para organizar los cables, utilicé bridas y velcro para mantenerlos juntos y evitar que se vean desordenados.
 Me tomó bastante tiempo organizarlos, ya que tuve que hacer varias salidas en esos días pero fue por mucho la tarea que más distfruté haciendo.
 
@@ -96,9 +109,11 @@ Me tomó bastante tiempo organizarlos, ya que tuve que hacer varias salidas en e
 ![Organización de cables](../../../assets/blog/my-setup-2024/PXL_20241214_170827675.webp)
 
 ![Organización de cables](../../../assets/blog/my-setup-2024/PXL_20241214_204809624.webp)
+
 > Cables conectados, pero no organizados.
 
 ![Organización de cables](../../../assets/blog/my-setup-2024/PXL_20241214_210420078.webp)
+
 > Resultado final :). Quedó mucho mejor de lo que esperaba.
 
 En este punto me di cuenta que la fuente de energia era otro componente que quería actualizar, ya que la fuente de energía que venia con la PC pre-armada no era modular, lo que dificultaba mucho la organización de los cables. Así que decidí comprar una fuente de energía modular, para facilitar la organización de los cables y para mejorar el rendimiento de la PC.
@@ -106,19 +121,23 @@ En este punto me di cuenta que la fuente de energia era otro componente que quer
 Spoiler, no logré tan bien como este primer resultado, pero bueno, no me quejo.
 
 ## Pruebas de rendimiento
+
 Estas no son pruebas perse, sino mas bien una muestra de los juegos que juego regularmente y como corren en esta PC. En general, estoy muy satisfecho con el rendimiento de la PC, ya que puedo jugar a la mayoría de los juegos modernos sin problemas.
 
 Estas pruebas las hice antes de cerrar el gabinete, así si tenia algún problema con el rendimiento, podía revisar si había algún problema con la organización de los cables o con la temperatura de los componentes.
 
 ![Ghost of Tsushima](../../../assets/blog/my-setup-2024/PXL_20250105_213701981.webp)
+
 > **Ghost of Tsushima**: Con los ajustes gráficos al máximo, el juego corre a un promedio de 120 FPS, con picos de hasta 140 FPS en áreas menos demandantes.
 
 ![Ghost of Tsushima](../../../assets/blog/my-setup-2024/PXL_20250106_054450396.webp)
+
 > **Ghost of Tsushima**: El juego debe de verse hermoso en 4k, pero con mi monitor 1440p, el rendimiento es excelente y la calidad gráfica sigue siendo impresionante.
 
 Y ya, basicamente esas fueron mi exahustivas pruebas de rendimiento. En general, estoy muy satisfecho con el rendimiento de la PC, ya que puedo jugar a la mayoría de los juegos modernos sin problemas.
 
 ## Fotos "finales"
+
 ![Ghost of Tsushima](../../../assets/blog/my-setup-2024/PXL_20241214_184808634.webp)
 ![Ghost of Tsushima](../../../assets/blog/my-setup-2024/PXL_20241217_013720822.webp)
 ![Ghost of Tsushima](../../../assets/blog/my-setup-2024/PXL_20241222_032148301.webp)

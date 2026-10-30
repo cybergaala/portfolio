@@ -11,6 +11,7 @@ Stack, structure and commands are in [README.md](README.md). This file covers th
 
 The production branch is `master`, not `main`. Work lands on `develop`.
 
+0. Run what CI runs and fix any failure first: `npm run format && npm run check && npm run build` (CI fails on `format:check`, so unformatted files break the release).
 1. Commit the pending work on `develop` (Conventional Commits, authored by Edgar, no Claude attribution).
 2. `git checkout -b release/x.y.z develop`
 3. `npm version x.y.z --no-git-tag-version`, then commit `chore(release): bump version to x.y.z`.
